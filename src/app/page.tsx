@@ -30,6 +30,7 @@ const quickActions = [
     badge: "Resell",
     tone: "bg-[var(--panel-soft)] border-[rgba(255,62,165,0.24)]",
     accent: "text-[var(--accent)]",
+    href: "#top",
   },
   {
     title: "Rent a Room",
@@ -38,6 +39,7 @@ const quickActions = [
     badge: "Stay",
     tone: "bg-[rgba(51,65,92,0.32)] border-[rgba(101,124,166,0.34)]",
     accent: "text-[#b8c6e6]",
+    href: "/rent-room",
   },
   {
     title: "Launch Events",
@@ -46,6 +48,7 @@ const quickActions = [
     badge: "Events",
     tone: "bg-[rgba(255,62,165,0.10)] border-[rgba(255,62,165,0.30)]",
     accent: "text-[var(--accent)]",
+    href: "#top",
   },
   {
     title: "Sticker + Art",
@@ -54,6 +57,7 @@ const quickActions = [
     badge: "Create",
     tone: "bg-[rgba(51,65,92,0.45)] border-[rgba(255,255,255,0.12)]",
     accent: "text-[#d7def0]",
+    href: "#top",
   },
 ];
 
@@ -165,9 +169,10 @@ export default function Home() {
         <p className="section-kicker mt-7 px-1">Everything Else</p>
 
         <section className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {quickActions.map(({ title, description, icon: Icon, badge, tone, accent }) => (
-            <article
+          {quickActions.map(({ title, description, icon: Icon, badge, tone, accent, href }) => (
+            <Link
               key={title}
+              href={href}
               className={`flex min-h-[150px] flex-col justify-between rounded-[18px] border px-4 py-4 transition hover:scale-[0.99] ${tone}`}
             >
               <div className={accent}>
@@ -184,7 +189,7 @@ export default function Home() {
               <span className="inline-flex w-fit rounded-md bg-white/10 px-2 py-1 text-[10px] font-semibold text-white/72">
                 {badge}
               </span>
-            </article>
+            </Link>
           ))}
         </section>
 
