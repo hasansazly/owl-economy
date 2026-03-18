@@ -11,7 +11,8 @@ module.exports = {
         dormstash: {
           background: "#14161B",
           foreground: "#FFFFFF",
-          accent: "#FF3EA5",
+          accent: "#46BFFF",
+          blue: "#57C8FF",
           navy: "#33415C",
           muted: "#A9B1C1",
         },
