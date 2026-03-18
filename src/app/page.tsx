@@ -122,9 +122,17 @@ export default function Home() {
             Dorm<span className="text-[var(--accent)]">Stash</span>
           </Link>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/6 px-3.5 py-1.5 text-[12px] font-medium text-white/60">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
-            Temple campus live
+          <div className="flex items-center gap-2">
+            <div className="hidden items-center gap-2 rounded-full border border-white/12 bg-white/6 px-3.5 py-1.5 text-[12px] font-medium text-white/60 sm:inline-flex">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+              Temple campus live
+            </div>
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[12px] font-semibold text-[var(--foreground)] transition hover:bg-white/10"
+            >
+              Log in
+            </Link>
           </div>
         </header>
 
@@ -283,11 +291,11 @@ export default function Home() {
           </Link>
 
           <Link
-            href="#top"
+            href="/login"
             className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-[14px] text-white/48 transition hover:bg-white/8"
           >
             <Sparkles className="h-4 w-4 text-[var(--accent)]" />
-            Post a listing
+            Log in to post
           </Link>
 
           <div className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-[14px] text-white/45">
