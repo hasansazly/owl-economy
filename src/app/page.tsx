@@ -51,12 +51,30 @@ const quickActions = [
     href: "#top",
   },
   {
+    title: "Fundraise Fast",
+    description: "Run science club drives, cookie drops, bake sales, and student fundraiser pushes.",
+    icon: HandCoins,
+    badge: "Fundraise",
+    tone: "bg-[linear-gradient(180deg,_rgba(255,62,165,0.10)_0%,_rgba(26,29,36,1)_100%)] border-[rgba(255,62,165,0.22)]",
+    accent: "text-[var(--accent)]",
+    href: "#top",
+  },
+  {
     title: "Sticker + Art",
     description: "Show custom designs, merch, and Temple-made creative work.",
     icon: Palette,
     badge: "Create",
     tone: "bg-[rgba(51,65,92,0.45)] border-[rgba(255,255,255,0.12)]",
     accent: "text-[#d7def0]",
+    href: "#top",
+  },
+  {
+    title: "Lost and Found",
+    description: "A digital bulletin board for lost IDs, keys, or Airpods. No fees, just campus karma.",
+    icon: MapPin,
+    badge: "Report",
+    tone: "bg-[rgba(51,65,92,0.38)] border-[rgba(255,255,255,0.12)]",
+    accent: "text-[var(--accent)]",
     href: "#top",
   },
 ];
@@ -191,20 +209,6 @@ export default function Home() {
               </span>
             </Link>
           ))}
-        </section>
-
-        <section className="mt-3 rounded-[18px] border border-[rgba(255,62,165,0.22)] bg-[linear-gradient(180deg,_rgba(255,62,165,0.10)_0%,_rgba(26,29,36,1)_100%)] px-5 py-5 transition hover:scale-[0.995]">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h2 className="font-display text-[16px] font-bold tracking-[-0.02em] text-[var(--foreground)]">
-                Fundraise Fast
-              </h2>
-              <p className="mt-1.5 text-[12px] leading-5 text-white/40">
-                Cookie drops, bake sales, and quick student fundraiser pushes in one visible lane.
-              </p>
-            </div>
-            <HandCoins className="h-10 w-10 text-[var(--accent)]" />
-          </div>
         </section>
 
         <section className="mt-7">
