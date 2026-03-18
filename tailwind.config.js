@@ -8,12 +8,12 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        temple: {
-          cherry: "#9D2235",
-          sand: "#F8DBE0",
-          ink: "#221316",
-          muted: "#69474E",
-          background: "#FFF7F8",
+        dormstash: {
+          background: "#14161B",
+          foreground: "#FFFFFF",
+          accent: "#FF3EA5",
+          navy: "#33415C",
+          muted: "#A9B1C1",
         },
       },
     },
