@@ -265,3 +265,13 @@ export default function Home() {
     </main>
   );
 }
+// Footer component
+function Footer() {
+  return (
+    <footer className="border-t border-[rgba(157,34,53,0.12)] bg-white py-8">
+      <div className="mx-auto max-w-7xl px-6 text-center lg:px-10">
+        <p className="text-sm font-medium text-[var(--muted)]">Built by Owls for Owls.</p>
+      </div>
+    </footer>
+  );
+}
