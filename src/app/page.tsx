@@ -1,277 +1,301 @@
 import Link from "next/link";
 import {
-  ArrowRight,
-  BadgeDollarSign,
-  BookOpen,
-  CalendarRange,
-  HousePlus,
-  Paintbrush2,
+  BedDouble,
+  ChevronRight,
+  Clock3,
+  DoorOpen,
+  GraduationCap,
+  HandCoins,
+  LampDesk,
+  MapPin,
+  Package,
+  Palette,
+  PartyPopper,
   Search,
   Shirt,
   Sparkles,
-  Store,
-  TicketPlus,
-  Users,
 } from "lucide-react";
 
-const categories = [
+const flashDrops = [
   {
-    name: "Sell Goods",
-    description: "Clothes, sneakers, books, and everyday finds circulating student-to-student.",
-    icon: Shirt,
+    title: "Move-out bundle drop",
+    location: "1300 residence hall",
+    time: "Tonight",
   },
   {
-    name: "Rent a Room",
-    description: "Offer a couch, spare room, or quick 1 to 2 night stay for extra income.",
-    icon: HousePlus,
+    title: "Study jam signups open",
+    location: "Tech Center lounge",
+    time: "7 PM",
   },
   {
-    name: "Launch Events",
-    description: "Promote parties, study jams, pop-ups, and new student-led experiences.",
-    icon: TicketPlus,
-  },
-  {
-    name: "Fundraise",
-    description: "Run cookie drops, bake sales, and club campaigns with stronger campus reach.",
-    icon: BadgeDollarSign,
-  },
-  {
-    name: "Sticker and Art",
-    description: "Share custom designs, dorm prints, and merch made by Temple creatives.",
-    icon: Paintbrush2,
-  },
-  {
-    name: "Campus Services",
-    description: "Find tutors, photographers, resellers, and helpers for student-side hustles.",
-    icon: Users,
+    title: "Custom sticker preorder",
+    location: "Tyler art collab",
+    time: "Live",
   },
 ];
 
-const highlights = [
+const quickActions = [
   {
-    title: "One marketplace, many hustle lanes",
-    description:
-      "Students can sell products, book short stays, run events, or raise money without leaving campus culture behind.",
-    icon: Sparkles,
+    title: "Sell Goods",
+    description: "Clothes, sneakers, books, and dorm extras students want right now.",
+    icon: Shirt,
+    badge: "Resell",
+    tone:
+      "bg-[#1A1A2E] border-[rgba(119,96,250,0.28)] text-[#A08FFF]",
   },
   {
-    title: "Search what matters first",
-    description:
-      "The homepage is built around discovery so students can jump into books, rooms, merch, or events immediately.",
-    icon: Search,
+    title: "Rent a Room",
+    description: "Open a bed, couch, or spare room for quick 1 to 2 night stays.",
+    icon: BedDouble,
+    badge: "Stay",
+    tone:
+      "bg-[#121826] border-[rgba(60,130,220,0.28)] text-[#6BAEF0]",
   },
   {
-    title: "Built for Temple rhythms",
-    description:
-      "From late-night study jams to weekend pop-ups, every section is tuned to how Temple students actually move.",
-    icon: CalendarRange,
+    title: "Launch Events",
+    description: "Push parties, study jams, pop-ups, and student-run drops.",
+    icon: PartyPopper,
+    badge: "Events",
+    tone:
+      "bg-[#1C1210] border-[rgba(220,100,60,0.28)] text-[#F0936B]",
+  },
+  {
+    title: "Sticker + Art",
+    description: "Show custom designs, merch, and Temple-made creative work.",
+    icon: Palette,
+    badge: "Create",
+    tone:
+      "bg-[#0F1A12] border-[rgba(60,180,100,0.28)] text-[#6FCF97]",
+  },
+];
+
+const recentListings = [
+  {
+    title: "Mini fridge + mirror combo",
+    meta: "Morgan Hall South",
+    price: "$40",
+  },
+  {
+    title: "One-night crash space",
+    meta: "Near Cecil B. Moore",
+    price: "$28",
+  },
+  {
+    title: "Cookie drop fundraiser box",
+    meta: "Pickup after 4 PM",
+    price: "$12",
+  },
+  {
+    title: "Custom owl sticker set",
+    meta: "Designed by Tyler student",
+    price: "$9",
+  },
+];
+
+const supportCards = [
+  {
+    title: "Move-Out Mode",
+    text: "Quickly list storage bins, rugs, mirrors, and mini fridges.",
+    icon: DoorOpen,
+  },
+  {
+    title: "Study Night",
+    text: "Push a study jam or browse last-minute desk gear and textbooks.",
+    icon: LampDesk,
+  },
+  {
+    title: "Campus Verified",
+    text: "Built for students who want faster, cleaner, dorm-first discovery.",
+    icon: GraduationCap,
   },
 ];
 
 export default function Home() {
   return (
     <main id="top" className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <section className="relative isolate overflow-hidden border-b border-[rgba(157,34,53,0.12)]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(157,34,53,0.18),_transparent_35%),linear-gradient(180deg,_#ffffff_0%,_#fff7f8_50%,_#fff1f3_100%)]" />
-        <div className="absolute inset-y-0 right-0 hidden w-[42%] bg-[linear-gradient(180deg,_rgba(157,34,53,0.06),_rgba(157,34,53,0.12))] lg:block" />
+      <section className="mx-auto max-w-4xl px-4 pb-16 pt-1 sm:px-6">
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-white/7 bg-[rgba(13,13,13,0.96)] px-1 py-5 backdrop-blur">
+          <Link
+            href="#top"
+            className="font-display text-[1.35rem] font-extrabold tracking-[-0.03em]"
+          >
+            Dorm<span className="text-[var(--accent)]">Stash</span>
+          </Link>
 
-        <div className="relative mx-auto max-w-7xl px-6 py-8 lg:px-10 lg:py-10">
-          <header className="flex flex-col gap-4 rounded-[2rem] border border-[rgba(157,34,53,0.12)] bg-white/90 px-5 py-4 shadow-[0_18px_50px_rgba(157,34,53,0.10)] backdrop-blur sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-display text-3xl uppercase tracking-[0.14em] text-[var(--temple-cherry)]">
-                The Owl Economy
-              </p>
-              <p className="text-sm text-[var(--muted)]">Temple University&apos;s student marketplace</p>
-            </div>
-            <nav className="flex items-center gap-3">
-              <Link
-                href="#categories"
-                className="rounded-full px-4 py-2 text-sm font-semibold text-[var(--foreground)] transition hover:text-[var(--temple-cherry)]"
-              >
-                Browse Categories
-              </Link>
-              <Link
-                href="#post"
-                className="inline-flex items-center gap-2 rounded-full bg-[var(--temple-cherry)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#821b2b]"
-              >
-                Post a Listing
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </nav>
-          </header>
-
-          <div className="grid items-center gap-12 py-14 lg:grid-cols-[1.1fr_0.9fr] lg:py-20">
-            <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(157,34,53,0.12)] bg-white px-4 py-2 text-sm font-medium text-[var(--muted)] shadow-sm">
-                <Sparkles className="h-4 w-4 text-[var(--temple-cherry)]" />
-                Marketplace energy for every Temple hustle
-              </div>
-
-              <h1 className="mt-6 font-display text-6xl uppercase leading-none tracking-[0.04em] text-[var(--foreground)] sm:text-7xl lg:text-[6.4rem]">
-                Buy, host, fundraise, and
-                <span className="block text-[var(--temple-cherry)]">build on campus.</span>
-              </h1>
-
-              <p className="mt-6 max-w-2xl text-xl leading-8 text-[var(--muted)]">
-                The Owl Economy brings Temple students into one multi-category space to trade goods,
-                post short stays, launch events, support club fundraisers, and showcase original art.
-              </p>
-
-              <form className="mt-8 rounded-[1.75rem] border border-[rgba(157,34,53,0.12)] bg-white p-3 shadow-[0_20px_60px_rgba(157,34,53,0.10)]">
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <label className="relative flex-1">
-                    <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--temple-cherry)]" />
-                    <input
-                      type="search"
-                      placeholder="Search books, rooms, events, merch, bake sales..."
-                      className="h-14 w-full rounded-[1.25rem] border border-[rgba(157,34,53,0.10)] bg-[#fffafb] pl-12 pr-4 text-base text-[var(--foreground)] outline-none transition placeholder:text-[#9e7b80] focus:border-[var(--temple-cherry)]"
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    className="inline-flex h-14 items-center justify-center gap-2 rounded-[1.25rem] bg-[var(--temple-cherry)] px-6 text-base font-semibold text-white transition hover:bg-[#821b2b]"
-                  >
-                    Search
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            <div className="rounded-[2rem] border border-[rgba(157,34,53,0.14)] bg-[linear-gradient(180deg,_#9d2235_0%,_#7f1a2b_100%)] p-7 text-white shadow-[0_24px_70px_rgba(157,34,53,0.22)]">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/70">
-                Trending This Week
-              </p>
-              <div className="mt-6 space-y-4">
-                {[
-                  "Used econ books under $40",
-                  "One-night room near Main Campus",
-                  "Study jam RSVP for midterms",
-                  "Cookie drop fundraiser for student orgs",
-                ].map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-[1.4rem] border border-white/12 bg-white/10 px-4 py-4 text-base font-medium backdrop-blur"
-                  >
-                    {item}
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-8 rounded-[1.5rem] bg-white px-5 py-5 text-[var(--foreground)]">
-                <div className="flex items-center gap-3">
-                  <BookOpen className="h-5 w-5 text-[var(--temple-cherry)]" />
-                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--temple-cherry)]">
-                    Why students use it
-                  </p>
-                </div>
-                <p className="mt-3 text-xl font-semibold">
-                  One search bar, six categories, and a Temple-first identity from day one.
-                </p>
-              </div>
-            </div>
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/6 px-3.5 py-1.5 text-[12px] font-medium text-white/60">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+            Temple campus live
           </div>
-        </div>
-      </section>
+        </header>
 
-      <section id="categories" className="mx-auto max-w-7xl px-6 py-20 lg:px-10">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-2xl">
-            <p className="section-kicker">Marketplace Categories</p>
-            <h2 className="mt-3 text-4xl font-semibold tracking-tight text-[var(--foreground)] sm:text-5xl">
-              Six ways The Owl Economy keeps campus moving.
-            </h2>
-          </div>
-          <p className="max-w-xl text-lg leading-8 text-[var(--muted)]">
-            Built to support everything from peer-to-peer resale to short stays, club money runs,
-            and Temple-made creative work.
+        <section className="px-1 pt-7">
+          <p className="text-[13px] uppercase tracking-[0.06em] text-white/45">Temple University</p>
+          <h1 className="mt-2 max-w-3xl font-display text-[2rem] font-bold leading-[1.08] tracking-[-0.04em] sm:text-[2.5rem]">
+            Dorm life moves fast.
+            <span className="text-[var(--accent)]"> DormStash keeps up.</span>
+          </h1>
+          <p className="mt-4 max-w-2xl text-[14px] leading-6 text-white/42 sm:text-[15px]">
+            Sell what you no longer need, find quick room options, launch student events, fundraise
+            for your org, and move campus-made items faster.
           </p>
+        </section>
+
+        <div className="mt-6 rounded-[14px] border border-white/10 bg-white/5 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <Search className="h-4 w-4 text-white/35" />
+            <input
+              type="search"
+              placeholder="Search dorm items, short stays, sticker drops, late-night finds..."
+              className="w-full bg-transparent text-[14px] text-[var(--foreground)] outline-none placeholder:text-white/35"
+            />
+          </div>
         </div>
 
-        <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {categories.map(({ name, description, icon: Icon }) => (
+        <p className="section-kicker mt-7 px-1">Live Right Now</p>
+
+        <section className="mt-3 overflow-hidden rounded-[18px] border border-[rgba(232,255,71,0.25)] bg-[linear-gradient(135deg,_#1A1A0A_0%,_#1C1C00_100%)] p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--accent)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)] shadow-[0_0_12px_rgba(232,255,71,0.85)]" />
+              Flash Drops
+            </div>
+            <span className="text-[12px] text-[rgba(232,255,71,0.6)]">3 active</span>
+          </div>
+
+          <div className="mt-4 space-y-2.5">
+            {flashDrops.map((drop) => (
+              <article
+                key={drop.title}
+                className="flex items-center justify-between rounded-[10px] bg-white/4 px-3.5 py-3 transition hover:bg-white/8"
+              >
+                <div className="min-w-0">
+                  <h2 className="truncate text-[13px] font-medium text-[var(--foreground)]">
+                    {drop.title}
+                  </h2>
+                  <div className="mt-1 flex items-center gap-1.5 text-[11px] text-white/38">
+                    <MapPin className="h-3 w-3 shrink-0" />
+                    <span className="truncate">{drop.location}</span>
+                  </div>
+                </div>
+                <span className="ml-4 rounded-md bg-[rgba(232,255,71,0.10)] px-2 py-1 text-[11px] font-semibold text-[var(--accent)]">
+                  {drop.time}
+                </span>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <p className="section-kicker mt-7 px-1">Everything Else</p>
+
+        <section className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {quickActions.map(({ title, description, icon: Icon, badge, tone }) => (
             <article
-              key={name}
-              className="group rounded-[2rem] border border-[rgba(157,34,53,0.10)] bg-white p-7 shadow-[0_18px_45px_rgba(157,34,53,0.08)] transition hover:-translate-y-1 hover:shadow-[0_26px_60px_rgba(157,34,53,0.14)]"
+              key={title}
+              className={`flex min-h-[150px] flex-col justify-between rounded-[18px] border px-4 py-4 transition hover:scale-[0.99] ${tone}`}
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgba(157,34,53,0.10)] text-[var(--temple-cherry)] transition group-hover:bg-[var(--temple-cherry)] group-hover:text-white">
+              <div className="text-[var(--foreground)]">
                 <Icon className="h-6 w-6" />
               </div>
-              <h3 className="mt-6 text-2xl font-semibold text-[var(--foreground)]">{name}</h3>
-              <p className="mt-3 text-base leading-7 text-[var(--muted)]">{description}</p>
-            </article>
-          ))}
-        </div>
-      </section>
 
-      <section className="bg-[var(--temple-cherry)] px-6 py-20 text-white lg:px-10">
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-3">
-          {highlights.map(({ title, description, icon: Icon }) => (
-            <div
-              key={title}
-              className="rounded-[1.85rem] border border-white/15 bg-white/8 p-7 backdrop-blur"
-            >
-              <Icon className="h-6 w-6 text-white" />
-              <h3 className="mt-5 text-2xl font-semibold">{title}</h3>
-              <p className="mt-3 text-base leading-7 text-white/78">{description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section id="post" className="mx-auto max-w-7xl px-6 py-20 lg:px-10">
-        <div className="rounded-[2.5rem] border border-[rgba(157,34,53,0.12)] bg-white p-8 shadow-[0_22px_70px_rgba(157,34,53,0.08)] lg:p-12">
-          <div className="grid gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-center">
-            <div>
-              <p className="section-kicker">Start Listing</p>
-              <h2 className="mt-3 text-4xl font-semibold tracking-tight text-[var(--foreground)] sm:text-5xl">
-                Post your next Temple-side offer in minutes.
-              </h2>
-              <p className="mt-5 max-w-2xl text-lg leading-8 text-[var(--muted)]">
-                Whether you&apos;re moving sneakers, opening a spare room, launching a pop-up, or
-                running a fundraiser, The Owl Economy helps students put ideas in front of campus
-                quickly.
-              </p>
-            </div>
-
-            <div className="rounded-[2rem] bg-[linear-gradient(180deg,_#fff5f7,_#ffffff)] p-6">
-              <div className="space-y-4">
-                {[
-                  "Upload a listing for resale, housing, events, art, or fundraising.",
-                  "Reach Temple students through a single branded campus marketplace.",
-                  "Turn side projects into momentum with discoverable categories.",
-                ].map((item) => (
-                  <div
-                    key={item}
-                    className="flex items-start gap-3 rounded-[1.25rem] border border-[rgba(157,34,53,0.10)] bg-white px-4 py-4"
-                  >
-                    <Store className="mt-1 h-5 w-5 shrink-0 text-[var(--temple-cherry)]" />
-                    <p className="text-base leading-7 text-[var(--muted)]">{item}</p>
-                  </div>
-                ))}
+              <div>
+                <h2 className="font-display text-[15px] font-bold tracking-[-0.02em] text-[var(--foreground)]">
+                  {title}
+                </h2>
+                <p className="mt-1.5 text-[11px] leading-5 text-white/40">{description}</p>
               </div>
 
-              <Link
-                href="#top"
-                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--temple-cherry)] px-5 py-3 text-base font-semibold text-white transition hover:bg-[#821b2b]"
-              >
-                Post a Listing
-                <ArrowRight className="h-4 w-4" />
-              </Link>
+              <span className="inline-flex w-fit rounded-md bg-white/10 px-2 py-1 text-[10px] font-semibold text-white/72">
+                {badge}
+              </span>
+            </article>
+          ))}
+        </section>
+
+        <section className="mt-3 rounded-[18px] border border-[rgba(240,80,80,0.25)] bg-[#180F0F] px-5 py-5 transition hover:scale-[0.995]">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="font-display text-[16px] font-bold tracking-[-0.02em] text-[var(--foreground)]">
+                Fundraise Fast
+              </h2>
+              <p className="mt-1.5 text-[12px] leading-5 text-white/40">
+                Cookie drops, bake sales, and club pushes all in one visible lane.
+              </p>
             </div>
+            <HandCoins className="h-10 w-10 text-[rgba(240,80,80,0.6)]" />
           </div>
-        </div>
+        </section>
+
+        <section className="mt-7">
+          <div className="mb-3 flex items-center justify-between px-1">
+            <p className="section-kicker !mt-0 !px-0">Recent Listings</p>
+            <Link href="#top" className="text-[12px] text-white/35 transition hover:text-white/55">
+              See all
+            </Link>
+          </div>
+
+          <div className="flex gap-3 overflow-x-auto pb-1">
+            {recentListings.map((listing) => (
+              <article
+                key={listing.title}
+                className="min-w-[190px] rounded-[16px] border border-white/8 bg-[#151515] p-4"
+              >
+                <div className="flex items-center justify-between">
+                  <Package className="h-4 w-4 text-[var(--accent)]" />
+                  <span className="text-[12px] font-semibold text-[var(--accent)]">
+                    {listing.price}
+                  </span>
+                </div>
+                <h3 className="mt-4 text-[13px] font-medium text-[var(--foreground)]">
+                  {listing.title}
+                </h3>
+                <p className="mt-1.5 text-[11px] text-white/38">{listing.meta}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-7 grid gap-3">
+          {supportCards.map(({ title, text, icon: Icon }) => (
+            <article
+              key={title}
+              className="rounded-[18px] border border-white/8 bg-[#131313] px-5 py-4"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h2 className="font-display text-[16px] font-bold tracking-[-0.02em] text-[var(--foreground)]">
+                    {title}
+                  </h2>
+                  <p className="mt-1.5 text-[12px] leading-5 text-white/40">{text}</p>
+                </div>
+                <Icon className="h-5 w-5 shrink-0 text-[var(--accent)]" />
+              </div>
+            </article>
+          ))}
+        </section>
+
+        <section className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href="#top"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-5 py-3 text-[14px] font-semibold text-black transition hover:bg-[#d8ef3b]"
+          >
+            Browse DormStash
+            <ChevronRight className="h-4 w-4" />
+          </Link>
+
+          <Link
+            href="#top"
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-[14px] text-white/48 transition hover:bg-white/8"
+          >
+            <Sparkles className="h-4 w-4 text-[var(--accent)]" />
+            Post a listing
+          </Link>
+
+          <div className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-[14px] text-white/45">
+            <Clock3 className="h-4 w-4 text-[var(--accent)]" />
+            Fresh listings every day
+          </div>
+        </section>
       </section>
     </main>
-  );
-}
-// Footer component
-function Footer() {
-  return (
-    <footer className="border-t border-[rgba(157,34,53,0.12)] bg-white py-8">
-      <div className="mx-auto max-w-7xl px-6 text-center lg:px-10">
-        <p className="text-sm font-medium text-[var(--muted)]">Built by Owls for Owls.</p>
-      </div>
-    </footer>
   );
 }
