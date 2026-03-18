@@ -43,7 +43,7 @@ const quickActions = [
   },
   {
     title: "Launch Events",
-    description: "Push parties, study jams, pop-ups, and student-run drops.",
+    description: "Push parties, study jams, pop-ups, signups, and event-side campus drops.",
     icon: PartyPopper,
     badge: "Events",
     tone: "bg-[rgba(255,62,165,0.10)] border-[rgba(255,62,165,0.30)]",
@@ -200,7 +200,7 @@ export default function Home() {
                 Fundraise Fast
               </h2>
               <p className="mt-1.5 text-[12px] leading-5 text-white/40">
-                Cookie drops, bake sales, and club pushes all in one visible lane.
+                Cookie drops, bake sales, and quick student fundraiser pushes in one visible lane.
               </p>
             </div>
             <HandCoins className="h-10 w-10 text-[var(--accent)]" />
