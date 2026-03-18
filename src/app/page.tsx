@@ -30,7 +30,7 @@ const quickActions = [
     badge: "Resell",
     tone: "bg-[var(--panel-soft)] border-[rgba(255,62,165,0.24)]",
     accent: "text-[var(--accent)]",
-    href: "#top",
+    href: "/sell-goods",
   },
   {
     title: "Rent a Room",
