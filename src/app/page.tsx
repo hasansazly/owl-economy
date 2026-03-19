@@ -18,9 +18,9 @@ import {
 } from "lucide-react";
 
 const flashDrops = [
-  { title: "Valentines party starts 10 PM", location: "1456 N 15th Broad St", time: "10 PM" },
-  { title: "Science Club fundraiser is live", location: "Student Center Temple", time: "Live" },
-  { title: "Sticker preorder + event signup open", location: "Tyler art collab", time: "Open" },
+  { title: "Valentines party ", location: "1456 N 15th Broad St", time: "10 PM" },
+  { title: "Ignite Temple Club fundraiser", location: "Student Center Temple", time: "Live" },
+  { title: "Skylar lost her airpod", location: "Charles Library", time: "yesterday" },
 ];
 
 const quickActions = [
