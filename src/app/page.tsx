@@ -11,6 +11,7 @@ import {
   Package,
   Palette,
   PartyPopper,
+  Scissors,
   Search,
   Shirt,
   Sparkles,
@@ -76,6 +77,15 @@ const quickActions = [
     tone: "bg-[rgba(51,65,92,0.38)] border-[rgba(255,255,255,0.12)]",
     accent: "text-[var(--accent)]",
     href: "#top",
+  },
+  {
+    title: "Campus Services",
+    description: "Book student-led pros for hair cutting, braids, nails, tech support, or moving help.",
+    icon: Scissors,
+    badge: "Book",
+    tone: "bg-[rgba(51,65,92,0.38)] border-[rgba(255,255,255,0.12)]",
+    accent: "text-[var(--accent)]",
+    href: "/campus-services",
   },
 ];
 
