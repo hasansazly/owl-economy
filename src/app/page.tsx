@@ -53,7 +53,7 @@ const quickActions = [
     href: "/fundraise-fast",
   },
   {
-    title: "Sticker + Art",
+    title: "Campus Creatives",
     description: "Show custom designs, merch, and Temple-made creative work.",
     icon: Palette,
     badge: "Create",
