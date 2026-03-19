@@ -58,7 +58,7 @@ const quickActions = [
     badge: "Fundraise",
     tone: "bg-[linear-gradient(180deg,_rgba(255,62,165,0.10)_0%,_rgba(26,29,36,1)_100%)] border-[rgba(255,62,165,0.22)]",
     accent: "text-[var(--accent)]",
-    href: "#top",
+    href: "/fundraise-fast",
   },
   {
     title: "Sticker + Art",
