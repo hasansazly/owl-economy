@@ -76,7 +76,7 @@ const quickActions = [
     badge: "Report",
     tone: "bg-[rgba(51,65,92,0.38)] border-[rgba(255,255,255,0.12)]",
     accent: "text-[var(--accent)]",
-    href: "#top",
+    href: "/lost-and-found",
   },
   {
     title: "Campus Services",
