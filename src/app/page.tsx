@@ -49,7 +49,7 @@ const quickActions = [
     badge: "Events",
     tone: "bg-[rgba(255,62,165,0.10)] border-[rgba(255,62,165,0.30)]",
     accent: "text-[var(--accent)]",
-    href: "#top",
+    href: "/launch-event",
   },
   {
     title: "Fundraise Fast",
