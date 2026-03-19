@@ -124,7 +124,7 @@ export default function Home() {
         </header>
 
         <section className="px-1 pt-7">
-          <p className="text-[13px] uppercase tracking-[0.28em] text-white">Temple University</p>
+          {/* <p className="text-[13px] uppercase tracking-[0.28em] text-white">Temple University</p> */}
           <h1 className="mt-3 max-w-3xl font-display text-[3.35rem] font-extrabold leading-[0.96] tracking-[-0.06em] sm:text-[4.9rem]">
             <span className="hero-gradient-title">Dorm life moves fast.</span>
             <span className="mt-2 block text-[var(--accent)]">DormStash keeps up.</span>
