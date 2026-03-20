@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { generateJson } from "@/lib/openai";
+import { AI_NOT_CONFIGURED_MESSAGE, generateJson } from "@/lib/openai";
 
 type ConciergeRequest = {
   question?: string;
@@ -34,7 +34,9 @@ Return JSON with exactly these string fields:
 
     return NextResponse.json(result);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "AI concierge failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const message =
+      error instanceof Error ? error.message : "AI is temporarily unavailable. Please try again.";
+    const status = message === AI_NOT_CONFIGURED_MESSAGE ? 503 : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }

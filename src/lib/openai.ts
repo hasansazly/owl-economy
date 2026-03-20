@@ -1,5 +1,7 @@
 const OPENAI_API_URL = "https://api.openai.com/v1/responses";
 const DEFAULT_MODEL = "gpt-5-mini";
+export const AI_NOT_CONFIGURED_MESSAGE =
+  "AI is not configured yet. Add OPENAI_API_KEY to your environment and restart the app.";
 
 type OpenAITextResponse = {
   output_text?: string;
@@ -10,7 +12,7 @@ export function getOpenAIConfig() {
   const model = process.env.OPENAI_MODEL || DEFAULT_MODEL;
 
   if (!apiKey) {
-    throw new Error("Missing OPENAI_API_KEY");
+    throw new Error(AI_NOT_CONFIGURED_MESSAGE);
   }
 
   return { apiKey, model };
@@ -54,13 +56,16 @@ export async function generateJson<T>({
 
   if (!response.ok) {
     const message = await response.text();
-    throw new Error(message || "OpenAI request failed");
+    if (response.status === 401 || response.status === 403) {
+      throw new Error("AI configuration looks invalid. Check your OpenAI API key and model settings.");
+    }
+    throw new Error(message || "AI is temporarily unavailable. Please try again.");
   }
 
   const data = (await response.json()) as OpenAITextResponse;
 
   if (!data.output_text) {
-    throw new Error("No AI output returned");
+    throw new Error("AI did not return a usable response. Please try again.");
   }
 
   return JSON.parse(data.output_text) as T;
