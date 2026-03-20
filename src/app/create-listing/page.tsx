@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Check, ChevronDown, ImageUp, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Check, ChevronDown, ImageUp, Loader2, ShieldCheck, Sparkles, X } from "lucide-react";
 import { ChangeEvent, useMemo, useState } from "react";
 
 const listingTypes = ["For Sale", "Rental", "Free", "Trade", "Campus Etsy", "Borrow"] as const;
@@ -48,6 +48,18 @@ export default function CreateListingPage() {
   const [period, setPeriod] = useState("Item");
   const [location, setLocation] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [aiNotes, setAiNotes] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
+  const [aiTip, setAiTip] = useState("");
+  const [trustLoading, setTrustLoading] = useState(false);
+  const [trustError, setTrustError] = useState("");
+  const [trustCheck, setTrustCheck] = useState<{
+    safeToPost: string;
+    riskLevel: string;
+    summary: string;
+    checks: string[];
+  } | null>(null);
 
   const priceDisabled = listingType === "Free" || listingType === "Borrow";
   const ready =
@@ -69,6 +81,106 @@ export default function CreateListingPage() {
   const handlePhotos = (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []).slice(0, 5);
     setPhotos(files.map((file, index) => `${previewEmojis[index % previewEmojis.length]} ${file.name}`));
+  };
+
+  const generateWithAI = async () => {
+    setAiError("");
+    setAiTip("");
+
+    if (!aiNotes.trim()) {
+      setAiError("Add a few item details so AI can draft the listing.");
+      return;
+    }
+
+    try {
+      setAiLoading(true);
+      const response = await fetch("/api/ai/listing-draft", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          listingType,
+          condition,
+          category,
+          price,
+          location,
+          notes: aiNotes,
+        }),
+      });
+
+      const data = (await response.json()) as {
+        error?: string;
+        title?: string;
+        description?: string;
+        categorySuggestion?: string;
+        pricingTip?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(data.error || "AI draft failed");
+      }
+
+      setTitle(data.title || "");
+      setDescription(data.description || "");
+      if (data.categorySuggestion && categories.includes(data.categorySuggestion)) {
+        setCategory(data.categorySuggestion);
+      }
+      setAiTip(data.pricingTip || "");
+    } catch (error) {
+      setAiError(error instanceof Error ? error.message : "AI draft failed");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const runTrustCheck = async () => {
+    setTrustError("");
+
+    if (!title.trim() && !description.trim()) {
+      setTrustError("Add a title or description before running AI trust check.");
+      return;
+    }
+
+    try {
+      setTrustLoading(true);
+      const response = await fetch("/api/ai/listing-trust-check", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          listingType,
+          title,
+          description,
+          price,
+          location,
+        }),
+      });
+
+      const data = (await response.json()) as {
+        error?: string;
+        safeToPost?: string;
+        riskLevel?: string;
+        summary?: string;
+        checks?: string[];
+      };
+
+      if (!response.ok) {
+        throw new Error(data.error || "AI trust check failed");
+      }
+
+      setTrustCheck({
+        safeToPost: data.safeToPost || "REVIEW",
+        riskLevel: data.riskLevel || "MEDIUM",
+        summary: data.summary || "",
+        checks: data.checks || [],
+      });
+    } catch (error) {
+      setTrustError(error instanceof Error ? error.message : "AI trust check failed");
+    } finally {
+      setTrustLoading(false);
+    }
   };
 
   if (submitted) {
@@ -140,6 +252,105 @@ export default function CreateListingPage() {
       </div>
 
       <div className="mx-auto flex max-w-3xl flex-col gap-6 px-6 pt-6">
+        <section className="rounded-[18px] border border-[rgba(18,214,255,0.18)] bg-[rgba(255,255,255,0.03)] p-5 backdrop-blur">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="section-kicker !px-0 !text-white">AI Listing Assistant</p>
+              <p className="mt-2 text-sm leading-6 text-white/48">
+                Describe the item in plain language and AI will draft the title, description, and a
+                likely category for you.
+              </p>
+            </div>
+            <div className="rounded-full bg-[rgba(18,214,255,0.12)] p-2 text-[var(--accent)]">
+              <Sparkles className="h-4 w-4" />
+            </div>
+          </div>
+
+          <label className="mt-4 flex flex-col gap-2">
+            <span className="text-xs font-medium uppercase tracking-[0.04em] text-white/45">
+              Item details for AI
+            </span>
+            <textarea
+              rows={4}
+              value={aiNotes}
+              onChange={(event) => setAiNotes(event.target.value)}
+              placeholder="Example: Black TI-84 calculator, lightly used, comes with charger and cover, can meet at Charles Library after 4 PM."
+              className="rounded-[12px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm leading-6 outline-none placeholder:text-white/22 focus:border-[rgba(18,214,255,0.45)]"
+            />
+          </label>
+
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <button
+              type="button"
+              onClick={generateWithAI}
+              disabled={aiLoading}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-black disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {aiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {aiLoading ? "Generating..." : "Generate with AI"}
+            </button>
+            {aiTip ? <p className="text-sm text-[var(--accent)]">{aiTip}</p> : null}
+          </div>
+
+          {aiError ? <p className="mt-3 text-sm text-[#F09595]">{aiError}</p> : null}
+        </section>
+
+        <section className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-5 backdrop-blur">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="section-kicker !px-0 !text-white">AI Trust Check</p>
+              <p className="mt-2 text-sm leading-6 text-white/48">
+                Run a safety and clarity review before posting so your listing feels more trustworthy.
+              </p>
+            </div>
+            <div className="rounded-full bg-[rgba(255,255,255,0.06)] p-2 text-[var(--accent)]">
+              <ShieldCheck className="h-4 w-4" />
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <button
+              type="button"
+              onClick={runTrustCheck}
+              disabled={trustLoading}
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-transparent px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {trustLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+              {trustLoading ? "Checking..." : "Run AI Trust Check"}
+            </button>
+            {trustError ? <p className="text-sm text-[#F09595]">{trustError}</p> : null}
+          </div>
+
+          {trustCheck ? (
+            <div className="mt-4 rounded-[16px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${
+                    trustCheck.safeToPost === "YES"
+                      ? "bg-[rgba(18,214,255,0.12)] text-[var(--accent)]"
+                      : "bg-[rgba(240,149,149,0.12)] text-[#F09595]"
+                  }`}
+                >
+                  {trustCheck.safeToPost === "YES" ? "Safe to Post" : "Needs Review"}
+                </span>
+                <span className="rounded-full bg-white/6 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/62">
+                  Risk {trustCheck.riskLevel}
+                </span>
+              </div>
+
+              <p className="mt-3 text-sm leading-6 text-white/60">{trustCheck.summary}</p>
+              <div className="mt-4 space-y-2">
+                {trustCheck.checks.map((item) => (
+                  <div key={item} className="flex items-start gap-2 text-sm text-white/52">
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)]" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </section>
+
         <label className="relative flex min-h-[140px] cursor-pointer flex-col items-center justify-center gap-2 rounded-[16px] border border-dashed border-white/15 px-5 py-8 text-center transition hover:border-[rgba(255,62,165,0.4)]">
           <input type="file" accept="image/*" multiple className="absolute inset-0 opacity-0" onChange={handlePhotos} />
           <div className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-white/6">

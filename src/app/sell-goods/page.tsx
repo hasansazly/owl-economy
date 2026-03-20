@@ -51,6 +51,14 @@ export default function SellGoodsPage() {
   const [selectedUploads, setSelectedUploads] = useState<string[]>([]);
   const [formState, setFormState] = useState<"idle" | "submitting" | "success">("idle");
   const [formError, setFormError] = useState("");
+  const [aiShopperQuery, setAiShopperQuery] = useState("");
+  const [aiShopperLoading, setAiShopperLoading] = useState(false);
+  const [aiShopperError, setAiShopperError] = useState("");
+  const [aiShopperResult, setAiShopperResult] = useState<{
+    summary: string;
+    itemIds: string[];
+    nextStep: string;
+  } | null>(null);
   const [sellForm, setSellForm] = useState<GoodsForm>({
     seller: "",
     email: "",
@@ -93,6 +101,13 @@ export default function SellGoodsPage() {
 
     return nextItems;
   }, [category, condition, items, query, sortBy]);
+
+  const aiRecommendedItems = useMemo(() => {
+    if (!aiShopperResult) return [];
+    return aiShopperResult.itemIds
+      .map((id) => items.find((item) => item.id === id))
+      .filter((item): item is GoodsListing => Boolean(item));
+  }, [aiShopperResult, items]);
 
   const formErrors = useMemo(() => {
     const errors: Partial<Record<keyof GoodsForm, string>> = {};
@@ -152,6 +167,47 @@ export default function SellGoodsPage() {
       setStatus("ready");
       setSelectedUploads([]);
     }, 800);
+  };
+
+  const getAIRecommendations = async () => {
+    setAiShopperError("");
+
+    if (!aiShopperQuery.trim()) {
+      setAiShopperError("Tell AI what kind of item you need.");
+      return;
+    }
+
+    try {
+      setAiShopperLoading(true);
+      const response = await fetch("/api/ai/goods-recommendations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query: aiShopperQuery }),
+      });
+
+      const data = (await response.json()) as {
+        error?: string;
+        summary?: string;
+        itemIds?: string[];
+        nextStep?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(data.error || "AI recommendations failed");
+      }
+
+      setAiShopperResult({
+        summary: data.summary || "",
+        itemIds: data.itemIds || [],
+        nextStep: data.nextStep || "",
+      });
+    } catch (error) {
+      setAiShopperError(error instanceof Error ? error.message : "AI recommendations failed");
+    } finally {
+      setAiShopperLoading(false);
+    }
   };
 
   return (
@@ -274,6 +330,78 @@ export default function SellGoodsPage() {
               Test error state
             </button>
           </div>
+        </section>
+
+        <section className="mt-6 rounded-[24px] border border-[rgba(70,191,255,0.18)] bg-[rgba(255,255,255,0.03)] p-5 backdrop-blur">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.24em] text-white/36">AI Shopper Match</p>
+              <h2 className="mt-2 font-display text-2xl font-bold tracking-[-0.03em]">
+                Tell DormStash AI what you need.
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/48">
+                Describe the item, budget, style, or pickup area and AI will point you to the best current listings.
+              </p>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(70,191,255,0.24)] bg-[rgba(70,191,255,0.08)] px-3 py-1.5 text-xs text-[var(--accent)]">
+              <Sparkles className="h-3.5 w-3.5" />
+              Real AI recommendations
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-3 lg:grid-cols-[1fr_auto]">
+            <label className="flex items-center gap-3 rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3">
+              <Sparkles className="h-4 w-4 text-[var(--accent)]" />
+              <input
+                value={aiShopperQuery}
+                onChange={(event) => setAiShopperQuery(event.target.value)}
+                placeholder="Example: I need a cheap orgo textbook near Charles Library."
+                className="w-full bg-transparent text-sm outline-none placeholder:text-white/30"
+              />
+            </label>
+
+            <button
+              type="button"
+              onClick={getAIRecommendations}
+              disabled={aiShopperLoading}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#14161b] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {aiShopperLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {aiShopperLoading ? "Matching..." : "Match with AI"}
+            </button>
+          </div>
+
+          {aiShopperError ? <p className="mt-3 text-sm text-[#F09595]">{aiShopperError}</p> : null}
+
+          {aiShopperResult ? (
+            <div className="mt-5 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+              <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
+                <p className="text-sm leading-6 text-white/60">{aiShopperResult.summary}</p>
+                <p className="mt-4 text-xs uppercase tracking-[0.16em] text-[var(--accent)]">Next Step</p>
+                <p className="mt-2 text-sm leading-6 text-white/52">{aiShopperResult.nextStep}</p>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-2">
+                {aiRecommendedItems.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={`/sell-goods/${item.id}`}
+                    className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 transition hover:bg-white/5"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="rounded-full bg-[rgba(70,191,255,0.10)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+                        {item.category}
+                      </span>
+                      <span className="text-sm font-semibold text-[var(--accent)]">${item.price}</span>
+                    </div>
+                    <h3 className="mt-4 text-base font-semibold text-white">{item.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-white/48">{item.summary}</p>
+                    <p className="mt-3 text-xs text-white/38">{item.neighborhood}</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </section>
 
         <section className="mt-8">
@@ -534,4 +662,3 @@ export default function SellGoodsPage() {
     </main>
   );
 }
-

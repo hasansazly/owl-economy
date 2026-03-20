@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   BedDouble,
@@ -7,6 +9,7 @@ import {
   GraduationCap,
   HandCoins,
   LampDesk,
+  Loader2,
   MapPin,
   Package,
   Palette,
@@ -16,6 +19,7 @@ import {
   Shirt,
   Sparkles,
 } from "lucide-react";
+import { useState } from "react";
 
 const flashDrops = [
   { title: "Valentines party ", location: "1456 N 15th Broad St", time: "10 PM" },
@@ -101,6 +105,56 @@ const supportCards = [
 ];
 
 export default function Home() {
+  const [assistantQuestion, setAssistantQuestion] = useState("");
+  const [assistantLoading, setAssistantLoading] = useState(false);
+  const [assistantError, setAssistantError] = useState("");
+  const [assistantReply, setAssistantReply] = useState<{
+    answer: string;
+    suggestedRoute: string;
+    suggestedAction: string;
+  } | null>(null);
+
+  const askAssistant = async () => {
+    setAssistantError("");
+
+    if (!assistantQuestion.trim()) {
+      setAssistantError("Ask DormStash AI a question first.");
+      return;
+    }
+
+    try {
+      setAssistantLoading(true);
+      const response = await fetch("/api/ai/campus-concierge", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ question: assistantQuestion }),
+      });
+
+      const data = (await response.json()) as {
+        error?: string;
+        answer?: string;
+        suggestedRoute?: string;
+        suggestedAction?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(data.error || "AI assistant failed");
+      }
+
+      setAssistantReply({
+        answer: data.answer || "",
+        suggestedRoute: data.suggestedRoute || "",
+        suggestedAction: data.suggestedAction || "",
+      });
+    } catch (error) {
+      setAssistantError(error instanceof Error ? error.message : "AI assistant failed");
+    } finally {
+      setAssistantLoading(false);
+    }
+  };
+
   return (
     <main id="top" className="relative min-h-screen overflow-hidden bg-[var(--background)] text-[var(--foreground)]">
       <div className="startup-orb left-[-120px] top-[120px] h-[240px] w-[240px] bg-[rgba(18,214,255,0.12)]" />
@@ -208,6 +262,63 @@ export default function Home() {
         </section>
 
         <div className="agora-divider mt-8" />
+
+        <section className="mt-7 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="agora-panel p-5">
+            <p className="section-kicker !mt-0 !px-0">DormStash AI</p>
+            <h2 className="mt-3 font-display text-[1.6rem] font-bold tracking-[-0.03em] text-white">
+              Ask where to post, browse, or start
+            </h2>
+            <p className="mt-3 max-w-xl text-[14px] leading-6 text-white/48">
+              Get a fast recommendation for the right DormStash flow based on what you need right now.
+            </p>
+
+            <div className="mt-5 rounded-[16px] border border-white/10 bg-white/5 p-3">
+              <textarea
+                rows={4}
+                value={assistantQuestion}
+                onChange={(event) => setAssistantQuestion(event.target.value)}
+                placeholder="Example: I need to raise money for my student org this weekend. Where should I post?"
+                className="w-full resize-none bg-transparent px-1 py-1 text-sm leading-6 outline-none placeholder:text-white/25"
+              />
+            </div>
+
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <button
+                type="button"
+                onClick={askAssistant}
+                disabled={assistantLoading}
+                className="capsule-primary inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {assistantLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                {assistantLoading ? "Thinking..." : "Ask DormStash AI"}
+              </button>
+              {assistantError ? <p className="text-sm text-[#F09595]">{assistantError}</p> : null}
+            </div>
+          </div>
+
+          <div className="agora-panel p-5">
+            <p className="section-kicker !mt-0 !px-0">AI Reply</p>
+            {assistantReply ? (
+              <div className="mt-4 space-y-4">
+                <p className="text-[14px] leading-6 text-white/72">{assistantReply.answer}</p>
+                <div className="rounded-[16px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">
+                    Suggested Route
+                  </p>
+                  <p className="mt-2 text-sm font-semibold text-white">{assistantReply.suggestedRoute}</p>
+                  <p className="mt-2 text-[13px] leading-6 text-white/48">{assistantReply.suggestedAction}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-4 rounded-[16px] border border-dashed border-white/10 bg-[rgba(255,255,255,0.02)] p-5">
+                <p className="text-sm leading-6 text-white/42">
+                  Ask a question about selling, rooms, fundraisers, services, lost items, or events and the AI concierge will guide you to the best DormStash flow.
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
 
         <p className="section-kicker mt-7 px-1">Everything Else</p>
 
