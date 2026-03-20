@@ -102,8 +102,12 @@ const supportCards = [
 
 export default function Home() {
   return (
-    <main id="top" className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <section className="mx-auto max-w-4xl px-4 pb-16 pt-1 sm:px-6">
+    <main id="top" className="relative min-h-screen overflow-hidden bg-[var(--background)] text-[var(--foreground)]">
+      <div className="startup-orb left-[-120px] top-[120px] h-[240px] w-[240px] bg-[rgba(18,214,255,0.12)]" />
+      <div className="startup-orb right-[-80px] top-[32px] h-[320px] w-[320px] bg-[rgba(30,58,138,0.18)]" />
+      <div className="startup-grid absolute inset-0" />
+
+      <section className="relative z-10 mx-auto max-w-6xl px-4 pb-16 pt-1 sm:px-6">
         <header className="sticky top-0 z-20 flex items-center justify-between border-b border-[var(--divider)] bg-[rgba(0,0,0,0.82)] px-1 py-5 backdrop-blur-xl">
           <Link href="#top" className="font-display text-[1.35rem] font-extrabold tracking-[-0.03em]">
             Dorm<span className="text-[var(--accent)]">Stash</span>
@@ -123,71 +127,96 @@ export default function Home() {
           </div>
         </header>
 
-        <section className="px-1 pt-7">
-          {/* <p className="text-[13px] uppercase tracking-[0.28em] text-white">Temple University</p> */}
-          <h1 className="mt-3 max-w-3xl font-display text-[3.35rem] font-extrabold leading-[0.96] tracking-[-0.06em] sm:text-[4.9rem]">
-            <span className="hero-gradient-title">Dorm life moves fast.</span>
-            <span className="mt-2 block text-[var(--accent)]">DormStash keeps up.</span>
-          </h1>
-          <p className="mt-5 max-w-2xl text-[14px] leading-6 text-white/52 sm:text-[15px]">
-            Sell what you no longer need, find quick room options, launch student events, fundraise
-            for your org, and move campus-made items faster.
-          </p>
-        </section>
-
-        <div className="agora-panel mt-8 px-4 py-3">
-          <div className="flex items-center gap-3">
-            <Search className="h-4 w-4 text-white/45" />
-            <input
-              type="search"
-              placeholder="Search dorm items, short stays, sticker drops, late-night finds..."
-              className="w-full bg-transparent text-[14px] text-[var(--foreground)] outline-none placeholder:text-white/35"
-            />
-          </div>
-        </div>
-
-        <p className="section-kicker mt-7 px-1">Live Right Now</p>
-
-        <section className="agora-panel mt-3 overflow-hidden p-5">
-          <div className="flex items-start justify-between gap-3">
-            <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--accent)]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)] shadow-[0_0_18px_rgba(18,214,255,0.85)]" />
-              Flash Drops
+        <section className="grid gap-6 px-1 pt-8 lg:grid-cols-[1.12fr_0.88fr] lg:items-start">
+          <div>
+            <div className="flex flex-wrap gap-2">
+              <div className="startup-chip px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/78">
+                Temple campus live
+              </div>
             </div>
-            <span className="text-[12px] text-[rgba(255,255,255,0.6)]">3 active</span>
+
+            <h1 className="mt-5 max-w-4xl font-display text-[3.35rem] font-extrabold leading-[0.92] tracking-[-0.065em] sm:text-[4.9rem] lg:text-[5.5rem]">
+              <span className="hero-gradient-title">Dorm life moves fast.</span>
+              <span className="mt-2 block text-[var(--accent)]">DormStash keeps up.</span>
+            </h1>
+            <p className="mt-5 max-w-2xl text-[14px] leading-6 text-white/52 sm:text-[15px]">
+              Sell what you no longer need, find quick room options, launch student events, fundraise
+              for your org, and move campus-made items faster.
+            </p>
+
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="#top"
+                className="capsule-primary inline-flex items-center justify-center gap-2 px-5 py-3 text-[14px] font-semibold transition hover:opacity-95"
+              >
+                Browse DormStash
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+
+              <Link
+                href="/create-listing"
+                className="capsule-secondary inline-flex items-center justify-center gap-2 px-5 py-3 text-[14px] transition"
+              >
+                <Sparkles className="h-4 w-4 text-[var(--accent)]" />
+                Create a listing
+              </Link>
+            </div>
+
+            <div className="agora-panel mt-7 px-4 py-3">
+              <div className="flex items-center gap-3">
+                <Search className="h-4 w-4 text-white/45" />
+                <input
+                  type="search"
+                  placeholder="Search dorm items, short stays, sticker drops, late-night finds..."
+                  className="w-full bg-transparent text-[14px] text-[var(--foreground)] outline-none placeholder:text-white/35"
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="mt-4 space-y-2.5">
-            {flashDrops.map((drop) => (
-              <article
-                key={drop.title}
-                className="agora-panel flex items-center justify-between px-3.5 py-3 transition hover:bg-white/[0.05]"
-              >
-                <div className="min-w-0">
-                  <h2 className="truncate text-[13px] font-medium text-[var(--foreground)]">
-                    {drop.title}
-                  </h2>
-                  <div className="mt-1 flex items-center gap-1.5 text-[11px] text-white/38">
-                    <MapPin className="h-3 w-3 shrink-0" />
-                    <span className="truncate">{drop.location}</span>
+          <div className="agora-panel overflow-hidden p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--accent)]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)] shadow-[0_0_18px_rgba(18,214,255,0.85)]" />
+                Flash Drops
+              </div>
+              <span className="text-[12px] text-[rgba(255,255,255,0.6)]">3 active</span>
+            </div>
+
+            <div className="mt-4 space-y-2.5">
+              {flashDrops.map((drop) => (
+                <article
+                  key={drop.title}
+                  className="agora-panel flex items-center justify-between px-3.5 py-3 transition hover:bg-white/[0.05]"
+                >
+                  <div className="min-w-0">
+                    <h2 className="truncate text-[13px] font-medium text-[var(--foreground)]">
+                      {drop.title}
+                    </h2>
+                    <div className="mt-1 flex items-center gap-1.5 text-[11px] text-white/38">
+                      <MapPin className="h-3 w-3 shrink-0" />
+                      <span className="truncate">{drop.location}</span>
+                    </div>
                   </div>
-                </div>
-                <span className="ml-4 rounded-full bg-[rgba(18,214,255,0.12)] px-2.5 py-1 text-[11px] font-semibold text-[var(--accent)]">
-                  {drop.time}
-                </span>
-              </article>
-            ))}
+                  <span className="ml-4 rounded-full bg-[rgba(18,214,255,0.12)] px-2.5 py-1 text-[11px] font-semibold text-[var(--accent)]">
+                    {drop.time}
+                  </span>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
+
+        <div className="agora-divider mt-8" />
 
         <p className="section-kicker mt-7 px-1">Everything Else</p>
 
-        <section className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <section className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {quickActions.map(({ title, description, icon: Icon, badge, href }) => (
             <Link
               key={title}
               href={href}
-              className="agora-panel flex min-h-[160px] flex-col justify-between px-4 py-4 transition hover:scale-[0.99] hover:bg-white/[0.05]"
+              className="agora-panel flex min-h-[168px] flex-col justify-between px-4 py-4 transition hover:-translate-y-0.5 hover:bg-white/[0.05]"
             >
               <div className="text-[var(--accent)]">
                 <Icon className="h-6 w-6" />
@@ -219,7 +248,7 @@ export default function Home() {
             {recentListings.map((listing) => (
               <article
                 key={listing.title}
-                className="agora-panel min-w-[190px] p-4"
+                className="agora-panel min-w-[220px] p-4"
               >
                 <div className="flex items-center justify-between">
                   <Package className="h-4 w-4 text-[var(--accent)]" />
@@ -240,7 +269,7 @@ export default function Home() {
           {supportCards.map(({ title, text, icon: Icon }) => (
             <article
               key={title}
-              className="agora-panel px-5 py-4"
+              className="agora-panel px-5 py-4 transition hover:bg-white/[0.05]"
             >
               <div className="flex items-center justify-between gap-4">
                 <div>
