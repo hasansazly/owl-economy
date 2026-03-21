@@ -61,7 +61,7 @@ const quickActions = [
     description: "Show custom designs, merch, and Temple-made creative work.",
     icon: Palette,
     badge: "Create",
-    href: "#top",
+    href: "/campus-creatives",
   },
   {
     title: "Lost and Found",
