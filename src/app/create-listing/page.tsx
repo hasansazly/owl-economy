@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AlertTriangle, ArrowLeft, Check, ChevronDown, ImageUp, Loader2, ShieldCheck, Sparkles, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Check, ChevronDown, ImageUp, Loader2, MessageCircleMore, Share2, ShieldCheck, Sparkles, X } from "lucide-react";
 import { ChangeEvent, useMemo, useState } from "react";
 
 const listingTypes = ["For Sale", "Rental", "Free", "Trade", "Campus Etsy", "Borrow"] as const;
@@ -36,6 +36,32 @@ const categories = [
 ];
 
 const previewEmojis = ["🖼️", "📷", "🌟", "📦", "✨"];
+const quickPostTemplates = [
+  {
+    label: "Dorm extra",
+    title: "Mini fridge for quick pickup",
+    category: "Furniture & Dorm Essentials",
+    description: "One photo, quick pickup, still works great for dorm life.",
+    price: "40",
+    location: "Morgan Hall",
+  },
+  {
+    label: "Class item",
+    title: "Used textbook bundle",
+    category: "Textbooks & School Supplies",
+    description: "One sentence post for a fast class pickup near campus.",
+    price: "25",
+    location: "Charles Library",
+  },
+  {
+    label: "Clothes drop",
+    title: "Campus hoodie for sale",
+    category: "Clothing & Accessories",
+    description: "Clean condition and easy meetup on campus this afternoon.",
+    price: "20",
+    location: "Student Center",
+  },
+] as const;
 
 export default function CreateListingPage() {
   const [photos, setPhotos] = useState<string[]>([]);
@@ -81,6 +107,46 @@ export default function CreateListingPage() {
   const handlePhotos = (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []).slice(0, 5);
     setPhotos(files.map((file, index) => `${previewEmojis[index % previewEmojis.length]} ${file.name}`));
+  };
+
+  const applyQuickTemplate = (template: (typeof quickPostTemplates)[number]) => {
+    setTitle(template.title);
+    setCategory(template.category);
+    setDescription(template.description);
+    setPrice(template.price);
+    setLocation(template.location);
+  };
+
+  const shareCopy = `${title || "New DormStash listing"} - ${previewPrice} - ${location || "Campus pickup"}\n${description || "Posted on DormStash."}`;
+
+  const shareToInstagram = async () => {
+    try {
+      await navigator.clipboard.writeText(shareCopy);
+    } catch {}
+
+    if (typeof window !== "undefined") {
+      window.location.href = "instagram://camera";
+      window.setTimeout(() => {
+        window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+      }, 600);
+    }
+  };
+
+  const shareToGroupChat = () => {
+    if (typeof window !== "undefined") {
+      window.location.href = `sms:&body=${encodeURIComponent(shareCopy)}`;
+    }
+  };
+
+  const nativeShare = async () => {
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({
+          title: title || "DormStash listing",
+          text: shareCopy,
+        });
+      } catch {}
+    }
   };
 
   const generateWithAI = async () => {
@@ -198,6 +264,32 @@ export default function CreateListingPage() {
               Your item <strong className="text-[var(--accent)]">&quot;{title}&quot;</strong> is now live
               on DormStash. Your campus will see it right away.
             </p>
+            <div className="mt-6 grid gap-3">
+              <button
+                type="button"
+                onClick={shareToInstagram}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-black"
+              >
+                <Share2 className="h-4 w-4" />
+                Repost to IG story
+              </button>
+              <button
+                type="button"
+                onClick={shareToGroupChat}
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--border)] bg-white/5 px-5 py-3 text-sm font-bold text-[var(--foreground)]"
+              >
+                <MessageCircleMore className="h-4 w-4 text-[var(--accent)]" />
+                Share to group chat
+              </button>
+              <button
+                type="button"
+                onClick={nativeShare}
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--border)] bg-transparent px-5 py-3 text-sm font-bold text-white/82"
+              >
+                <Share2 className="h-4 w-4 text-[var(--accent)]" />
+                Share anywhere
+              </button>
+            </div>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Link
                 href="/"
@@ -252,6 +344,33 @@ export default function CreateListingPage() {
       </div>
 
       <div className="mx-auto flex max-w-3xl flex-col gap-6 px-6 pt-6">
+        <section className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-5 backdrop-blur">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="section-kicker !px-0 !text-white">30-Second Quick Post</p>
+              <p className="mt-2 text-sm leading-6 text-white/48">
+                Fastest flow wins supply: one photo, one sentence, price, and a dorm or pickup spot.
+              </p>
+            </div>
+            <div className="rounded-full bg-[rgba(255,255,255,0.06)] p-2 text-[var(--accent)]">
+              <Sparkles className="h-4 w-4" />
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {quickPostTemplates.map((template) => (
+              <button
+                key={template.label}
+                type="button"
+                onClick={() => applyQuickTemplate(template)}
+                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/78 transition hover:border-white/25 hover:bg-white/8"
+              >
+                {template.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
         <section className="rounded-[18px] border border-[rgba(18,214,255,0.18)] bg-[rgba(255,255,255,0.03)] p-5 backdrop-blur">
           <div className="flex items-start justify-between gap-3">
             <div>

@@ -12,6 +12,29 @@ const promoTips = [
   "Use a clear location students already recognize on campus.",
 ] as const;
 
+const quickEventTemplates = [
+  {
+    label: "Study Jam",
+    headline: "Late Night Study Jam",
+    type: "Study Jam",
+    description: "Open tables, low-pressure study energy, and a quick campus meetup before exams hit.",
+    location: "Charles Library",
+    startTime: "8:00 PM",
+    endTime: "10:00 PM",
+    cta: "Pull up with your notes",
+  },
+  {
+    label: "Popup",
+    headline: "Campus Popup Drop",
+    type: "Popup",
+    description: "Quick student popup with limited stock and fast campus pickup.",
+    location: "Student Center",
+    startTime: "1:00 PM",
+    endTime: "3:00 PM",
+    cta: "Come early for first pick",
+  },
+] as const;
+
 export default function LaunchEventPage() {
   const [headline, setHeadline] = useState("");
   const [eventType, setEventType] = useState<(typeof eventTypes)[number]>("Party");
@@ -27,6 +50,16 @@ export default function LaunchEventPage() {
     setExtras((current) =>
       current.includes(value) ? current.filter((item) => item !== value) : [...current, value],
     );
+  };
+
+  const applyTemplate = (template: (typeof quickEventTemplates)[number]) => {
+    setHeadline(template.headline);
+    setEventType(template.type as (typeof eventTypes)[number]);
+    setDescription(template.description);
+    setLocation(template.location);
+    setStartTime(template.startTime);
+    setEndTime(template.endTime);
+    setCta(template.cta);
   };
 
   const liveHeadline = headline || "Your event headline";
@@ -84,6 +117,22 @@ export default function LaunchEventPage() {
             </div>
 
             <div className="mt-6 space-y-6">
+              <div>
+                <span className="text-[13px] font-semibold text-white">Quick Templates</span>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {quickEventTemplates.map((template) => (
+                    <button
+                      key={template.label}
+                      type="button"
+                      onClick={() => applyTemplate(template)}
+                      className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/72 transition hover:border-white/25 hover:bg-white/8"
+                    >
+                      {template.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <label className="block">
                 <span className="text-[13px] font-semibold text-white">Headline</span>
                 <p className="mt-1 text-[12px] leading-5 text-white/38">

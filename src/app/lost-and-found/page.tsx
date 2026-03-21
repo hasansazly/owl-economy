@@ -45,6 +45,25 @@ const reports = [
   },
 ];
 
+const quickReportTemplates = [
+  {
+    label: "Lost AirPods",
+    type: "Lost" as const,
+    itemName: "AirPods in case",
+    location: "Charles Library",
+    time: "Today around 2 PM",
+    details: "White case with a small sticker on the back.",
+  },
+  {
+    label: "Found ID",
+    type: "Found" as const,
+    itemName: "Student ID card",
+    location: "Student Center Lobby",
+    time: "Just now",
+    details: "Found near the front seating area and keeping it safe.",
+  },
+] as const;
+
 export default function LostAndFoundPage() {
   const [activeCategory, setActiveCategory] = useState<(typeof categories)[number]>("All");
   const [search, setSearch] = useState("");
@@ -66,6 +85,14 @@ export default function LostAndFoundPage() {
       return categoryMatch && searchMatch;
     });
   }, [activeCategory, search]);
+
+  const applyTemplate = (template: (typeof quickReportTemplates)[number]) => {
+    setReportType(template.type);
+    setItemName(template.itemName);
+    setReportLocation(template.location);
+    setReportTime(template.time);
+    setReportDetails(template.details);
+  };
 
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -210,6 +237,19 @@ export default function LostAndFoundPage() {
                     }`}
                   >
                     {type}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {quickReportTemplates.map((template) => (
+                  <button
+                    key={template.label}
+                    type="button"
+                    onClick={() => applyTemplate(template)}
+                    className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/72 transition hover:border-white/25 hover:bg-white/8"
+                  >
+                    {template.label}
                   </button>
                 ))}
               </div>

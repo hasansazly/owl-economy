@@ -10,6 +10,27 @@ const paymentOptions = [
   { id: "digital", label: "DormStash Digital Pay" },
 ] as const;
 
+const quickFundraisers = [
+  {
+    label: "Donut drop",
+    headline: "Warm Donuts - Robotics Club",
+    description: "Help the Robotics Team get to Nationals. All proceeds go toward travel and build costs.",
+    price: "12",
+    location: "Bell Tower",
+    startTime: "11:00 AM",
+    endTime: "1:00 PM",
+  },
+  {
+    label: "Cookie table",
+    headline: "Study Week Cookie Sale",
+    description: "Funds support our student org event budget. Every box helps cover supplies and campus programming.",
+    price: "8",
+    location: "Student Center Lobby",
+    startTime: "2:00 PM",
+    endTime: "4:00 PM",
+  },
+] as const;
+
 export default function FundraiseFastPage() {
   const [headline, setHeadline] = useState("");
   const [description, setDescription] = useState("");
@@ -24,6 +45,15 @@ export default function FundraiseFastPage() {
     setPaymentMethod((current) =>
       current.includes(method) ? current.filter((item) => item !== method) : [...current, method],
     );
+  };
+
+  const applyTemplate = (template: (typeof quickFundraisers)[number]) => {
+    setHeadline(template.headline);
+    setDescription(template.description);
+    setPrice(template.price);
+    setLocation(template.location);
+    setStartTime(template.startTime);
+    setEndTime(template.endTime);
   };
 
   const headlineCount = headline.length;
@@ -73,6 +103,22 @@ export default function FundraiseFastPage() {
             </div>
 
             <div className="mt-6 space-y-6">
+              <div>
+                <span className="text-[13px] font-semibold text-white">Quick Templates</span>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {quickFundraisers.map((template) => (
+                    <button
+                      key={template.label}
+                      type="button"
+                      onClick={() => applyTemplate(template)}
+                      className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/72 transition hover:border-white/25 hover:bg-white/8"
+                    >
+                      {template.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <label className="block">
                 <span className="text-[13px] font-semibold text-white">Headline (The Hook)</span>
                 <p className="mt-1 text-[12px] leading-5 text-white/38">
