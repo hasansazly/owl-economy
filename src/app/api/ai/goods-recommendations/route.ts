@@ -5,6 +5,9 @@ import { AI_NOT_CONFIGURED_MESSAGE, generateJson } from "@/lib/openai";
 
 type RecommendationRequest = {
   query?: string;
+  homeCampus?: string;
+  browseCampus?: string;
+  includeOtherCampuses?: boolean;
 };
 
 type RecommendationResponse = {
@@ -25,6 +28,7 @@ export async function POST(request: Request) {
     const listingContext = goodsListings.map((item) => ({
       id: item.id,
       title: item.title,
+      campus: item.campus,
       category: item.category,
       condition: item.condition,
       price: item.price,
@@ -34,8 +38,11 @@ export async function POST(request: Request) {
 
     const result = await generateJson<RecommendationResponse>({
       system:
-        "You are an AI shopping assistant for a student marketplace. Recommend the most relevant items for the student's need from the provided listing catalog only. Return JSON only. itemIds must contain 1 to 3 valid IDs from the catalog.",
-      prompt: `Student request: ${query}
+        "You are an AI shopping assistant for a student marketplace used by university students across the USA. Each user has a home campus, but they may browse other campuses too. Prefer strong matches from the home campus first when available, but include other campuses when the student is open to cross-campus shopping or when another campus clearly has a better fit or price. Recommend only from the provided listing catalog. Return JSON only. itemIds must contain 1 to 3 valid IDs from the catalog.",
+      prompt: `Student home campus: ${body.homeCampus || "Unknown"}
+Current browse campus: ${body.browseCampus || "Unknown"}
+Include other campuses: ${body.includeOtherCampuses ? "Yes" : "No"}
+Student request: ${query}
 
 Available listings:
 ${JSON.stringify(listingContext, null, 2)}

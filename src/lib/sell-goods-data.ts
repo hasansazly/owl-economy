@@ -14,6 +14,7 @@ export type GoodsListing = {
   id: string;
   title: string;
   seller: string;
+  campus: string;
   category: GoodsCategory;
   condition: GoodsCondition;
   price: number;
@@ -30,6 +31,7 @@ export const goodsListings: GoodsListing[] = [
     id: "sg-1",
     title: "Rare Beauty blush duo",
     seller: "Nadia K.",
+    campus: "Temple University",
     category: "Cosmetics",
     condition: "New",
     price: 18,
@@ -45,6 +47,7 @@ export const goodsListings: GoodsListing[] = [
     id: "sg-2",
     title: "Nike Dunk Low size 9",
     seller: "Chris D.",
+    campus: "Temple University",
     category: "Sneakers",
     condition: "Used",
     price: 52,
@@ -60,6 +63,7 @@ export const goodsListings: GoodsListing[] = [
     id: "sg-3",
     title: "Organic Chemistry textbook + notes",
     seller: "Maya R.",
+    campus: "Temple University",
     category: "Books",
     condition: "Used",
     price: 28,
@@ -75,6 +79,7 @@ export const goodsListings: GoodsListing[] = [
     id: "sg-4",
     title: "Desk lamp + organizer kit",
     seller: "Jordan T.",
+    campus: "Temple University",
     category: "Dorm Essentials",
     condition: "Used",
     price: 14,
@@ -90,6 +95,7 @@ export const goodsListings: GoodsListing[] = [
     id: "sg-5",
     title: "iPad keyboard case",
     seller: "Alex P.",
+    campus: "Drexel University",
     category: "Electronics",
     condition: "Used",
     price: 24,
@@ -105,6 +111,7 @@ export const goodsListings: GoodsListing[] = [
     id: "sg-6",
     title: "Vintage hoodie bundle",
     seller: "Sana L.",
+    campus: "University of Pennsylvania",
     category: "Clothes",
     condition: "Used",
     price: 20,
@@ -120,6 +127,7 @@ export const goodsListings: GoodsListing[] = [
     id: "sg-7",
     title: "Charm bracelet + earrings set",
     seller: "Lina M.",
+    campus: "Temple University",
     category: "Accessories",
     condition: "New",
     price: 11,
@@ -135,6 +143,7 @@ export const goodsListings: GoodsListing[] = [
     id: "sg-8",
     title: "Misc student extras box",
     seller: "Tori B.",
+    campus: "Drexel University",
     category: "Other",
     condition: "Used",
     price: 9,
@@ -147,4 +156,3 @@ export const goodsListings: GoodsListing[] = [
     createdAt: "2026-03-13T11:40:00.000Z",
   },
 ];
-

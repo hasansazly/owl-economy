@@ -41,9 +41,20 @@ const categories: ("All" | GoodsCategory)[] = [
   "Other",
 ];
 
+const campuses = [
+  "Temple University",
+  "Drexel University",
+  "University of Pennsylvania",
+  "Penn State University",
+  "New York University",
+] as const;
+
 export default function SellGoodsPage() {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [items, setItems] = useState<GoodsListing[]>([]);
+  const [homeCampus, setHomeCampus] = useState<(typeof campuses)[number]>("Temple University");
+  const [browseCampus, setBrowseCampus] = useState<"Home Campus" | (typeof campuses)[number]>("Home Campus");
+  const [includeOtherCampuses, setIncludeOtherCampuses] = useState(true);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<"All" | GoodsCategory>("All");
   const [condition, setCondition] = useState<"All" | GoodsCondition>("All");
@@ -81,16 +92,22 @@ export default function SellGoodsPage() {
 
   const filteredItems = useMemo(() => {
     const nextItems = items.filter((item) => {
+      const activeCampus = browseCampus === "Home Campus" ? homeCampus : browseCampus;
+      const matchesCampus =
+        browseCampus === "Home Campus"
+          ? includeOtherCampuses || item.campus === homeCampus
+          : item.campus === activeCampus;
+
       const matchesQuery =
         !query.trim() ||
-        `${item.title} ${item.category} ${item.summary} ${item.neighborhood}`
+        `${item.title} ${item.category} ${item.summary} ${item.neighborhood} ${item.campus}`
           .toLowerCase()
           .includes(query.trim().toLowerCase());
 
       const matchesCategory = category === "All" || item.category === category;
       const matchesCondition = condition === "All" || item.condition === condition;
 
-      return matchesQuery && matchesCategory && matchesCondition;
+      return matchesCampus && matchesQuery && matchesCategory && matchesCondition;
     });
 
     nextItems.sort((a, b) => {
@@ -100,7 +117,7 @@ export default function SellGoodsPage() {
     });
 
     return nextItems;
-  }, [category, condition, items, query, sortBy]);
+  }, [browseCampus, category, condition, homeCampus, includeOtherCampuses, items, query, sortBy]);
 
   const aiRecommendedItems = useMemo(() => {
     if (!aiShopperResult) return [];
@@ -151,6 +168,7 @@ export default function SellGoodsPage() {
         id: `sg-${Date.now()}`,
         title: sellForm.title.trim(),
         seller: sellForm.seller.trim(),
+        campus: homeCampus,
         category: sellForm.category,
         condition: sellForm.condition,
         price: Number(sellForm.price),
@@ -184,7 +202,12 @@ export default function SellGoodsPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ query: aiShopperQuery }),
+        body: JSON.stringify({
+          query: aiShopperQuery,
+          homeCampus,
+          browseCampus: browseCampus === "Home Campus" ? homeCampus : browseCampus,
+          includeOtherCampuses,
+        }),
       });
 
       const data = (await response.json()) as {
@@ -246,6 +269,9 @@ export default function SellGoodsPage() {
             <p className="mt-4 max-w-2xl text-base leading-7 text-white/56">
               Only students can upload, post, browse, and buy. Shop new and used cosmetics,
               accessories, clothes, sneakers, books, dorm essentials, electronics, and other student items.
+            </p>
+            <p className="mt-3 text-sm leading-6 text-[var(--accent)]">
+              Home campus: {homeCampus}. Cross-campus shopping helps students compare better prices across schools.
             </p>
           </div>
 
@@ -310,10 +336,52 @@ export default function SellGoodsPage() {
             </select>
           </div>
 
+          <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_1fr_auto]">
+            <select
+              value={homeCampus}
+              onChange={(event) => setHomeCampus(event.target.value as (typeof campuses)[number])}
+              className="rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm outline-none"
+            >
+              {campuses.map((campus) => (
+                <option key={campus} value={campus}>
+                  Home campus: {campus}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={browseCampus}
+              onChange={(event) =>
+                setBrowseCampus(event.target.value as "Home Campus" | (typeof campuses)[number])
+              }
+              className="rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm outline-none"
+            >
+              <option value="Home Campus">Browse home campus first</option>
+              {campuses.map((campus) => (
+                <option key={campus} value={campus}>
+                  Browse {campus}
+                </option>
+              ))}
+            </select>
+
+            <label className="inline-flex items-center gap-3 rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm text-white/70">
+              <input
+                type="checkbox"
+                checked={includeOtherCampuses}
+                onChange={(event) => setIncludeOtherCampuses(event.target.checked)}
+                className="h-4 w-4 rounded border-white/20 bg-transparent accent-[var(--accent)]"
+              />
+              Include cross-campus deals
+            </label>
+          </div>
+
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(70,191,255,0.24)] bg-[rgba(70,191,255,0.08)] px-3 py-1.5 text-xs text-[var(--accent)]">
               <ShieldCheck className="h-3.5 w-3.5" />
               Student-only buying and selling
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/60">
+              Campus default: {browseCampus === "Home Campus" ? homeCampus : browseCampus}
             </div>
             <button
               type="button"
@@ -392,11 +460,16 @@ export default function SellGoodsPage() {
                       <span className="rounded-full bg-[rgba(70,191,255,0.10)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
                         {item.category}
                       </span>
+                      <span className="rounded-full bg-white/6 px-3 py-1 text-xs text-white/62">
+                        {item.campus}
+                      </span>
                       <span className="text-sm font-semibold text-[var(--accent)]">${item.price}</span>
                     </div>
                     <h3 className="mt-4 text-base font-semibold text-white">{item.title}</h3>
                     <p className="mt-2 text-sm leading-6 text-white/48">{item.summary}</p>
-                    <p className="mt-3 text-xs text-white/38">{item.neighborhood}</p>
+                    <p className="mt-3 text-xs text-white/38">
+                      {item.campus} · {item.neighborhood}
+                    </p>
                   </Link>
                 ))}
               </div>
@@ -474,6 +547,9 @@ export default function SellGoodsPage() {
                   <div className="mt-4 flex flex-wrap items-center gap-2">
                     <span className="rounded-full bg-[rgba(70,191,255,0.10)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
                       {item.category}
+                    </span>
+                    <span className="rounded-full bg-white/6 px-3 py-1 text-xs text-white/62">
+                      {item.campus}
                     </span>
                     <span className="rounded-full bg-white/6 px-3 py-1 text-xs text-white/62">
                       {item.condition}
