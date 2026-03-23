@@ -96,9 +96,10 @@ const supportCards = [
     icon: DoorOpen,
   },
   {
-    title: "Study Night",
-    text: "Push a study jam or browse last-minute desk gear and textbooks.",
+    title: "Academic Essentials",
+    text: "Buy, sell, or borrow textbooks and desk gear, or launch a student-led study jam.",
     icon: LampDesk,
+    href: "/academic-essentials",
   },
   {
     title: "Campus Verified",
@@ -408,11 +409,8 @@ export default function Home() {
         </section>
 
         <section className="mt-7 grid gap-3">
-          {supportCards.map(({ title, text, icon: Icon }) => (
-            <article
-              key={title}
-              className="agora-panel px-5 py-4 transition hover:bg-white/[0.05]"
-            >
+          {supportCards.map(({ title, text, icon: Icon, href }) => {
+            const content = (
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <h2 className="font-display text-[16px] font-bold tracking-[-0.02em] text-white">
@@ -422,8 +420,29 @@ export default function Home() {
                 </div>
                 <Icon className="h-5 w-5 shrink-0 text-[var(--accent)]" />
               </div>
-            </article>
-          ))}
+            );
+
+            if (href) {
+              return (
+                <Link
+                  key={title}
+                  href={href}
+                  className="agora-panel block px-5 py-4 transition hover:bg-white/[0.05]"
+                >
+                  {content}
+                </Link>
+              );
+            }
+
+            return (
+              <article
+                key={title}
+                className="agora-panel px-5 py-4 transition hover:bg-white/[0.05]"
+              >
+                {content}
+              </article>
+            );
+          })}
         </section>
 
         <div className="agora-divider mt-8" />
