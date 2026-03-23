@@ -15,6 +15,12 @@ export default async function SellGoodsDetailPage({
 
   if (!item) notFound();
 
+  const contactSellerHref = `mailto:${item.sellerEmail}?subject=${encodeURIComponent(
+    `Interest in ${item.title} on DormStash`,
+  )}&body=${encodeURIComponent(
+    "Hi, I saw your listing on DormStash. Is this still available to meet on campus?",
+  )}`;
+
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <section className="mx-auto max-w-5xl px-4 pb-16 pt-2 sm:px-6">
@@ -53,7 +59,12 @@ export default async function SellGoodsDetailPage({
             </div>
 
             <h1 className="mt-4 font-display text-4xl font-bold tracking-[-0.04em]">{item.title}</h1>
-            <p className="mt-2 text-sm text-white/46">Sold by {item.seller}</p>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-white/46">
+              <span>Sold by {item.seller}</span>
+              <span className="rounded-full bg-[rgba(148,163,184,0.14)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#d7e5f6]">
+                Temple Verified
+              </span>
+            </div>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <div className="rounded-[16px] border border-white/8 bg-white/5 p-4">
@@ -88,16 +99,15 @@ export default async function SellGoodsDetailPage({
               </p>
             </div>
 
-            <button
-              type="button"
-              className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+            <a
+              href={contactSellerHref}
+              className="mt-6 inline-flex w-full items-center justify-center rounded-full border border-[rgba(148,163,184,0.26)] bg-[rgba(148,163,184,0.10)] px-5 py-3 text-sm font-semibold text-[#d7e5f6] transition hover:bg-[rgba(148,163,184,0.16)]"
             >
-              Message seller
-            </button>
+              Contact Seller
+            </a>
           </div>
         </div>
       </section>
     </main>
   );
 }
-

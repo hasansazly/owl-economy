@@ -126,11 +126,18 @@ export default function SellGoodsPage() {
       .filter((item): item is GoodsListing => Boolean(item));
   }, [aiShopperResult, items]);
 
+  const getSellerContactHref = (item: GoodsListing) =>
+    `mailto:${item.sellerEmail}?subject=${encodeURIComponent(
+      `Interest in ${item.title} on DormStash`,
+    )}&body=${encodeURIComponent(
+      "Hi, I saw your listing on DormStash. Is this still available to meet on campus?",
+    )}`;
+
   const formErrors = useMemo(() => {
     const errors: Partial<Record<keyof GoodsForm, string>> = {};
     if (!sellForm.seller.trim()) errors.seller = "Seller name is required.";
-    if (!sellForm.email.trim().toLowerCase().endsWith(".edu") || !sellForm.email.includes("@")) {
-      errors.email = "Only valid student .edu emails can post items.";
+    if (!sellForm.email.trim().toLowerCase().endsWith("@temple.edu") || !sellForm.email.includes("@")) {
+      errors.email = "Only verified temple.edu emails can post marketplace items.";
     }
     if (!sellForm.title.trim()) errors.title = "Add a product title.";
     if (!sellForm.price || Number(sellForm.price) <= 0) {
@@ -168,6 +175,7 @@ export default function SellGoodsPage() {
         id: `sg-${Date.now()}`,
         title: sellForm.title.trim(),
         seller: sellForm.seller.trim(),
+        sellerEmail: sellForm.email.trim(),
         campus: homeCampus,
         category: sellForm.category,
         condition: sellForm.condition,
@@ -451,9 +459,8 @@ export default function SellGoodsPage() {
 
               <div className="grid gap-3 md:grid-cols-2">
                 {aiRecommendedItems.map((item) => (
-                  <Link
+                  <article
                     key={item.id}
-                    href={`/sell-goods/${item.id}`}
                     className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 transition hover:bg-white/5"
                   >
                     <div className="flex items-center justify-between gap-3">
@@ -465,12 +472,26 @@ export default function SellGoodsPage() {
                       </span>
                       <span className="text-sm font-semibold text-[var(--accent)]">${item.price}</span>
                     </div>
-                    <h3 className="mt-4 text-base font-semibold text-white">{item.title}</h3>
+                    <Link href={`/sell-goods/${item.id}`} className="block">
+                      <h3 className="mt-4 text-base font-semibold text-white">{item.title}</h3>
+                    </Link>
+                    <div className="mt-2 flex items-center gap-2 text-[12px] text-white/58">
+                      <span>{item.seller}</span>
+                      <span className="rounded-full bg-[rgba(125,156,191,0.18)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#c7d6ee]">
+                        Temple Verified
+                      </span>
+                    </div>
                     <p className="mt-2 text-sm leading-6 text-white/48">{item.summary}</p>
                     <p className="mt-3 text-xs text-white/38">
                       {item.campus} · {item.neighborhood}
                     </p>
-                  </Link>
+                    <a
+                      href={getSellerContactHref(item)}
+                      className="mt-4 inline-flex w-full items-center justify-center rounded-full border border-[rgba(148,163,184,0.26)] bg-[rgba(148,163,184,0.10)] px-4 py-3 text-sm font-semibold text-[#d7e5f6] transition hover:bg-[rgba(148,163,184,0.16)]"
+                    >
+                      Contact Seller
+                    </a>
+                  </article>
                 ))}
               </div>
             </div>
@@ -535,35 +556,51 @@ export default function SellGoodsPage() {
           {status === "ready" && filteredItems.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {filteredItems.map((item) => (
-                <Link
+                <article
                   key={item.id}
-                  href={`/sell-goods/${item.id}`}
                   className="rounded-[20px] border border-[var(--border)] bg-[var(--panel)] p-5 transition hover:bg-[var(--panel-soft)]"
                 >
-                  <div className="flex h-36 items-center justify-center rounded-[16px] bg-[linear-gradient(135deg,_rgba(51,65,92,0.42),_rgba(70,191,255,0.08))] text-lg font-semibold text-white/70">
-                    {item.imageHint}
+                  <Link href={`/sell-goods/${item.id}`} className="block">
+                    <div className="flex h-36 items-center justify-center rounded-[16px] bg-[linear-gradient(135deg,_rgba(51,65,92,0.42),_rgba(70,191,255,0.08))] text-lg font-semibold text-white/70">
+                      {item.imageHint}
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap items-center gap-2">
+                      <span className="rounded-full bg-[rgba(70,191,255,0.10)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+                        {item.category}
+                      </span>
+                      <span className="rounded-full bg-white/6 px-3 py-1 text-xs text-white/62">
+                        {item.campus}
+                      </span>
+                      <span className="rounded-full bg-white/6 px-3 py-1 text-xs text-white/62">
+                        {item.condition}
+                      </span>
+                    </div>
+
+                    <h3 className="mt-4 text-xl font-semibold">{item.title}</h3>
+                  </Link>
+
+                  <div className="mt-2 flex items-center gap-2 text-[12px] text-white/58">
+                    <span>{item.seller}</span>
+                    <span className="rounded-full bg-[rgba(148,163,184,0.14)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#d7e5f6]">
+                      Temple Verified
+                    </span>
                   </div>
 
-                  <div className="mt-4 flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-[rgba(70,191,255,0.10)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
-                      {item.category}
-                    </span>
-                    <span className="rounded-full bg-white/6 px-3 py-1 text-xs text-white/62">
-                      {item.campus}
-                    </span>
-                    <span className="rounded-full bg-white/6 px-3 py-1 text-xs text-white/62">
-                      {item.condition}
-                    </span>
-                  </div>
-
-                  <h3 className="mt-4 text-xl font-semibold">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-white/48">{item.summary}</p>
+                  <p className="mt-3 text-sm leading-6 text-white/48">{item.summary}</p>
 
                   <div className="mt-4 flex items-center justify-between">
                     <span className="text-sm text-white/44">{item.neighborhood}</span>
                     <span className="text-base font-semibold text-[var(--accent)]">${item.price}</span>
                   </div>
-                </Link>
+
+                  <a
+                    href={getSellerContactHref(item)}
+                    className="mt-4 inline-flex w-full items-center justify-center rounded-full border border-[rgba(148,163,184,0.26)] bg-[rgba(148,163,184,0.10)] px-4 py-3 text-sm font-semibold text-[#d7e5f6] transition hover:bg-[rgba(148,163,184,0.16)]"
+                  >
+                    Contact Seller
+                  </a>
+                </article>
               ))}
             </div>
           ) : null}

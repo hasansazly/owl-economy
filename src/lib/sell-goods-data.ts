@@ -14,6 +14,7 @@ export type GoodsListing = {
   id: string;
   title: string;
   seller: string;
+  sellerEmail: string;
   campus: string;
   category: GoodsCategory;
   condition: GoodsCondition;
@@ -31,6 +32,7 @@ export const goodsListings: GoodsListing[] = [
     id: "sg-1",
     title: "Rare Beauty blush duo",
     seller: "Nadia K.",
+    sellerEmail: "nadia.k@temple.edu",
     campus: "Temple University",
     category: "Cosmetics",
     condition: "New",
@@ -47,6 +49,7 @@ export const goodsListings: GoodsListing[] = [
     id: "sg-2",
     title: "Nike Dunk Low size 9",
     seller: "Chris D.",
+    sellerEmail: "chris.d@temple.edu",
     campus: "Temple University",
     category: "Sneakers",
     condition: "Used",
@@ -63,6 +66,7 @@ export const goodsListings: GoodsListing[] = [
     id: "sg-3",
     title: "Organic Chemistry textbook + notes",
     seller: "Maya R.",
+    sellerEmail: "maya.r@temple.edu",
     campus: "Temple University",
     category: "Books",
     condition: "Used",
@@ -79,6 +83,7 @@ export const goodsListings: GoodsListing[] = [
     id: "sg-4",
     title: "Desk lamp + organizer kit",
     seller: "Jordan T.",
+    sellerEmail: "jordan.t@temple.edu",
     campus: "Temple University",
     category: "Dorm Essentials",
     condition: "Used",
@@ -95,6 +100,7 @@ export const goodsListings: GoodsListing[] = [
     id: "sg-5",
     title: "iPad keyboard case",
     seller: "Alex P.",
+    sellerEmail: "alex.p@temple.edu",
     campus: "Drexel University",
     category: "Electronics",
     condition: "Used",
@@ -111,6 +117,7 @@ export const goodsListings: GoodsListing[] = [
     id: "sg-6",
     title: "Vintage hoodie bundle",
     seller: "Sana L.",
+    sellerEmail: "sana.l@temple.edu",
     campus: "University of Pennsylvania",
     category: "Clothes",
     condition: "Used",
@@ -127,6 +134,7 @@ export const goodsListings: GoodsListing[] = [
     id: "sg-7",
     title: "Charm bracelet + earrings set",
     seller: "Lina M.",
+    sellerEmail: "lina.m@temple.edu",
     campus: "Temple University",
     category: "Accessories",
     condition: "New",
@@ -143,6 +151,7 @@ export const goodsListings: GoodsListing[] = [
     id: "sg-8",
     title: "Misc student extras box",
     seller: "Tori B.",
+    sellerEmail: "tori.b@temple.edu",
     campus: "Drexel University",
     category: "Other",
     condition: "Used",
