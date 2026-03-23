@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { AI_NOT_CONFIGURED_MESSAGE, generateJson } from "@/lib/openai";
+import { enforceRateLimit } from "@/lib/rate-limit";
+import { clampText, getApiErrorStatus, parseJsonBody } from "@/lib/security";
 
 type TrustCheckRequest = {
   listingType?: string;
@@ -19,9 +21,17 @@ type TrustCheckResponse = {
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as TrustCheckRequest;
+    enforceRateLimit(request, {
+      keyPrefix: "ai-listing-trust-check",
+      limit: 8,
+      windowMs: 60_000,
+    });
 
-    if (!body.title?.trim() && !body.description?.trim()) {
+    const body = await parseJsonBody<TrustCheckRequest>(request, 12_288);
+    const title = clampText(body.title, 120);
+    const description = clampText(body.description, 1_500);
+
+    if (!title && !description) {
       return NextResponse.json(
         { error: "Add a title or description before running AI trust check." },
         { status: 400 },
@@ -33,11 +43,11 @@ export async function POST(request: Request) {
         "You are a marketplace trust assistant for a US student marketplace called DormStash. Review listings for clarity, suspicious resale risk, missing details, or safety issues. Do not be alarmist. Return JSON only. safeToPost should be either YES or REVIEW. riskLevel should be LOW, MEDIUM, or HIGH. checks must be an array of 2 to 4 short strings.",
       prompt: `Review this listing:
 
-Listing type: ${body.listingType || "Unknown"}
-Title: ${body.title || "Unknown"}
-Description: ${body.description || "Unknown"}
-Price: ${body.price || "Unknown"}
-Pickup location: ${body.location || "Unknown"}
+Listing type: ${clampText(body.listingType, 60) || "Unknown"}
+Title: ${title || "Unknown"}
+Description: ${description || "Unknown"}
+Price: ${clampText(body.price, 40) || "Unknown"}
+Pickup location: ${clampText(body.location, 120) || "Unknown"}
 
 Return JSON with exactly these fields:
 - safeToPost (string)
@@ -50,7 +60,7 @@ Return JSON with exactly these fields:
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "AI is temporarily unavailable. Please try again.";
-    const status = message === AI_NOT_CONFIGURED_MESSAGE ? 503 : 500;
+    const status = getApiErrorStatus(message, AI_NOT_CONFIGURED_MESSAGE);
     return NextResponse.json({ error: message }, { status });
   }
 }

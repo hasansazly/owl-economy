@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { DormStashLogo } from "@/components/logo";
 import { goodsListings } from "@/lib/sell-goods-data";
+import { buildSellerContactHref, isVerifiedTempleEmail } from "@/lib/security";
 
 export default async function SellGoodsDetailPage({
   params,
@@ -15,16 +16,12 @@ export default async function SellGoodsDetailPage({
 
   if (!item) notFound();
 
-  const contactSellerHref = `mailto:${item.sellerEmail}?subject=${encodeURIComponent(
-    `Interest in ${item.title} on DormStash`,
-  )}&body=${encodeURIComponent(
-    "Hi, I saw your listing on DormStash. Is this still available to meet on campus?",
-  )}`;
+  const contactSellerHref = buildSellerContactHref(item.title, item.sellerEmail);
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <section className="mx-auto max-w-5xl px-4 pb-16 pt-2 sm:px-6">
-        <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-4 border-b border-white/7 bg-[rgba(20,22,27,0.96)] py-4 backdrop-blur">
+    <main className="page-shell">
+      <section className="page-wrap max-w-5xl">
+        <header className="page-header flex-wrap py-4">
           <div className="flex items-center gap-4">
             <Link
               href="/sell-goods"
@@ -61,9 +58,11 @@ export default async function SellGoodsDetailPage({
             <h1 className="mt-4 font-display text-4xl font-bold tracking-[-0.04em]">{item.title}</h1>
             <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-white/46">
               <span>Sold by {item.seller}</span>
-              <span className="rounded-full bg-[rgba(148,163,184,0.14)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#d7e5f6]">
-                Temple Verified
-              </span>
+              {isVerifiedTempleEmail(item.sellerEmail) ? (
+                <span className="rounded-full bg-[rgba(148,163,184,0.14)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#d7e5f6]">
+                  Temple Verified
+                </span>
+              ) : null}
             </div>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -99,12 +98,18 @@ export default async function SellGoodsDetailPage({
               </p>
             </div>
 
-            <a
-              href={contactSellerHref}
-              className="mt-6 inline-flex w-full items-center justify-center rounded-full border border-[rgba(148,163,184,0.26)] bg-[rgba(148,163,184,0.10)] px-5 py-3 text-sm font-semibold text-[#d7e5f6] transition hover:bg-[rgba(148,163,184,0.16)]"
-            >
-              Contact Seller
-            </a>
+            {contactSellerHref ? (
+              <a
+                href={contactSellerHref}
+                className="mt-6 inline-flex w-full items-center justify-center rounded-full border border-[rgba(148,163,184,0.26)] bg-[rgba(148,163,184,0.10)] px-5 py-3 text-sm font-semibold text-[#d7e5f6] transition hover:bg-[rgba(148,163,184,0.16)]"
+              >
+                Contact Seller
+              </a>
+            ) : (
+              <span className="mt-6 inline-flex w-full items-center justify-center rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white/40">
+                Contact unavailable
+              </span>
+            )}
           </div>
         </div>
       </section>

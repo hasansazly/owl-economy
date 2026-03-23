@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { AI_NOT_CONFIGURED_MESSAGE, generateJson } from "@/lib/openai";
+import { enforceRateLimit } from "@/lib/rate-limit";
+import { clampText, getApiErrorStatus, parseJsonBody } from "@/lib/security";
 
 type ListingDraftRequest = {
   listingType?: string;
@@ -20,9 +22,15 @@ type ListingDraftResponse = {
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as ListingDraftRequest;
+    enforceRateLimit(request, {
+      keyPrefix: "ai-listing-draft",
+      limit: 8,
+      windowMs: 60_000,
+    });
 
-    const notes = body.notes?.trim();
+    const body = await parseJsonBody<ListingDraftRequest>(request, 12_288);
+
+    const notes = clampText(body.notes, 1_500);
     if (!notes) {
       return NextResponse.json({ error: "Please add a few details first." }, { status: 400 });
     }
@@ -32,11 +40,11 @@ export async function POST(request: Request) {
         "You help students create campus marketplace listings for DormStash. Return concise, trustworthy output as JSON only. Keep the tone student-friendly, specific, and practical. The title must be under 60 characters. The description must be under 280 characters.",
       prompt: `Draft a marketplace listing using this info:
 
-Listing type: ${body.listingType || "Unknown"}
-Condition: ${body.condition || "Unknown"}
-Current category: ${body.category || "Unknown"}
-Current price: ${body.price || "Unknown"}
-Pickup location: ${body.location || "Unknown"}
+Listing type: ${clampText(body.listingType, 60) || "Unknown"}
+Condition: ${clampText(body.condition, 60) || "Unknown"}
+Current category: ${clampText(body.category, 60) || "Unknown"}
+Current price: ${clampText(body.price, 40) || "Unknown"}
+Pickup location: ${clampText(body.location, 120) || "Unknown"}
 Seller notes: ${notes}
 
 Return JSON with exactly these string fields:
@@ -50,7 +58,7 @@ Return JSON with exactly these string fields:
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "AI is temporarily unavailable. Please try again.";
-    const status = message === AI_NOT_CONFIGURED_MESSAGE ? 503 : 500;
+    const status = getApiErrorStatus(message, AI_NOT_CONFIGURED_MESSAGE);
     return NextResponse.json({ error: message }, { status });
   }
 }

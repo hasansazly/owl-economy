@@ -17,6 +17,7 @@ import {
 
 import { DormStashLogo } from "@/components/logo";
 import { goodsListings, type GoodsCategory, type GoodsCondition, type GoodsListing } from "@/lib/sell-goods-data";
+import { buildSellerContactHref, isVerifiedTempleEmail } from "@/lib/security";
 
 type GoodsForm = {
   seller: string;
@@ -126,17 +127,12 @@ export default function SellGoodsPage() {
       .filter((item): item is GoodsListing => Boolean(item));
   }, [aiShopperResult, items]);
 
-  const getSellerContactHref = (item: GoodsListing) =>
-    `mailto:${item.sellerEmail}?subject=${encodeURIComponent(
-      `Interest in ${item.title} on DormStash`,
-    )}&body=${encodeURIComponent(
-      "Hi, I saw your listing on DormStash. Is this still available to meet on campus?",
-    )}`;
+  const getSellerContactHref = (item: GoodsListing) => buildSellerContactHref(item.title, item.sellerEmail);
 
   const formErrors = useMemo(() => {
     const errors: Partial<Record<keyof GoodsForm, string>> = {};
     if (!sellForm.seller.trim()) errors.seller = "Seller name is required.";
-    if (!sellForm.email.trim().toLowerCase().endsWith("@temple.edu") || !sellForm.email.includes("@")) {
+    if (!isVerifiedTempleEmail(sellForm.email)) {
       errors.email = "Only verified temple.edu emails can post marketplace items.";
     }
     if (!sellForm.title.trim()) errors.title = "Add a product title.";
@@ -175,7 +171,7 @@ export default function SellGoodsPage() {
         id: `sg-${Date.now()}`,
         title: sellForm.title.trim(),
         seller: sellForm.seller.trim(),
-        sellerEmail: sellForm.email.trim(),
+        sellerEmail: sellForm.email.trim().toLowerCase(),
         campus: homeCampus,
         category: sellForm.category,
         condition: sellForm.condition,
@@ -242,9 +238,9 @@ export default function SellGoodsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <section className="mx-auto max-w-6xl px-4 pb-16 pt-2 sm:px-6">
-        <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-4 border-b border-white/7 bg-[rgba(20,22,27,0.96)] py-4 backdrop-blur">
+    <main className="page-shell">
+      <section className="page-wrap max-w-6xl">
+        <header className="page-header flex-wrap py-4">
           <div className="flex items-center gap-4">
             <Link
               href="/"
@@ -477,20 +473,28 @@ export default function SellGoodsPage() {
                     </Link>
                     <div className="mt-2 flex items-center gap-2 text-[12px] text-white/58">
                       <span>{item.seller}</span>
-                      <span className="rounded-full bg-[rgba(125,156,191,0.18)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#c7d6ee]">
-                        Temple Verified
-                      </span>
+                      {isVerifiedTempleEmail(item.sellerEmail) ? (
+                        <span className="rounded-full bg-[rgba(125,156,191,0.18)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#c7d6ee]">
+                          Temple Verified
+                        </span>
+                      ) : null}
                     </div>
                     <p className="mt-2 text-sm leading-6 text-white/48">{item.summary}</p>
                     <p className="mt-3 text-xs text-white/38">
                       {item.campus} · {item.neighborhood}
                     </p>
-                    <a
-                      href={getSellerContactHref(item)}
-                      className="mt-4 inline-flex w-full items-center justify-center rounded-full border border-[rgba(148,163,184,0.26)] bg-[rgba(148,163,184,0.10)] px-4 py-3 text-sm font-semibold text-[#d7e5f6] transition hover:bg-[rgba(148,163,184,0.16)]"
-                    >
-                      Contact Seller
-                    </a>
+                    {getSellerContactHref(item) ? (
+                      <a
+                        href={getSellerContactHref(item) ?? "#"}
+                        className="mt-4 inline-flex w-full items-center justify-center rounded-full border border-[rgba(148,163,184,0.26)] bg-[rgba(148,163,184,0.10)] px-4 py-3 text-sm font-semibold text-[#d7e5f6] transition hover:bg-[rgba(148,163,184,0.16)]"
+                      >
+                        Contact Seller
+                      </a>
+                    ) : (
+                      <span className="mt-4 inline-flex w-full items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/40">
+                        Contact unavailable
+                      </span>
+                    )}
                   </article>
                 ))}
               </div>
@@ -582,9 +586,11 @@ export default function SellGoodsPage() {
 
                   <div className="mt-2 flex items-center gap-2 text-[12px] text-white/58">
                     <span>{item.seller}</span>
-                    <span className="rounded-full bg-[rgba(148,163,184,0.14)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#d7e5f6]">
-                      Temple Verified
-                    </span>
+                    {isVerifiedTempleEmail(item.sellerEmail) ? (
+                      <span className="rounded-full bg-[rgba(148,163,184,0.14)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#d7e5f6]">
+                        Temple Verified
+                      </span>
+                    ) : null}
                   </div>
 
                   <p className="mt-3 text-sm leading-6 text-white/48">{item.summary}</p>
@@ -594,12 +600,18 @@ export default function SellGoodsPage() {
                     <span className="text-base font-semibold text-[var(--accent)]">${item.price}</span>
                   </div>
 
-                  <a
-                    href={getSellerContactHref(item)}
-                    className="mt-4 inline-flex w-full items-center justify-center rounded-full border border-[rgba(148,163,184,0.26)] bg-[rgba(148,163,184,0.10)] px-4 py-3 text-sm font-semibold text-[#d7e5f6] transition hover:bg-[rgba(148,163,184,0.16)]"
-                  >
-                    Contact Seller
-                  </a>
+                  {getSellerContactHref(item) ? (
+                    <a
+                      href={getSellerContactHref(item) ?? "#"}
+                      className="mt-4 inline-flex w-full items-center justify-center rounded-full border border-[rgba(148,163,184,0.26)] bg-[rgba(148,163,184,0.10)] px-4 py-3 text-sm font-semibold text-[#d7e5f6] transition hover:bg-[rgba(148,163,184,0.16)]"
+                    >
+                      Contact Seller
+                    </a>
+                  ) : (
+                    <span className="mt-4 inline-flex w-full items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/40">
+                      Contact unavailable
+                    </span>
+                  )}
                 </article>
               ))}
             </div>

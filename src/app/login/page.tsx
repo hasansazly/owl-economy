@@ -3,8 +3,8 @@ import { ArrowLeft, LockKeyhole, Mail } from "lucide-react";
 
 export default function LoginPage() {
   return (
-    <main className="min-h-screen bg-[var(--background)] px-4 py-10 text-[var(--foreground)] sm:px-6">
-      <div className="mx-auto max-w-md">
+    <main className="page-shell px-4 py-10 text-[var(--foreground)] sm:px-6">
+      <div className="relative z-10 mx-auto max-w-md">
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-sm text-white/50 transition hover:text-white/75"
@@ -13,7 +13,7 @@ export default function LoginPage() {
           Back to MyDormStash
         </Link>
 
-        <div className="mt-8 rounded-[24px] border border-[var(--border)] bg-[var(--panel)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
+        <div className="page-card mt-8 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
           <p className="font-display text-3xl font-bold tracking-[-0.03em]">
             <span className="text-[var(--brand-blue)]">my</span>dormstash<span className="text-white/88">.com</span>
           </p>

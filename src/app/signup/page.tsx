@@ -71,8 +71,8 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[var(--background)] px-6 py-10 text-[var(--foreground)]">
-      <div className="w-full max-w-md">
+    <main className="page-shell flex items-center justify-center px-6 py-10 text-[var(--foreground)]">
+      <div className="relative z-10 w-full max-w-md">
         <div className="mb-8 flex justify-center">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-[9px] bg-[var(--accent)]">
@@ -84,7 +84,7 @@ export default function SignupPage() {
           </div>
         </div>
 
-        <div className="rounded-[20px] border border-[var(--border)] bg-[var(--panel)] px-7 py-8 shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
+        <div className="page-card px-7 py-8 shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
           {!submitted ? (
             <>
               <div className="mb-5 inline-flex items-center gap-2 rounded-lg border border-[rgba(255,62,165,0.24)] bg-[rgba(255,62,165,0.10)] px-3 py-1.5 text-[11px] font-semibold text-[rgba(255,122,193,0.92)]">

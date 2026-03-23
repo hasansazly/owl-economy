@@ -98,9 +98,9 @@ export default function CampusServicesPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0B0E14] text-[var(--foreground)]">
-      <section className="mx-auto max-w-5xl px-4 pb-16 pt-1 sm:px-6">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-white/7 bg-[rgba(11,14,20,0.94)] px-1 py-5 backdrop-blur">
+    <main className="page-shell">
+      <section className="page-wrap max-w-5xl">
+        <header className="page-header">
           <Link
             href="/"
             className="inline-flex items-center gap-1.5 text-sm text-white/45 transition hover:text-white/70"
@@ -113,17 +113,17 @@ export default function CampusServicesPage() {
             <span className="text-[var(--brand-blue)]">my</span>dormstash<span className="text-white/88">.com</span>
           </Link>
 
-          <div className="hidden rounded-full border border-[var(--border)] bg-white/5 px-3.5 py-1.5 text-[12px] font-medium text-white/60 sm:inline-flex">
+          <div className="page-chip hidden sm:inline-flex">
             Student pros live
           </div>
         </header>
 
-        <section className="px-1 pt-8 text-center">
+        <section className="page-hero">
           <p className="section-kicker">Campus Services</p>
-          <h1 className="mt-3 font-display text-[1.95rem] font-bold uppercase tracking-[0.22em] text-white sm:text-[2.4rem]">
+          <h1 className="page-title">
             Campus Services
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-[14px] leading-6 text-white/42 sm:text-[15px]">
+          <p className="page-copy">
             Message student-led providers for grooming, glam, and move-day help without leaving the
             MyDormStash flow.
           </p>
@@ -133,7 +133,7 @@ export default function CampusServicesPage() {
           {services.map(({ title, description, icon: Icon, provider, handle, rating, accent }) => (
             <article
               key={title}
-              className="flex min-h-[250px] flex-col justify-between rounded-[18px] border border-white/10 bg-white/5 px-4 py-4 transition hover:scale-[0.99] hover:bg-white/[0.07]"
+              className="page-card flex min-h-[250px] flex-col justify-between px-4 py-4 transition hover:scale-[0.99] hover:bg-white/[0.07]"
             >
               <div>
                 <div className="flex items-start justify-between gap-3">
@@ -180,7 +180,7 @@ export default function CampusServicesPage() {
         <div className="fixed inset-0 z-40 bg-[rgba(0,0,0,0.58)]">
           <button type="button" aria-label="Close chat" className="absolute inset-0" onClick={closeChat} />
           <aside
-            className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col border-l border-white/10 bg-[#0F131B] shadow-[0_24px_80px_rgba(0,0,0,0.42)]"
+            className="page-card absolute right-0 top-0 flex h-full w-full max-w-md flex-col rounded-none border-l border-white/10 bg-[rgba(7,10,15,0.96)] shadow-[0_24px_80px_rgba(0,0,0,0.42)]"
             role="dialog"
             aria-modal="true"
             aria-labelledby="campus-services-chat-title"

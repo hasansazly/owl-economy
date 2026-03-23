@@ -63,9 +63,9 @@ export default function FundraiseFastPage() {
     .filter(Boolean).length;
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <section className="mx-auto max-w-4xl px-4 pb-16 pt-1 sm:px-6">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-white/7 bg-[rgba(20,22,27,0.96)] px-1 py-5 backdrop-blur">
+    <main className="page-shell">
+      <section className="page-wrap max-w-4xl">
+        <header className="page-header">
           <Link
             href="/"
             className="inline-flex items-center gap-1.5 text-sm text-white/45 transition hover:text-white/70"
@@ -78,25 +78,25 @@ export default function FundraiseFastPage() {
             <span className="text-[var(--brand-blue)]">my</span>dormstash<span className="text-white/88">.com</span>
           </p>
 
-          <div className="hidden items-center gap-2 rounded-full border border-[var(--border)] bg-white/5 px-3.5 py-1.5 text-[12px] font-medium text-white/60 sm:inline-flex">
+          <div className="page-chip hidden items-center gap-2 sm:inline-flex">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
             Fundraiser builder
           </div>
         </header>
 
-        <section className="px-1 pt-8 text-center">
+        <section className="page-hero">
           <p className="section-kicker">Fundraise Fast</p>
-          <h1 className="mt-3 font-display text-[1.95rem] font-bold uppercase tracking-[0.22em] text-white sm:text-[2.35rem]">
+          <h1 className="page-title">
             Fundraise Fast
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-[14px] leading-6 text-white/42 sm:text-[15px]">
+          <p className="page-copy">
             Build a clear, campus-ready fundraiser listing with a strong hook, a short why, and
             fast logistics students can scan in seconds.
           </p>
         </section>
 
         <div className="mt-7 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-          <section className="rounded-[20px] border border-white/10 bg-white/5 px-5 py-5 backdrop-blur">
+          <section className="page-card px-5 py-5">
             <div className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
               <HandCoins className="h-4 w-4" />
               Listing Prompt
@@ -268,7 +268,7 @@ export default function FundraiseFastPage() {
           </section>
 
           <aside className="space-y-4">
-            <section className="rounded-[20px] border border-white/10 bg-white/5 px-5 py-5">
+            <section className="page-card px-5 py-5">
               <p className="section-kicker !mt-0 !px-0">Preview</p>
               <div className="mt-4 rounded-[18px] border border-[rgba(255,62,165,0.22)] bg-[linear-gradient(180deg,_rgba(255,62,165,0.08)_0%,_rgba(26,29,36,1)_100%)] p-4">
                 <div className="inline-flex rounded-full bg-[rgba(255,255,255,0.08)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--accent)]">
@@ -291,7 +291,7 @@ export default function FundraiseFastPage() {
               </div>
             </section>
 
-            <section className="rounded-[20px] border border-white/10 bg-white/5 px-5 py-5">
+            <section className="page-card px-5 py-5">
               <p className="section-kicker !mt-0 !px-0">Checklist</p>
               <div className="mt-4 space-y-3">
                 {[

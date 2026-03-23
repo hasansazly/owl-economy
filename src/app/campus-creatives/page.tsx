@@ -46,9 +46,9 @@ const featuredWorks = [
 
 export default function CampusCreativesPage() {
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <section className="mx-auto max-w-6xl px-4 pb-16 pt-1 sm:px-6">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-[var(--divider)] bg-[rgba(0,0,0,0.82)] px-1 py-5 backdrop-blur-xl">
+    <main className="page-shell">
+      <section className="page-wrap max-w-6xl">
+        <header className="page-header">
           <Link
             href="/"
             className="inline-flex items-center gap-1.5 text-sm text-white/45 transition hover:text-white/70"

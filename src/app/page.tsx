@@ -36,11 +36,14 @@ const quickActions = [
     href: "/sell-goods",
   },
   {
-    title: "Rent a Room",
-    description: "Open a bed, couch, or spare room for quick 1 to 2 night stays.",
+    title: "The Room Swap",
+    description:
+      "Need a place for a visiting friend? Or have a couch to spare? We're building the ultimate campus-only stay network.",
     icon: BedDouble,
-    badge: "Stay",
-    href: "/rent-room",
+    badge: "Coming Soon",
+    href: undefined,
+    hypeBadge: "GET READY",
+    disabled: true,
   },
   {
     title: "Launch Events",
@@ -323,28 +326,56 @@ export default function Home() {
         <p className="section-kicker mt-7 px-1">Everything Else</p>
 
         <section className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {quickActions.map(({ title, description, icon: Icon, badge, href }) => (
-            <Link
-              key={title}
-              href={href}
-              className="agora-panel flex min-h-[168px] flex-col justify-between px-4 py-4 transition hover:-translate-y-0.5 hover:bg-white/[0.05]"
-            >
-              <div className="text-[var(--accent)]">
-                <Icon className="h-6 w-6" />
-              </div>
+          {quickActions.map(({ title, description, icon: Icon, badge, href, hypeBadge, disabled }) => {
+            const cardClassName = `agora-panel relative flex min-h-[168px] flex-col justify-between px-4 py-4 transition ${
+              disabled ? "cursor-default" : "hover:-translate-y-0.5 hover:bg-white/[0.05]"
+            }`;
 
-              <div>
-                <h2 className="font-display text-[15px] font-bold tracking-[-0.02em] text-white">
-                  {title}
-                </h2>
-                <p className="mt-1.5 text-[11px] leading-5 text-white/46">{description}</p>
-              </div>
+            const content = (
+              <>
+                {hypeBadge ? (
+                  <span className="absolute right-4 top-4 rounded-full border border-amber-400/30 bg-amber-400/14 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-200 shadow-[0_0_20px_rgba(251,191,36,0.22)]">
+                    {hypeBadge}
+                  </span>
+                ) : null}
 
-              <span className="inline-flex w-fit rounded-full border border-white/10 bg-[rgba(18,214,255,0.08)] px-2.5 py-1 text-[10px] font-semibold text-[var(--accent)]">
-                {badge}
-              </span>
-            </Link>
-          ))}
+                <div className={`text-[var(--accent)] ${disabled ? "opacity-90" : ""}`}>
+                  <Icon className="h-6 w-6" />
+                </div>
+
+                <div>
+                  <h2 className="font-display text-[15px] font-bold tracking-[-0.02em] text-white">
+                    {title}
+                  </h2>
+                  <p className="mt-1.5 max-w-[28ch] text-[11px] leading-5 text-white/46">{description}</p>
+                </div>
+
+                <span
+                  className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                    disabled
+                      ? "pointer-events-none border border-white/12 bg-white/6 text-white/52"
+                      : "border border-white/10 bg-[rgba(18,214,255,0.08)] text-[var(--accent)]"
+                  }`}
+                >
+                  {badge}
+                </span>
+              </>
+            );
+
+            if (disabled || !href) {
+              return (
+                <div key={title} className={cardClassName}>
+                  {content}
+                </div>
+              );
+            }
+
+            return (
+              <Link key={title} href={href} className={cardClassName}>
+                {content}
+              </Link>
+            );
+          })}
         </section>
 
         <section className="mt-7">

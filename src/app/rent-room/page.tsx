@@ -298,9 +298,9 @@ export default function RentRoomPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <section className="mx-auto max-w-6xl px-4 pb-16 pt-2 sm:px-6">
-        <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-4 border-b border-white/7 bg-[rgba(20,22,27,0.96)] py-4 backdrop-blur">
+    <main className="page-shell">
+      <section className="page-wrap max-w-6xl">
+        <header className="page-header flex-wrap py-4">
           <div className="flex items-center gap-4">
             <Link
               href="/"
@@ -336,7 +336,7 @@ export default function RentRoomPage() {
             </p>
           </div>
 
-          <div className="rounded-[22px] border border-[var(--border)] bg-[linear-gradient(135deg,_rgba(51,65,92,0.55),_rgba(26,29,36,0.92))] p-5">
+          <div className="page-card bg-[linear-gradient(135deg,_rgba(51,65,92,0.55),_rgba(26,29,36,0.92))] p-5">
             <div className="grid gap-3 sm:grid-cols-3">
               {[
                 { label: "Typical Nightly Price", value: "$14-$32", icon: Wallet },
@@ -353,7 +353,7 @@ export default function RentRoomPage() {
           </div>
         </section>
 
-        <section className="rounded-[24px] border border-[var(--border)] bg-[var(--panel)] p-5">
+        <section className="page-card p-5">
           <div className="grid gap-3 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr]">
             <label className="flex items-center gap-3 rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3">
               <Search className="h-4 w-4 text-white/35" />

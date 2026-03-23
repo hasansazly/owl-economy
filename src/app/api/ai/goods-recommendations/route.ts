@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 
 import { goodsListings } from "@/lib/sell-goods-data";
 import { AI_NOT_CONFIGURED_MESSAGE, generateJson } from "@/lib/openai";
+import { enforceRateLimit } from "@/lib/rate-limit";
+import { clampText, getApiErrorStatus, parseJsonBody } from "@/lib/security";
 
 type RecommendationRequest = {
   query?: string;
@@ -18,8 +20,16 @@ type RecommendationResponse = {
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as RecommendationRequest;
-    const query = body.query?.trim();
+    enforceRateLimit(request, {
+      keyPrefix: "ai-goods-recommendations",
+      limit: 10,
+      windowMs: 60_000,
+    });
+
+    const body = await parseJsonBody<RecommendationRequest>(request, 10_240);
+    const query = clampText(body.query, 320);
+    const homeCampus = clampText(body.homeCampus, 80) || "Unknown";
+    const browseCampus = clampText(body.browseCampus, 80) || "Unknown";
 
     if (!query) {
       return NextResponse.json({ error: "Add a shopping question first." }, { status: 400 });
@@ -39,8 +49,8 @@ export async function POST(request: Request) {
     const result = await generateJson<RecommendationResponse>({
       system:
         "You are an AI shopping assistant for a student marketplace used by university students across the USA. Each user has a home campus, but they may browse other campuses too. Prefer strong matches from the home campus first when available, but include other campuses when the student is open to cross-campus shopping or when another campus clearly has a better fit or price. Recommend only from the provided listing catalog. Return JSON only. itemIds must contain 1 to 3 valid IDs from the catalog.",
-      prompt: `Student home campus: ${body.homeCampus || "Unknown"}
-Current browse campus: ${body.browseCampus || "Unknown"}
+      prompt: `Student home campus: ${homeCampus}
+Current browse campus: ${browseCampus}
 Include other campuses: ${body.includeOtherCampuses ? "Yes" : "No"}
 Student request: ${query}
 
@@ -63,7 +73,7 @@ Return JSON with exactly these fields:
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "AI is temporarily unavailable. Please try again.";
-    const status = message === AI_NOT_CONFIGURED_MESSAGE ? 503 : 500;
+    const status = getApiErrorStatus(message, AI_NOT_CONFIGURED_MESSAGE);
     return NextResponse.json({ error: message }, { status });
   }
 }

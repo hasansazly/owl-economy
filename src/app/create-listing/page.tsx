@@ -251,9 +251,9 @@ export default function CreateListingPage() {
 
   if (submitted) {
     return (
-      <main className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)]">
+      <main className="page-shell px-6 py-16">
         <div className="mx-auto max-w-xl text-center">
-          <div className="rounded-[20px] border border-[var(--border)] bg-[var(--panel)] px-8 py-10">
+          <div className="page-card px-8 py-10">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[rgba(255,62,165,0.12)]">
               <Check className="h-7 w-7 text-[var(--accent)]" />
             </div>
@@ -323,8 +323,8 @@ export default function CreateListingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--background)] pb-16 text-[var(--foreground)]">
-      <div className="sticky top-0 z-20 flex items-center justify-between border-b border-white/7 bg-[rgba(20,22,27,0.96)] px-6 py-4 backdrop-blur">
+    <main className="page-shell pb-16 text-[var(--foreground)]">
+      <div className="page-header px-6 py-4">
         <Link
           href="/"
           className="inline-flex items-center gap-1.5 text-sm text-white/45 transition hover:text-white/70"
@@ -343,8 +343,8 @@ export default function CreateListingPage() {
         </button>
       </div>
 
-      <div className="mx-auto flex max-w-3xl flex-col gap-6 px-6 pt-6">
-        <section className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-5 backdrop-blur">
+      <div className="relative z-10 mx-auto flex max-w-3xl flex-col gap-6 px-6 pt-6">
+        <section className="page-card p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="section-kicker !px-0 !text-white">30-Second Quick Post</p>
@@ -371,7 +371,7 @@ export default function CreateListingPage() {
           </div>
         </section>
 
-        <section className="rounded-[18px] border border-[rgba(18,214,255,0.18)] bg-[rgba(255,255,255,0.03)] p-5 backdrop-blur">
+        <section className="page-card p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="section-kicker !px-0 !text-white">AI Listing Assistant</p>
@@ -414,7 +414,7 @@ export default function CreateListingPage() {
           {aiError ? <p className="mt-3 text-sm text-[#F09595]">{aiError}</p> : null}
         </section>
 
-        <section className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-5 backdrop-blur">
+        <section className="page-card p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="section-kicker !px-0 !text-white">AI Trust Check</p>
