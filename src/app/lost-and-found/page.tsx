@@ -8,9 +8,9 @@ const categories = ["All", "IDs", "Keys", "Tech", "Accessories", "Dorm Items"] a
 
 const reports = [
   {
-    title: "Temple ID + SEPTA pass",
+    title: "Temple ID card with owl sticker",
     category: "IDs",
-    location: "Student Center Lobby",
+    location: "Student Center South Lobby",
     time: "Posted 20 min ago",
     details: "Found near the front seating area after lunch rush.",
     icon: Wallet,
