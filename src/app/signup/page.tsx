@@ -79,7 +79,7 @@ export default function SignupPage() {
               <LockKeyhole className="h-[18px] w-[18px] text-white" />
             </div>
             <p className="font-display text-3xl font-extrabold tracking-[-0.03em]">
-              Dorm<span className="text-[var(--accent)]">Stash</span>
+              <span className="text-[var(--brand-blue)]">my</span>dormstash<span className="text-white/88">.com</span>
             </p>
           </div>
         </div>
@@ -96,7 +96,7 @@ export default function SignupPage() {
                 Create your account
               </h1>
               <p className="mt-1.5 text-sm leading-6 text-white/45">
-                Join your campus community on DormStash.
+                Join your campus community on MyDormStash.
               </p>
 
               <form
@@ -240,7 +240,7 @@ export default function SignupPage() {
                 <strong className="text-[var(--accent)]">{email.trim()}</strong>
                 <br />
                 <br />
-                Click the link to activate your DormStash account.
+                Click the link to activate your MyDormStash account.
               </p>
             </div>
           )}
@@ -258,7 +258,7 @@ export default function SignupPage() {
           className="mt-5 inline-flex items-center gap-2 text-sm text-white/50 transition hover:text-white/75"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to DormStash
+          Back to MyDormStash
         </Link>
       </div>
     </main>

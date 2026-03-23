@@ -10,9 +10,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "DormStash | Campus Marketplace",
+  title: "mydormstash.com | Campus Marketplace",
   description:
-    "DormStash is a campus-first marketplace for dorm deals, short stays, event drops, custom merch, and student listings.",
+    "MyDormStash is a campus-first marketplace for dorm deals, short stays, event drops, custom merch, and student listings.",
 };
 
 export default function RootLayout({

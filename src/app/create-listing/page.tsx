@@ -117,7 +117,7 @@ export default function CreateListingPage() {
     setLocation(template.location);
   };
 
-  const shareCopy = `${title || "New DormStash listing"} - ${previewPrice} - ${location || "Campus pickup"}\n${description || "Posted on DormStash."}`;
+  const shareCopy = `${title || "New MyDormStash listing"} - ${previewPrice} - ${location || "Campus pickup"}\n${description || "Posted on MyDormStash."}`;
 
   const shareToInstagram = async () => {
     try {
@@ -142,7 +142,7 @@ export default function CreateListingPage() {
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({
-          title: title || "DormStash listing",
+          title: title || "MyDormStash listing",
           text: shareCopy,
         });
       } catch {}
@@ -262,7 +262,7 @@ export default function CreateListingPage() {
             </h1>
             <p className="mt-2 text-sm leading-6 text-white/40">
               Your item <strong className="text-[var(--accent)]">&quot;{title}&quot;</strong> is now live
-              on DormStash. Your campus will see it right away.
+              on MyDormStash. Your campus will see it right away.
             </p>
             <div className="mt-6 grid gap-3">
               <button

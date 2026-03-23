@@ -10,12 +10,12 @@ export default function LoginPage() {
           className="inline-flex items-center gap-2 text-sm text-white/50 transition hover:text-white/75"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to DormStash
+          Back to MyDormStash
         </Link>
 
         <div className="mt-8 rounded-[24px] border border-[var(--border)] bg-[var(--panel)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
           <p className="font-display text-3xl font-bold tracking-[-0.03em]">
-            Dorm<span className="text-[var(--accent)]">Stash</span>
+            <span className="text-[var(--brand-blue)]">my</span>dormstash<span className="text-white/88">.com</span>
           </p>
           <h1 className="mt-4 font-display text-2xl font-bold tracking-[-0.03em]">Log in</h1>
           <p className="mt-2 text-sm leading-6 text-white/42">

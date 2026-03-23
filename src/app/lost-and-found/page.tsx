@@ -107,7 +107,7 @@ export default function LostAndFoundPage() {
           </Link>
 
           <p className="font-display text-[1.35rem] font-extrabold tracking-[-0.03em]">
-            Dorm<span className="text-[var(--accent)]">Stash</span>
+            <span className="text-[var(--brand-blue)]">my</span>dormstash<span className="text-white/88">.com</span>
           </p>
 
           <div className="hidden items-center gap-2 rounded-full border border-[var(--border)] bg-white/5 px-3.5 py-1.5 text-[12px] font-medium text-white/60 sm:inline-flex">

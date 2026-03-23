@@ -58,7 +58,7 @@ export default function CampusCreativesPage() {
           </Link>
 
           <Link href="/" className="font-display text-[1.35rem] font-extrabold tracking-[-0.03em]">
-            Dorm<span className="text-[var(--accent)]">Stash</span>
+            <span className="text-[var(--brand-blue)]">my</span>dormstash<span className="text-white/88">.com</span>
           </Link>
 
           <div className="capsule-secondary hidden items-center gap-2 px-3.5 py-1.5 text-[12px] font-medium text-white/70 sm:inline-flex">

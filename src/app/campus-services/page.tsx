@@ -110,7 +110,7 @@ export default function CampusServicesPage() {
           </Link>
 
           <Link href="/" className="font-display text-[1.35rem] font-extrabold tracking-[-0.03em]">
-            Dorm<span className="text-[var(--accent)]">Stash</span>
+            <span className="text-[var(--brand-blue)]">my</span>dormstash<span className="text-white/88">.com</span>
           </Link>
 
           <div className="hidden rounded-full border border-[var(--border)] bg-white/5 px-3.5 py-1.5 text-[12px] font-medium text-white/60 sm:inline-flex">
@@ -125,7 +125,7 @@ export default function CampusServicesPage() {
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-[14px] leading-6 text-white/42 sm:text-[15px]">
             Message student-led providers for grooming, glam, and move-day help without leaving the
-            DormStash flow.
+            MyDormStash flow.
           </p>
         </section>
 

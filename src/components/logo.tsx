@@ -26,66 +26,27 @@ export function DormStashLogo({
       >
         <defs>
           <linearGradient id="dormstash-logo-gradient" x1="20" y1="20" x2="108" y2="108">
-            <stop offset="0%" stopColor="#76D5FF" />
-            <stop offset="100%" stopColor="#46BFFF" />
+            <stop offset="0%" stopColor="#8BE7FF" />
+            <stop offset="100%" stopColor="#12D6FF" />
           </linearGradient>
         </defs>
-        <path
-          d="M28 36V98"
-          stroke="url(#dormstash-logo-gradient)"
-          strokeWidth="8"
-          strokeLinecap="round"
-        />
-        <path
-          d="M28 36H54C84 36 104 58 104 84C104 101 92 108 74 108H28"
-          stroke="url(#dormstash-logo-gradient)"
-          strokeWidth="8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M28 36L60 18L97 38"
-          stroke="url(#dormstash-logo-gradient)"
-          strokeWidth="8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <circle cx="28" cy="36" r="6.5" fill="url(#dormstash-logo-gradient)" />
-        <circle cx="60" cy="18" r="6.5" fill="url(#dormstash-logo-gradient)" />
-        <circle cx="28" cy="98" r="6.5" fill="url(#dormstash-logo-gradient)" />
-        <circle cx="60" cy="98" r="5.5" fill="#5E7EA3" opacity="0.55" />
-        <circle cx="60" cy="36" r="5.5" fill="#5E7EA3" opacity="0.45" />
-        <circle cx="60" cy="66" r="5.5" fill="#5E7EA3" opacity="0.55" />
-        <path d="M38 66H86" stroke="#4E7196" strokeWidth="2" strokeDasharray="6 6" opacity="0.55" />
-        <path d="M38 66L60 36L60 18" stroke="#4E7196" strokeWidth="2" opacity="0.45" />
-        <path d="M60 98L86 66" stroke="#4E7196" strokeWidth="2" opacity="0.45" />
-        <path
-          d="M74 8C79 12 82 18 82 24"
-          stroke="#355378"
-          strokeWidth="2"
-          strokeLinecap="round"
-          opacity="0.65"
-        />
-        <path
-          d="M82 4C88 10 92 18 92 28"
-          stroke="#355378"
-          strokeWidth="2"
-          strokeLinecap="round"
-          opacity="0.45"
-        />
-        <path
-          d="M46 8C41 12 38 18 38 24"
-          stroke="#355378"
-          strokeWidth="2"
-          strokeLinecap="round"
-          opacity="0.35"
-        />
+        <rect x="10" y="10" width="108" height="108" rx="24" stroke="url(#dormstash-logo-gradient)" strokeWidth="4" opacity="0.95" />
+        <path d="M34 34V94" stroke="url(#dormstash-logo-gradient)" strokeWidth="8" strokeLinecap="round" />
+        <path d="M34 34L66 20L96 34" stroke="url(#dormstash-logo-gradient)" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M52 42H84C90 42 94 46 94 52V92" stroke="url(#dormstash-logo-gradient)" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M52 58H80" stroke="#79DFFF" strokeWidth="6" strokeLinecap="round" opacity="0.9" />
+        <path d="M52 74H80" stroke="#79DFFF" strokeWidth="6" strokeLinecap="round" opacity="0.7" />
+        <path d="M52 90H74" stroke="#79DFFF" strokeWidth="6" strokeLinecap="round" opacity="0.55" />
       </svg>
 
       <div className="leading-none">
-        <div className={`font-display font-extrabold tracking-[-0.04em] ${compact ? "text-2xl" : "text-3xl"}`}>
-          <span className="text-white">Dorm</span>
-          <span className="text-[var(--brand-blue)]">Stash</span>
+        <div
+          className={`font-display font-extrabold tracking-[-0.05em] ${compact ? "text-[1.6rem]" : "text-[2.15rem]"}`}
+          style={{ textShadow: "0 0 28px rgba(18,214,255,0.28)" }}
+        >
+          <span className="text-[var(--brand-blue)]">my</span>
+          <span className="text-white">dormstash</span>
+          <span className="text-white/88">.com</span>
         </div>
         {showTagline ? (
           <div className="mt-2 space-y-1.5">
@@ -106,4 +67,3 @@ export function DormStashLogo({
 
   return content;
 }
-

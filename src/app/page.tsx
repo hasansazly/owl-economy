@@ -118,7 +118,7 @@ export default function Home() {
     setAssistantError("");
 
     if (!assistantQuestion.trim()) {
-      setAssistantError("Ask DormStash AI a question first.");
+      setAssistantError("Ask MyDormStash AI a question first.");
       return;
     }
 
@@ -164,7 +164,7 @@ export default function Home() {
       <section className="relative z-10 mx-auto max-w-6xl px-4 pb-16 pt-1 sm:px-6">
         <header className="sticky top-0 z-20 flex items-center justify-between border-b border-[var(--divider)] bg-[rgba(0,0,0,0.82)] px-1 py-5 backdrop-blur-xl">
           <Link href="#top" className="font-display text-[1.35rem] font-extrabold tracking-[-0.03em]">
-            Dorm<span className="text-[var(--accent)]">Stash</span>
+            <span className="text-[var(--brand-blue)]">my</span>dormstash<span className="text-white/88">.com</span>
           </Link>
 
           <div className="flex items-center gap-2">
@@ -191,7 +191,7 @@ export default function Home() {
 
             <h1 className="mt-5 max-w-4xl font-display text-[3.35rem] font-extrabold leading-[0.92] tracking-[-0.065em] sm:text-[4.9rem] lg:text-[5.5rem]">
               <span className="hero-gradient-title">Dorm life moves fast.</span>
-              <span className="mt-2 block text-[var(--accent)]">DormStash keeps up.</span>
+              <span className="mt-2 block text-[var(--accent)]">MyDormStash keeps up.</span>
             </h1>
             <p className="mt-5 max-w-2xl text-[14px] leading-6 text-white/52 sm:text-[15px]">
               Sell what you no longer need, find quick room options, launch student events, fundraise
@@ -203,7 +203,7 @@ export default function Home() {
                 href="#top"
                 className="capsule-primary inline-flex items-center justify-center gap-2 px-5 py-3 text-[14px] font-semibold transition hover:opacity-95"
               >
-                Browse DormStash
+                Browse MyDormStash
                 <ChevronRight className="h-4 w-4" />
               </Link>
 
@@ -265,12 +265,12 @@ export default function Home() {
 
         <section className="mt-7 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="agora-panel p-5">
-            <p className="section-kicker !mt-0 !px-0">DormStash AI</p>
+            <p className="section-kicker !mt-0 !px-0">MyDormStash AI</p>
             <h2 className="mt-3 font-display text-[1.6rem] font-bold tracking-[-0.03em] text-white">
               Ask where to post, browse, or start
             </h2>
             <p className="mt-3 max-w-xl text-[14px] leading-6 text-white/48">
-              Get a fast recommendation for the right DormStash flow based on what you need right now.
+              Get a fast recommendation for the right MyDormStash flow based on what you need right now.
             </p>
 
             <div className="mt-5 rounded-[16px] border border-white/10 bg-white/5 p-3">
@@ -291,7 +291,7 @@ export default function Home() {
                 className="capsule-primary inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {assistantLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                {assistantLoading ? "Thinking..." : "Ask DormStash AI"}
+                {assistantLoading ? "Thinking..." : "Ask MyDormStash AI"}
               </button>
               {assistantError ? <p className="text-sm text-[#F09595]">{assistantError}</p> : null}
             </div>
@@ -313,7 +313,7 @@ export default function Home() {
             ) : (
               <div className="mt-4 rounded-[16px] border border-dashed border-white/10 bg-[rgba(255,255,255,0.02)] p-5">
                 <p className="text-sm leading-6 text-white/42">
-                  Ask a question about selling, rooms, fundraisers, services, lost items, or events and the AI concierge will guide you to the best DormStash flow.
+                  Ask a question about selling, rooms, fundraisers, services, lost items, or events and the AI concierge will guide you to the best MyDormStash flow.
                 </p>
               </div>
             )}
@@ -402,7 +402,7 @@ export default function Home() {
             href="#top"
             className="capsule-primary inline-flex items-center justify-center gap-2 px-5 py-3 text-[14px] font-semibold transition hover:opacity-95"
           >
-            Browse DormStash
+            Browse MyDormStash
             <ChevronRight className="h-4 w-4" />
           </Link>
 
