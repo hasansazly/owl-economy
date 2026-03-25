@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, BrushCleaning, Camera, ChevronRight, Palette, Shirt, Sparkles, Sticker } from "lucide-react";
+import { ArrowLeft, Paintbrush, Camera, ChevronRight, Palette, Shirt, Sparkles, Sticker } from "lucide-react";
 
 const creatorCards = [
   {
@@ -92,7 +92,7 @@ export default function CampusCreativesPage() {
                 href="/create-listing"
                 className="capsule-secondary inline-flex items-center justify-center gap-2 px-5 py-3 text-[14px] transition"
               >
-                <BrushCleaning className="h-4 w-4 text-[var(--accent)]" />
+                <Paintbrush className="h-4 w-4 text-[var(--accent)]" />
                 Post your creative work
               </Link>
             </div>
