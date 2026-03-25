@@ -9,8 +9,7 @@ import {
   Check,
   ChevronRight,
   Clock3,
-  Home,
-  ImagePlus,
+  ImageUp,
   MapPin,
   Search,
   Send,
@@ -267,7 +266,7 @@ export default function RoomSwapPage() {
           </Link>
 
           <div className="page-chip hidden items-center gap-2 sm:inline-flex">
-            <Home className="h-3.5 w-3.5 text-[var(--accent)]" />
+            <Sparkles className="h-3.5 w-3.5 text-[var(--accent)]" />
             Room Swap
           </div>
         </header>
@@ -470,7 +469,7 @@ export default function RoomSwapPage() {
                 onChange={(event) => handleFiles(event.target.files)}
               />
               <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-white/6 text-[var(--accent)]">
-                <ImagePlus className="h-5 w-5" />
+                <ImageUp className="h-5 w-5" />
               </div>
               <p className="mt-4 text-sm font-semibold text-white">Upload room photos</p>
               <p className="mt-2 text-xs text-white/38">Drag and drop or tap to add up to 5 photos</p>
