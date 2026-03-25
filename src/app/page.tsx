@@ -204,7 +204,7 @@ export default function Home() {
           <a
             key={item.label}
             href={item.href}
-            className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/46 transition hover:text-[#9e1b32]"
+            className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/46 transition hover:text-[var(--accent)]"
           >
             {item.label}
           </a>
@@ -231,7 +231,7 @@ export default function Home() {
           </div>
           <h1 className="mt-4 max-w-3xl font-display text-[2.1rem] font-extrabold leading-[0.98] tracking-[0.01em] text-white sm:text-[2.8rem]">
             Everything campus.
-            <span className="mt-1 block text-[#9e1b32]">All in one place.</span>
+              <span className="mt-1 block text-[var(--accent)]">All in one place.</span>
           </h1>
           <p className="mt-3 max-w-2xl text-[13px] leading-6 text-white/62 sm:text-[14px]">
             The student network for what you need. Buy, sell, and connect with your community instantly.
@@ -240,7 +240,7 @@ export default function Home() {
 
         <section id="flash" className="border-t border-white/8 px-1 py-4">
           <div className="mb-3 flex items-center justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#9e1b32]">Flash Drops</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--accent)]">Flash Drops</p>
             <span className="text-[12px] text-white/48">3 active</span>
           </div>
           <div className="space-y-2">
@@ -256,7 +256,7 @@ export default function Home() {
                     <span className="truncate">{drop.location}</span>
                   </div>
                 </div>
-                <span className="rounded-full border border-[#9e1b32]/30 bg-[#9e1b32]/10 px-2.5 py-1 text-[11px] font-semibold text-[#d65b72]">
+                <span className="rounded-full border border-white/10 bg-[rgba(18,214,255,0.08)] px-2.5 py-1 text-[11px] font-semibold text-[var(--accent)]">
                   {drop.time}
                 </span>
               </article>
@@ -281,7 +281,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9e1b32]">
+                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/64">
                     {badge}
                   </span>
                   <ChevronRight className="h-4 w-4 text-white/28 transition group-hover:text-white/56" />
@@ -322,7 +322,7 @@ export default function Home() {
               <div className="flex h-32 items-center justify-center rounded-[14px] border border-white/8 bg-[linear-gradient(135deg,_rgba(158,27,50,0.18),_rgba(255,255,255,0.03))] text-center text-sm font-semibold text-white/72">
                 {previewItem.title}
               </div>
-              <p className="mt-4 text-[12px] font-semibold uppercase tracking-[0.18em] text-[#9e1b32]">
+              <p className="mt-4 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
                 Preview
               </p>
               <p className="mt-2 text-sm text-white">{previewItem.price} - {previewItem.title}</p>
@@ -367,7 +367,7 @@ export default function Home() {
               <div className="mt-4 space-y-3">
                 <p className="text-sm leading-6 text-white/72">{assistantReply.answer}</p>
                 <div className="rounded-[14px] border border-white/8 bg-white/[0.02] p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9e1b32]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
                     Suggested Route
                   </p>
                   <p className="mt-2 text-sm font-semibold text-white">{assistantReply.suggestedRoute}</p>
@@ -379,7 +379,7 @@ export default function Home() {
                 Use the fixed command line to ask about selling, rooms, fundraisers, services, lost items, or events.
               </p>
             )}
-            {assistantError ? <p className="mt-4 text-sm text-[#d65b72]">{assistantError}</p> : null}
+            {assistantError ? <p className="mt-4 text-sm text-white/58">{assistantError}</p> : null}
           </div>
         </section>
       </section>
