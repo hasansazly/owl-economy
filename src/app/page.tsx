@@ -260,12 +260,13 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="flash" className="border-t border-white/8 px-1 py-4">
+        <section id="flash" className="campus-live-section px-1 py-4">
           <div className="mb-3 flex items-center justify-between">
-            <p className="rounded-full border border-[var(--accent)]/30 bg-[rgba(18,214,255,0.12)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-white shadow-[0_10px_24px_rgba(18,214,255,0.12)]">
+            <p className="campus-live-heading">
+              <span className="campus-live-dot" aria-hidden="true" />
               Campus Live
             </p>
-            <span className="text-[12px] text-white/48">3 active</span>
+            <span className="campus-live-badge">3 active</span>
           </div>
           <div className="space-y-2">
             {flashDrops.map((drop) => (

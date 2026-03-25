@@ -242,3 +242,57 @@ a {
   border-radius: 20px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
+
+.campus-live-section {
+  position: relative;
+  border-top: 1px solid rgba(191, 90, 242, 0.28);
+  box-shadow: inset 0 1px 0 rgba(191, 90, 242, 0.16), 0 -12px 30px rgba(191, 90, 242, 0.08);
+}
+
+.campus-live-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.campus-live-dot {
+  height: 0.5rem;
+  width: 0.5rem;
+  border-radius: 9999px;
+  background: #bf5af2;
+  box-shadow: 0 0 0 rgba(191, 90, 242, 0.55);
+  animation: campus-live-pulse 2.2s ease-in-out infinite;
+}
+
+.campus-live-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid rgba(191, 90, 242, 0.34);
+  background: rgba(191, 90, 242, 0.1);
+  padding: 0.38rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+@keyframes campus-live-pulse {
+  0%,
+  100% {
+    transform: scale(0.95);
+    opacity: 0.78;
+    box-shadow: 0 0 0 0 rgba(191, 90, 242, 0.4), 0 0 12px rgba(191, 90, 242, 0.28);
+  }
+
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+    box-shadow: 0 0 0 5px rgba(191, 90, 242, 0.08), 0 0 18px rgba(191, 90, 242, 0.44);
+  }
+}
