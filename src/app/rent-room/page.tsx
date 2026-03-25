@@ -16,7 +16,6 @@ import {
   Send,
   Sparkles,
   X,
-  UserSearch,
 } from "lucide-react";
 
 type StayMode = "Semester" | "Few Months" | "One Month" | "Short Stay";
@@ -305,7 +304,7 @@ export default function RoomSwapPage() {
               {[
                 { label: "Best for", value: "Semester + few months", icon: BedDouble },
                 { label: "Also supports", value: "1 month + short stays", icon: Clock3 },
-                { label: "Built for", value: "Room posts and room requests", icon: UserSearch },
+                { label: "Built for", value: "Room posts and room requests", icon: Search },
               ].map(({ label, value, icon: Icon }) => (
                 <div key={label} className="page-card p-4">
                   <Icon className="h-4 w-4 text-[var(--accent)]" />
