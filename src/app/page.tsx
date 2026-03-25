@@ -227,7 +227,7 @@ export default function Home() {
 
           <Link
             href="/login"
-            className="rounded-full border border-white/12 bg-white px-4 py-2 text-[13px] font-semibold text-black transition hover:opacity-95"
+            className="rounded-full border border-[var(--accent)]/30 bg-[rgba(18,214,255,0.12)] px-4 py-2 text-[13px] font-semibold text-white shadow-[0_10px_24px_rgba(18,214,255,0.12)] transition hover:border-[var(--accent)]/45 hover:bg-[rgba(18,214,255,0.18)]"
           >
             Log in
           </Link>
