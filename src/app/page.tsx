@@ -201,11 +201,11 @@ export default function Home() {
               </div>
             </div>
 
-            <h1 className="mt-5 max-w-4xl font-display text-[3.35rem] font-extrabold leading-[0.92] tracking-[-0.065em] sm:text-[4.9rem] lg:text-[5.5rem]">
+            <h1 className="mt-5 max-w-4xl font-display text-[2.85rem] font-extrabold leading-[0.94] tracking-[-0.06em] sm:text-[4.25rem] lg:text-[5.5rem]">
               <span className="hero-gradient-title">Dorm life moves fast.</span>
               <span className="mt-2 block text-[var(--accent)]">MyDormStash keeps up.</span>
             </h1>
-            <p className="mt-5 max-w-2xl text-[14px] leading-6 text-white/52 sm:text-[15px]">
+            <p className="mt-4 max-w-2xl text-[13px] leading-6 text-white/52 sm:mt-5 sm:text-[15px]">
               Sell what you no longer need, find quick room options, launch student events, fundraise
               for your org, and move campus-made items faster.
             </p>
@@ -274,63 +274,6 @@ export default function Home() {
         </section>
 
         <div className="agora-divider mt-8" />
-
-        <section className="mt-7 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-          <div className="agora-panel p-5">
-            <p className="section-kicker !mt-0 !px-0">MyDormStash AI</p>
-            <h2 className="mt-3 font-display text-[1.6rem] font-bold tracking-[-0.03em] text-white">
-              Ask where to post, browse, or start
-            </h2>
-            <p className="mt-3 max-w-xl text-[14px] leading-6 text-white/48">
-              Get a fast recommendation for the right MyDormStash flow based on what you need right now.
-            </p>
-
-            <div className="mt-5 rounded-[16px] border border-white/10 bg-white/5 p-3">
-              <textarea
-                rows={4}
-                value={assistantQuestion}
-                onChange={(event) => setAssistantQuestion(event.target.value)}
-                placeholder="Example: I need to raise money for my student org this weekend. Where should I post?"
-                className="w-full resize-none bg-transparent px-1 py-1 text-sm leading-6 outline-none placeholder:text-white/25"
-              />
-            </div>
-
-            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <button
-                type="button"
-                onClick={askAssistant}
-                disabled={assistantLoading}
-                className="capsule-primary inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                {assistantLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                {assistantLoading ? "Thinking..." : "Ask MyDormStash AI"}
-              </button>
-              {assistantError ? <p className="text-sm text-[#F09595]">{assistantError}</p> : null}
-            </div>
-          </div>
-
-          <div className="agora-panel p-5">
-            <p className="section-kicker !mt-0 !px-0">AI Reply</p>
-            {assistantReply ? (
-              <div className="mt-4 space-y-4">
-                <p className="text-[14px] leading-6 text-white/72">{assistantReply.answer}</p>
-                <div className="rounded-[16px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">
-                    Suggested Route
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-white">{assistantReply.suggestedRoute}</p>
-                  <p className="mt-2 text-[13px] leading-6 text-white/48">{assistantReply.suggestedAction}</p>
-                </div>
-              </div>
-            ) : (
-              <div className="mt-4 rounded-[16px] border border-dashed border-white/10 bg-[rgba(255,255,255,0.02)] p-5">
-                <p className="text-sm leading-6 text-white/42">
-                  Ask a question about selling, rooms, fundraisers, services, lost items, or events and the AI concierge will guide you to the best MyDormStash flow.
-                </p>
-              </div>
-            )}
-          </div>
-        </section>
 
         <p className="section-kicker mt-7 px-1">Everything Else</p>
 
@@ -451,6 +394,63 @@ export default function Home() {
               </article>
             );
           })}
+        </section>
+
+        <section className="mt-8 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="agora-panel p-5">
+            <p className="section-kicker !mt-0 !px-0">MyDormStash AI</p>
+            <h2 className="mt-3 font-display text-[1.35rem] font-bold tracking-[-0.03em] text-white sm:text-[1.6rem]">
+              Ask where to post, browse, or start
+            </h2>
+            <p className="mt-3 max-w-xl text-[13px] leading-6 text-white/48 sm:text-[14px]">
+              Get a fast recommendation for the right MyDormStash flow based on what you need right now.
+            </p>
+
+            <div className="mt-5 rounded-[16px] border border-white/10 bg-white/5 p-3">
+              <textarea
+                rows={4}
+                value={assistantQuestion}
+                onChange={(event) => setAssistantQuestion(event.target.value)}
+                placeholder="Example: I need to raise money for my student org this weekend. Where should I post?"
+                className="w-full resize-none bg-transparent px-1 py-1 text-sm leading-6 outline-none placeholder:text-white/25"
+              />
+            </div>
+
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <button
+                type="button"
+                onClick={askAssistant}
+                disabled={assistantLoading}
+                className="capsule-primary inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {assistantLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                {assistantLoading ? "Thinking..." : "Ask MyDormStash AI"}
+              </button>
+              {assistantError ? <p className="text-sm text-[#F09595]">{assistantError}</p> : null}
+            </div>
+          </div>
+
+          <div className="agora-panel p-5">
+            <p className="section-kicker !mt-0 !px-0">AI Reply</p>
+            {assistantReply ? (
+              <div className="mt-4 space-y-4">
+                <p className="text-[14px] leading-6 text-white/72">{assistantReply.answer}</p>
+                <div className="rounded-[16px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">
+                    Suggested Route
+                  </p>
+                  <p className="mt-2 text-sm font-semibold text-white">{assistantReply.suggestedRoute}</p>
+                  <p className="mt-2 text-[13px] leading-6 text-white/48">{assistantReply.suggestedAction}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-4 rounded-[16px] border border-dashed border-white/10 bg-[rgba(255,255,255,0.02)] p-5">
+                <p className="text-sm leading-6 text-white/42">
+                  Ask a question about selling, rooms, fundraisers, services, lost items, or events and the AI concierge will guide you to the best MyDormStash flow.
+                </p>
+              </div>
+            )}
+          </div>
         </section>
 
         <div className="agora-divider mt-8" />
