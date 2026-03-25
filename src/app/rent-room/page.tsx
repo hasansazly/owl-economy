@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
   ArrowLeft,
-  BadgeCheck,
   BedDouble,
   CalendarDays,
+  Check,
   ChevronRight,
   Clock3,
   Home,
@@ -496,7 +496,7 @@ export default function RoomSwapPage() {
               <p className="mt-2 text-sm text-white/42">Semester and few-month stays are prioritized first.</p>
             </div>
             <div className="page-chip hidden items-center gap-2 sm:inline-flex">
-              <BadgeCheck className="h-3.5 w-3.5 text-[var(--accent)]" />
+              <Check className="h-3.5 w-3.5 text-[var(--accent)]" />
               Verified Student
             </div>
           </div>
