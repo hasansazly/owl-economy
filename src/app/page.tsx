@@ -27,6 +27,14 @@ type QuickAction = {
   href?: string;
 };
 
+const quickPills = [
+  { label: "Resell", href: "/sell-goods" },
+  { label: "Rooms", href: "/rent-room" },
+  { label: "Events", href: "/launch-event" },
+  { label: "Lost", href: "/lost-and-found" },
+  { label: "Book", href: "/campus-services" },
+];
+
 const flashDrops = [
   { title: "Valentines party", location: "1456 N 15th Broad St", time: "10 PM" },
   { title: "Ignite Temple Club fundraiser", location: "Student Center Temple", time: "Live" },
@@ -36,49 +44,49 @@ const flashDrops = [
 const quickActions: QuickAction[] = [
   {
     title: "Sell Goods",
-    description: "Clothes, sneakers, books, and dorm extras students want right now.",
+    description: "Clothes, books, and dorm extras moving fast.",
     icon: Shirt,
     badge: "Resell",
     href: "/sell-goods",
   },
   {
     title: "The Room Swap",
-    description: "Semester sublets, few-month stays, one-month options, and short stays, plus room-wanted posts in one place.",
+    description: "Semester sublets and room-wanted posts.",
     icon: BedDouble,
     badge: "Rooms",
     href: "/rent-room",
   },
   {
     title: "Launch Events",
-    description: "Push parties, study jams, pop-ups, signups, and event-side campus drops.",
+    description: "Parties, study jams, and pop-ups on campus.",
     icon: PartyPopper,
     badge: "Events",
     href: "/launch-event",
   },
   {
     title: "Fundraise Fast",
-    description: "Run science club drives, cookie drops, bake sales, and student fundraiser pushes.",
+    description: "Fast fundraiser posts for clubs and orgs.",
     icon: HandCoins,
     badge: "Fundraise",
     href: "/fundraise-fast",
   },
   {
     title: "Campus Creatives",
-    description: "Show custom designs, merch, and campus-made creative work.",
+    description: "Custom designs, merch, and student-made work.",
     icon: Palette,
     badge: "Create",
     href: "/campus-creatives",
   },
   {
     title: "Lost and Found",
-    description: "A digital bulletin board for lost IDs, keys, or Airpods. No fees, just campus karma.",
+    description: "Lost IDs, keys, and AirPods with campus karma.",
     icon: MapPin,
     badge: "Report",
     href: "/lost-and-found",
   },
   {
     title: "Campus Services",
-    description: "Book student-led pros for hair cutting, braids, nails, tech support, or moving help.",
+    description: "Hair, braids, nails, tech support, and moving help.",
     icon: Scissors,
     badge: "Book",
     href: "/campus-services",
@@ -238,6 +246,20 @@ export default function Home() {
           </p>
         </section>
 
+        <section className="border-t border-white/8 px-1 py-4">
+          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {quickPills.map((pill) => (
+              <Link
+                key={pill.label}
+                href={pill.href}
+                className="shrink-0 rounded-full border border-white/14 bg-white/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/76 transition hover:border-white/22 hover:bg-white/[0.08]"
+              >
+                {pill.label}
+              </Link>
+            ))}
+          </div>
+        </section>
+
         <section id="flash" className="border-t border-white/8 px-1 py-4">
           <div className="mb-3 flex items-center justify-between">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--accent)]">Flash Drops</p>
@@ -256,9 +278,21 @@ export default function Home() {
                     <span className="truncate">{drop.location}</span>
                   </div>
                 </div>
-                <span className="rounded-full border border-white/10 bg-[rgba(18,214,255,0.08)] px-2.5 py-1 text-[11px] font-semibold text-[var(--accent)]">
-                  {drop.time}
-                </span>
+                <div className="flex shrink-0 items-center gap-2">
+                  <button
+                    type="button"
+                    className="rounded-full border border-white/12 bg-white/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70 transition hover:border-white/20 hover:bg-white/[0.08]"
+                  >
+                    {drop.title.includes("party")
+                      ? "Events"
+                      : drop.title.includes("fundraiser")
+                        ? "Fundraise"
+                        : "Lost"}
+                  </button>
+                  <span className="rounded-full border border-white/10 bg-[rgba(18,214,255,0.08)] px-2.5 py-1 text-[11px] font-semibold text-[var(--accent)]">
+                    {drop.time}
+                  </span>
+                </div>
               </article>
             ))}
           </div>
@@ -266,25 +300,29 @@ export default function Home() {
 
         <section id="launcher" className="border-t border-white/8 px-1 py-5">
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/54">Everything Else</p>
-          <div className="space-y-1">
+          <div className="grid grid-cols-2 gap-3">
             {quickActions.map(({ title, description, icon: Icon, badge, href }) => (
               <Link
                 key={title}
                 href={href || "#"}
-                className="group flex items-center justify-between rounded-[18px] border border-transparent px-2 py-3 transition hover:border-white/8 hover:bg-white/[0.03]"
+                className="group rounded-[20px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 shadow-[0_16px_32px_rgba(0,0,0,0.18)] backdrop-blur-xl transition hover:border-white/18 hover:bg-white/[0.05]"
               >
-                <div className="flex min-w-0 items-center gap-3 pr-4">
-                  <Icon className="h-4 w-4 shrink-0 text-white/72" />
-                  <div className="min-w-0">
-                  <h2 className="truncate text-[15px] font-semibold tracking-[0.02em] text-white">{title}</h2>
-                  <p className="truncate text-[12px] text-white/42">{description}</p>
+                <div className="flex h-full flex-col justify-between gap-4">
+                  <div>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04]">
+                      <Icon className="h-5 w-5 text-white/78" />
+                    </div>
+                    <div className="mt-4 min-w-0">
+                      <h2 className="truncate text-[15px] font-semibold tracking-[0.01em] text-white">{title}</h2>
+                      <p className="mt-1 text-[12px] leading-5 text-white/46">{description}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex shrink-0 items-center gap-3">
-                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/64">
-                    {badge}
-                  </span>
-                  <ChevronRight className="h-4 w-4 text-white/28 transition group-hover:text-white/56" />
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="rounded-full border border-white/12 bg-white/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70">
+                      {badge}
+                    </span>
+                    <ChevronRight className="h-4 w-4 shrink-0 text-white/32 transition group-hover:text-white/58" />
+                  </div>
                 </div>
               </Link>
             ))}
@@ -313,7 +351,9 @@ export default function Home() {
                   <span className="min-w-0 truncate text-[14px] font-medium tracking-[0.01em] text-white">
                     {listing.price} - {listing.title} - {listing.meta}
                   </span>
-                  <span className="ml-3 shrink-0 text-[11px] uppercase tracking-[0.14em] text-white/28">Peek</span>
+                  <span className="ml-3 shrink-0 rounded-full border border-white/12 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/66">
+                    Peek
+                  </span>
                 </button>
               ))}
             </div>
