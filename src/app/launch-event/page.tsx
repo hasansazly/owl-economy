@@ -104,19 +104,18 @@ export default function LaunchEventPage() {
             Launch Event
           </h1>
           <p className="page-copy">
-            Spin up parties, study jams, club activations, and pop-up moments with a fast listing
-            flow that matches the rest of MyDormStash.
+            Post parties, study jams, and popups fast.
           </p>
         </section>
 
         <div className="mt-7 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-          <section className="page-card px-5 py-5">
+          <section className="page-card px-4 py-4">
             <div className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
               <PartyPopper className="h-4 w-4" />
               Event Prompt
             </div>
 
-            <div className="mt-6 space-y-6">
+            <div className="mt-5 space-y-5">
               <div>
                 <span className="text-[13px] font-semibold text-white">Quick Templates</span>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -125,7 +124,7 @@ export default function LaunchEventPage() {
                       key={template.label}
                       type="button"
                       onClick={() => applyTemplate(template)}
-                      className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/72 transition hover:border-white/25 hover:bg-white/8"
+                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[13px] font-semibold text-white/72 transition hover:border-white/25 hover:bg-white/8"
                     >
                       {template.label}
                     </button>
@@ -136,14 +135,14 @@ export default function LaunchEventPage() {
               <label className="block">
                 <span className="text-[13px] font-semibold text-white">Headline</span>
                 <p className="mt-1 text-[12px] leading-5 text-white/38">
-                  Lead with the drop, collab, or reason students should stop scrolling.
+                  Lead with why students should care.
                 </p>
                 <input
                   type="text"
                   value={headline}
                   onChange={(event) => setHeadline(event.target.value)}
                   placeholder="Late Night Study Jam at Charles"
-                  className="mt-3 w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-[14px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                  className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                 />
               </label>
 
@@ -155,7 +154,7 @@ export default function LaunchEventPage() {
                       key={type}
                       type="button"
                       onClick={() => setEventType(type)}
-                      className={`rounded-full border px-4 py-2 text-sm transition ${
+                      className={`rounded-full border px-3 py-1.5 text-[13px] transition ${
                         eventType === type
                           ? "border-[rgba(70,191,255,0.3)] bg-[rgba(70,191,255,0.08)] text-[var(--accent)]"
                           : "border-[var(--border)] bg-white/5 text-white/50 hover:border-white/25 hover:text-white/80"
@@ -170,18 +169,18 @@ export default function LaunchEventPage() {
               <label className="block">
                 <span className="text-[13px] font-semibold text-white">The Vibe</span>
                 <p className="mt-1 text-[12px] leading-5 text-white/38">
-                  Keep it short, specific, and social. What should people expect when they pull up?
+                  Keep it short and clear.
                 </p>
                 <textarea
-                  rows={4}
+                  rows={3}
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
                   placeholder="Open invite for Temple students with music, snacks, and low-pressure networking before midterms hit."
-                  className="mt-3 w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-[14px] leading-6 outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                  className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] leading-5 outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                 />
               </label>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <label className="block">
                   <span className="text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">
                     Event Date
@@ -191,7 +190,7 @@ export default function LaunchEventPage() {
                     value={eventDate}
                     onChange={(event) => setEventDate(event.target.value)}
                     placeholder="Friday, March 22"
-                    className="mt-2 w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-[14px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                    className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                   />
                 </label>
 
@@ -204,12 +203,12 @@ export default function LaunchEventPage() {
                     value={location}
                     onChange={(event) => setLocation(event.target.value)}
                     placeholder="Student Center South Lobby"
-                    className="mt-2 w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-[14px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                    className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                   />
                 </label>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <label className="block">
                   <span className="text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">
                     Start Time
@@ -219,7 +218,7 @@ export default function LaunchEventPage() {
                     value={startTime}
                     onChange={(event) => setStartTime(event.target.value)}
                     placeholder="7:00 PM"
-                    className="mt-2 w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-[14px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                    className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                   />
                 </label>
 
@@ -232,7 +231,7 @@ export default function LaunchEventPage() {
                     value={endTime}
                     onChange={(event) => setEndTime(event.target.value)}
                     placeholder="10:00 PM"
-                    className="mt-2 w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-[14px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                    className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                   />
                 </label>
               </div>
@@ -240,14 +239,14 @@ export default function LaunchEventPage() {
               <label className="block">
                 <span className="text-[13px] font-semibold text-white">Call to Action</span>
                 <p className="mt-1 text-[12px] leading-5 text-white/38">
-                  Tell students what to do next: RSVP, show up, bring friends, or sign up.
+                  Tell students what to do next.
                 </p>
                 <input
                   type="text"
                   value={cta}
                   onChange={(event) => setCta(event.target.value)}
                   placeholder="RSVP now and bring your roommate"
-                  className="mt-3 w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-[14px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                  className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                 />
               </label>
 
@@ -262,7 +261,7 @@ export default function LaunchEventPage() {
                         key={item}
                         type="button"
                         onClick={() => toggleExtra(item)}
-                        className={`rounded-full border px-3 py-2 text-[12px] font-semibold transition ${
+                        className={`rounded-full border px-3 py-1.5 text-[11px] font-semibold transition ${
                           active
                             ? "border-[rgba(255,62,165,0.3)] bg-[rgba(255,62,165,0.12)] text-[var(--accent)]"
                             : "border-white/10 bg-white/5 text-white/50 hover:border-white/25 hover:text-white/78"
@@ -278,17 +277,17 @@ export default function LaunchEventPage() {
           </section>
 
           <aside className="space-y-4">
-            <section className="page-card px-5 py-5">
+            <section className="page-card px-4 py-4">
               <p className="section-kicker !mt-0 !px-0">Live Preview</p>
               <div className="mt-4 rounded-[18px] border border-[rgba(255,62,165,0.25)] bg-[linear-gradient(135deg,_rgba(51,65,92,0.65)_0%,_rgba(255,62,165,0.12)_100%)] p-4">
                 <div className="inline-flex items-center gap-2 rounded-full bg-[rgba(255,255,255,0.08)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--accent)]">
                   <Sparkles className="h-3.5 w-3.5" />
                   {eventType}
                 </div>
-                <h2 className="mt-4 font-display text-[19px] font-bold tracking-[-0.03em] text-white">
+                <h2 className="mt-3 font-display text-[17px] font-bold tracking-[-0.03em] text-white">
                   {liveHeadline}
                 </h2>
-                <p className="mt-3 text-[13px] leading-6 text-white/50">{liveDescription}</p>
+                <p className="mt-2 text-[12px] leading-5 text-white/50">{liveDescription}</p>
 
                 <div className="mt-5 space-y-2 text-[12px] text-white/58">
                   <div className="flex items-center gap-2">
@@ -320,13 +319,13 @@ export default function LaunchEventPage() {
                   )}
                 </div>
 
-                <div className="mt-5 inline-flex rounded-[12px] bg-[var(--accent)] px-4 py-3 text-[12px] font-bold text-white">
+                <div className="mt-4 inline-flex rounded-[12px] bg-[var(--accent)] px-4 py-2.5 text-[12px] font-bold text-white">
                   {eventMeta.cta}
                 </div>
               </div>
             </section>
 
-            <section className="page-card px-5 py-5">
+            <section className="page-card px-4 py-4">
               <p className="section-kicker !mt-0 !px-0">Promotion Tips</p>
               <div className="mt-4 space-y-3">
                 {promoTips.map((tip, index) => (
@@ -337,7 +336,7 @@ export default function LaunchEventPage() {
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[rgba(70,191,255,0.12)] text-[12px] font-bold text-[var(--accent)]">
                       {index + 1}
                     </span>
-                    <p className="text-[12px] leading-5 text-white/55">{tip}</p>
+                    <p className="text-[11px] leading-5 text-white/55">{tip}</p>
                   </div>
                 ))}
               </div>
@@ -359,7 +358,7 @@ export default function LaunchEventPage() {
                 </div>
                 <div className="mt-4 flex items-center gap-2 text-[12px] text-white/42">
                   <Ticket className="h-4 w-4 text-[var(--accent)]" />
-                  Add the key reason to pull up right in the headline.
+                  Put the main draw in the headline.
                 </div>
               </div>
             </section>

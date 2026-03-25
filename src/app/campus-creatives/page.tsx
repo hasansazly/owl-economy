@@ -67,22 +67,21 @@ export default function CampusCreativesPage() {
           </div>
         </header>
 
-        <section className="grid gap-6 px-1 py-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
+        <section className="grid gap-4 px-1 py-5 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
           <div>
             <p className="section-kicker !px-0">Campus Creatives</p>
-            <h1 className="mt-4 max-w-4xl font-display text-[3rem] font-extrabold leading-[0.94] tracking-[-0.06em] sm:text-[4.4rem]">
+            <h1 className="mt-3 max-w-4xl font-display text-[2.4rem] font-extrabold leading-[0.94] tracking-[-0.06em] sm:text-[3.5rem]">
               Student-made work deserves
               <span className="hero-gradient-title block"> a campus-first storefront.</span>
             </h1>
-            <p className="mt-5 max-w-2xl text-[15px] leading-7 text-white/52">
-              Discover stickers, art prints, custom merch, photo sessions, and creator-made drops
-              from students across campus networks without losing the local feel.
+            <p className="mt-3 max-w-xl text-[13px] leading-6 text-white/52">
+              Discover merch, prints, stickers, and student-made drops.
             </p>
 
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
               <Link
                 href="#featured"
-                className="capsule-primary inline-flex items-center justify-center gap-2 px-5 py-3 text-[14px] font-semibold transition hover:opacity-95"
+                className="capsule-primary inline-flex items-center justify-center gap-2 px-5 py-2.5 text-[13px] font-semibold transition hover:opacity-95"
               >
                 Explore creator drops
                 <ChevronRight className="h-4 w-4" />
@@ -90,7 +89,7 @@ export default function CampusCreativesPage() {
 
               <Link
                 href="/create-listing"
-                className="capsule-secondary inline-flex items-center justify-center gap-2 px-5 py-3 text-[14px] transition"
+                className="capsule-secondary inline-flex items-center justify-center gap-2 px-5 py-2.5 text-[13px] transition"
               >
                 <Paintbrush className="h-4 w-4 text-[var(--accent)]" />
                 Post your creative work
@@ -98,21 +97,21 @@ export default function CampusCreativesPage() {
             </div>
           </div>
 
-          <div className="agora-panel p-5">
+          <div className="agora-panel p-4">
             <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--accent)]">
               <Sparkles className="h-4 w-4" />
               Creator Snapshot
             </div>
 
-            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <div className="mt-4 grid gap-2.5 sm:grid-cols-3">
               {[
                 { label: "Live creators", value: "120+" },
                 { label: "Avg drop size", value: "8 items" },
                 { label: "Campus reach", value: "Multi-school" },
               ].map((stat) => (
-                <div key={stat.label} className="agora-panel p-4">
-                  <p className="text-lg font-semibold text-white">{stat.value}</p>
-                  <p className="mt-1 text-xs text-white/42">{stat.label}</p>
+                <div key={stat.label} className="agora-panel p-3.5">
+                  <p className="text-[15px] font-semibold text-white">{stat.value}</p>
+                  <p className="mt-1 text-[11px] text-white/42">{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -121,19 +120,19 @@ export default function CampusCreativesPage() {
 
         <section className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {creatorCards.map(({ title, description, icon: Icon, creator, campus, price }) => (
-            <article key={title} className="agora-panel flex min-h-[220px] flex-col justify-between px-4 py-4">
+            <article key={title} className="agora-panel flex min-h-[200px] flex-col justify-between px-3.5 py-3.5">
               <div>
                 <div className="text-[var(--accent)]">
                   <Icon className="h-6 w-6" />
                 </div>
-                <h2 className="mt-6 font-display text-[16px] font-bold tracking-[-0.02em] text-white">
+                <h2 className="mt-5 font-display text-[15px] font-bold tracking-[-0.02em] text-white">
                   {title}
                 </h2>
-                <p className="mt-2 text-[12px] leading-6 text-white/46">{description}</p>
+                <p className="mt-2 text-[11px] leading-5 text-white/46">{description}</p>
               </div>
 
               <div className="mt-5">
-                <div className="flex items-center justify-between gap-3 text-[12px] text-white/58">
+                <div className="flex items-center justify-between gap-3 text-[11px] text-white/58">
                   <span>{creator}</span>
                   <span className="text-[var(--accent)]">{price}</span>
                 </div>
@@ -143,7 +142,7 @@ export default function CampusCreativesPage() {
           ))}
         </section>
 
-        <section id="featured" className="mt-8">
+        <section id="featured" className="mt-6">
           <div className="mb-3 flex items-center justify-between px-1">
             <p className="section-kicker !mt-0 !px-0">Featured Works</p>
             <Link href="/create-listing" className="text-[12px] text-white/42 transition hover:text-white/68">
@@ -153,12 +152,12 @@ export default function CampusCreativesPage() {
 
           <div className="grid gap-3 md:grid-cols-3">
             {featuredWorks.map((item) => (
-              <article key={item.title} className="agora-panel p-4">
-                <div className="flex h-36 items-center justify-center rounded-[16px] bg-[linear-gradient(135deg,_rgba(51,65,92,0.42),_rgba(18,214,255,0.08))] text-sm font-semibold text-white/70">
+              <article key={item.title} className="agora-panel p-3.5">
+                <div className="flex h-28 items-center justify-center rounded-[14px] bg-[linear-gradient(135deg,_rgba(51,65,92,0.42),_rgba(18,214,255,0.08))] text-[13px] font-semibold text-white/70">
                   {item.meta}
                 </div>
-                <h3 className="mt-4 text-[15px] font-semibold text-white">{item.title}</h3>
-                <div className="mt-2 flex items-center justify-between text-[12px]">
+                <h3 className="mt-3 text-[14px] font-semibold text-white">{item.title}</h3>
+                <div className="mt-2 flex items-center justify-between text-[11px]">
                   <span className="text-white/42">{item.meta}</span>
                   <span className="font-semibold text-[var(--accent)]">{item.price}</span>
                 </div>

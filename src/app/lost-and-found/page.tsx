@@ -122,14 +122,13 @@ export default function LostAndFoundPage() {
             Lost and Found
           </h1>
           <p className="page-copy">
-            A fast digital bulletin board for missing IDs, keys, tech, and dorm essentials across
-            campus.
+            A fast board for IDs, keys, tech, and dorm essentials.
           </p>
         </section>
 
         <div className="mt-7 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-          <section className="page-card px-5 py-5">
-            <div className="rounded-[14px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-3">
+          <section className="page-card px-4 py-4">
+            <div className="rounded-[12px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-3 py-2.5">
               <div className="flex items-center gap-3">
                 <Search className="h-4 w-4 text-white/35" />
                 <input
@@ -137,7 +136,7 @@ export default function LostAndFoundPage() {
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder="Search IDs, keys, AirPods, chargers..."
-                  className="w-full bg-transparent text-[14px] text-[var(--foreground)] outline-none placeholder:text-white/35"
+                  className="w-full bg-transparent text-[13px] text-[var(--foreground)] outline-none placeholder:text-white/35"
                 />
               </div>
             </div>
@@ -148,7 +147,7 @@ export default function LostAndFoundPage() {
                   key={category}
                   type="button"
                   onClick={() => setActiveCategory(category)}
-                  className={`rounded-full border px-4 py-2 text-sm transition ${
+                  className={`rounded-full border px-3 py-1.5 text-[13px] transition ${
                     activeCategory === category
                       ? "border-[rgba(70,191,255,0.3)] bg-[rgba(70,191,255,0.08)] text-[var(--accent)]"
                       : "border-[var(--border)] bg-white/5 text-white/50 hover:border-white/25 hover:text-white/80"
@@ -159,27 +158,27 @@ export default function LostAndFoundPage() {
               ))}
             </div>
 
-            <div className="mt-5 space-y-3">
+            <div className="mt-4 space-y-3">
               {filteredReports.map(({ title, category, location, time, details, icon: Icon, status }) => (
                 <article
                   key={`${title}-${location}`}
-                  className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 transition hover:bg-white/[0.06]"
+                  className="rounded-[16px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-3.5 py-3.5 transition hover:bg-white/[0.06]"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3">
-                      <div className="inline-flex rounded-[12px] border border-white/10 bg-white/5 p-2.5 text-[var(--accent)]">
+                        <div className="inline-flex rounded-[12px] border border-white/10 bg-white/5 p-2 text-[var(--accent)]">
                         <Icon className="h-5 w-5" />
                       </div>
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h2 className="font-display text-[15px] font-bold tracking-[-0.02em] text-white">
+                          <h2 className="font-display text-[14px] font-bold tracking-[-0.02em] text-white">
                             {title}
                           </h2>
                           <span className="rounded-full bg-white/8 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-white/62">
                             {category}
                           </span>
                         </div>
-                        <p className="mt-2 text-[11px] leading-5 text-white/40">{details}</p>
+                        <p className="mt-1.5 text-[11px] leading-5 text-white/40">{details}</p>
                       </div>
                     </div>
                     <span
@@ -193,7 +192,7 @@ export default function LostAndFoundPage() {
                     </span>
                   </div>
 
-                  <div className="mt-4 flex flex-wrap items-center gap-4 text-[11px] text-white/38">
+                  <div className="mt-3 flex flex-wrap items-center gap-4 text-[11px] text-white/38">
                     <div className="inline-flex items-center gap-1.5">
                       <MapPin className="h-3.5 w-3.5" />
                       {location}
@@ -210,7 +209,7 @@ export default function LostAndFoundPage() {
                 <div className="rounded-[18px] border border-dashed border-white/12 bg-[rgba(255,255,255,0.02)] px-4 py-8 text-center">
                   <p className="font-display text-[16px] font-bold text-white">No matches yet</p>
                   <p className="mt-2 text-[12px] leading-5 text-white/38">
-                    Try another category or search term to scan the campus board.
+                    Try another category or search term.
                   </p>
                 </div>
               ) : null}
@@ -218,7 +217,7 @@ export default function LostAndFoundPage() {
           </section>
 
           <aside className="space-y-4">
-            <section className="page-card px-5 py-5">
+            <section className="page-card px-4 py-4">
               <div className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
                 <Sparkles className="h-4 w-4" />
                 Post a Report
@@ -230,7 +229,7 @@ export default function LostAndFoundPage() {
                     key={type}
                     type="button"
                     onClick={() => setReportType(type)}
-                    className={`rounded-full border px-4 py-2 text-sm transition ${
+                  className={`rounded-full border px-3 py-1.5 text-[13px] transition ${
                       reportType === type
                         ? "border-[rgba(255,62,165,0.3)] bg-[rgba(255,62,165,0.12)] text-[var(--accent)]"
                         : "border-[var(--border)] bg-white/5 text-white/50 hover:border-white/25 hover:text-white/80"
@@ -247,14 +246,14 @@ export default function LostAndFoundPage() {
                     key={template.label}
                     type="button"
                     onClick={() => applyTemplate(template)}
-                    className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/72 transition hover:border-white/25 hover:bg-white/8"
+                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[13px] font-semibold text-white/72 transition hover:border-white/25 hover:bg-white/8"
                   >
                     {template.label}
                   </button>
                 ))}
               </div>
 
-              <div className="mt-5 space-y-4">
+              <div className="mt-4 space-y-3">
                 <label className="block">
                   <span className="text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">
                     Item Name
@@ -264,7 +263,7 @@ export default function LostAndFoundPage() {
                     value={itemName}
                     onChange={(event) => setItemName(event.target.value)}
                     placeholder="Temple ID, AirPods, key ring..."
-                    className="mt-2 w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-[14px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                    className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                   />
                 </label>
 
@@ -277,7 +276,7 @@ export default function LostAndFoundPage() {
                     value={reportLocation}
                     onChange={(event) => setReportLocation(event.target.value)}
                     placeholder="Bell Tower, Tech Center, Morgan Hall"
-                    className="mt-2 w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-[14px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                    className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                   />
                 </label>
 
@@ -290,7 +289,7 @@ export default function LostAndFoundPage() {
                     value={reportTime}
                     onChange={(event) => setReportTime(event.target.value)}
                     placeholder="Today around 3 PM"
-                    className="mt-2 w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-[14px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                    className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                   />
                 </label>
 
@@ -299,33 +298,32 @@ export default function LostAndFoundPage() {
                     Details
                   </span>
                   <textarea
-                    rows={4}
+                    rows={3}
                     value={reportDetails}
                     onChange={(event) => setReportDetails(event.target.value)}
                     placeholder="Color, stickers, case, brand, or anything that helps someone identify it."
-                    className="mt-2 w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-[14px] leading-6 outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                    className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] leading-5 outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                   />
                 </label>
 
                 <button
                   type="button"
-                  className="inline-flex w-full items-center justify-center rounded-[12px] bg-[var(--accent)] px-4 py-3 text-[12px] font-bold text-white transition hover:opacity-90"
+                  className="inline-flex w-full items-center justify-center rounded-[12px] bg-[var(--accent)] px-4 py-2.5 text-[12px] font-bold text-white transition hover:opacity-90"
                 >
                   Post {reportType} Report
                 </button>
               </div>
             </section>
 
-            <section className="page-card px-5 py-5">
+            <section className="page-card px-4 py-4">
               <p className="section-kicker !mt-0 !px-0">Community Note</p>
               <div className="mt-4 rounded-[16px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
                 <div className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-white/50">
                   <ShieldCheck className="h-4 w-4 text-[var(--accent)]" />
                   Safe Returns
                 </div>
-                <p className="mt-3 text-[12px] leading-6 text-white/48">
-                  Keep personal details minimal in public posts. Share exact identifiers only after
-                  confirming the item belongs to the right student.
+                <p className="mt-3 text-[12px] leading-5 text-white/48">
+                  Keep personal details minimal. Share exact identifiers only after confirming the right student.
                 </p>
               </div>
             </section>

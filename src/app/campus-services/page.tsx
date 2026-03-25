@@ -124,16 +124,15 @@ export default function CampusServicesPage() {
             Campus Services
           </h1>
           <p className="page-copy">
-            Message student-led providers for grooming, glam, and move-day help without leaving the
-            MyDormStash flow.
+            Message student-led providers for grooming, glam, and move-day help.
           </p>
         </section>
 
-        <section className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <section className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {services.map(({ title, description, icon: Icon, provider, handle, rating, accent }) => (
             <article
               key={title}
-              className="page-card flex min-h-[250px] flex-col justify-between px-4 py-4 transition hover:scale-[0.99] hover:bg-white/[0.07]"
+              className="page-card flex min-h-[220px] flex-col justify-between px-3.5 py-3.5 transition hover:scale-[0.99] hover:bg-white/[0.07]"
             >
               <div>
                 <div className="flex items-start justify-between gap-3">
@@ -146,12 +145,12 @@ export default function CampusServicesPage() {
                   </div>
                 </div>
 
-                <h2 className="mt-6 font-display text-[15px] font-bold tracking-[-0.02em] text-[var(--foreground)]">
+                <h2 className="mt-5 font-display text-[15px] font-bold tracking-[-0.02em] text-[var(--foreground)]">
                   {title}
                 </h2>
                 <p className="mt-1.5 text-[11px] leading-5 text-white/40">{description}</p>
 
-                <div className="mt-5 flex items-center gap-3 rounded-[14px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-3 py-3">
+                <div className="mt-4 flex items-center gap-3 rounded-[14px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-3 py-2.5">
                   <div
                     className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${accent} text-[13px] font-bold text-[#0B0E14]`}
                   >
@@ -167,7 +166,7 @@ export default function CampusServicesPage() {
               <button
                 type="button"
                 onClick={() => openChat({ title, description, icon: Icon, provider, handle, rating, accent })}
-                className="mt-5 inline-flex w-full items-center justify-center rounded-[12px] bg-[var(--accent)] px-4 py-3 text-[12px] font-bold text-white transition hover:opacity-90"
+                className="mt-4 inline-flex w-full items-center justify-center rounded-[12px] bg-[var(--accent)] px-4 py-2.5 text-[12px] font-bold text-white transition hover:opacity-90"
               >
                 Message to Schedule
               </button>

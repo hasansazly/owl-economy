@@ -224,25 +224,24 @@ export default function RoomSwapPage() {
           </div>
         </header>
 
-        <section className="grid gap-6 px-1 py-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
+        <section className="grid gap-4 px-1 py-5 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
           <div>
             <p className="section-kicker !px-0">The Room Swap</p>
-            <h1 className="mt-4 max-w-4xl font-display text-[3rem] font-extrabold leading-[0.94] tracking-[-0.06em] sm:text-[4.5rem]">
+            <h1 className="mt-3 max-w-4xl font-display text-[2.35rem] font-extrabold leading-[0.94] tracking-[-0.06em] sm:text-[3.5rem]">
               Semester and few-month
               <span className="hero-gradient-title block"> student stays first.</span>
             </h1>
-            <p className="mt-5 max-w-2xl text-[15px] leading-7 text-white/52">
-              Focused on semester sublets, few-month stays, one-month options, and short stays up to a week.
-              Students can post rooms and also post what they are looking for in the same section.
+            <p className="mt-3 max-w-xl text-[13px] leading-6 text-white/52">
+              Semester and few-month stays first. Room posts and room requests stay in one place.
             </p>
 
-            <div className="mt-7 inline-flex flex-wrap rounded-full border border-white/10 bg-white/5 p-1.5">
+            <div className="mt-5 inline-flex flex-wrap rounded-full border border-white/10 bg-white/5 p-1">
               {stayModes.map((mode) => (
                 <button
                   key={mode}
                   type="button"
                   onClick={() => setActiveMode(mode)}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  className={`rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition ${
                     activeMode === mode ? "bg-white text-black" : "text-white/60 hover:bg-white/5 hover:text-white/84"
                   }`}
                 >
@@ -251,33 +250,33 @@ export default function RoomSwapPage() {
               ))}
             </div>
 
-            <div className="mt-5 grid gap-3 sm:grid-cols-3">
-              <div className="page-card p-4">
+            <div className="mt-4 grid gap-2.5 sm:grid-cols-3">
+              <div className="page-card p-3.5">
                 <CalendarDays className="h-4 w-4 text-[var(--accent)]" />
-                <p className="mt-4 text-lg font-semibold text-white">Semester + few months</p>
-                <p className="mt-1 text-xs text-white/42">Main focus</p>
+                <p className="mt-3 text-[15px] font-semibold text-white">Semester + few months</p>
+                <p className="mt-1 text-[11px] text-white/42">Main focus</p>
               </div>
-              <div className="page-card p-4">
+              <div className="page-card p-3.5">
                 <Clock3 className="h-4 w-4 text-[var(--accent)]" />
-                <p className="mt-4 text-lg font-semibold text-white">1 month + short stays</p>
-                <p className="mt-1 text-xs text-white/42">Also supported</p>
+                <p className="mt-3 text-[15px] font-semibold text-white">1 month + short stays</p>
+                <p className="mt-1 text-[11px] text-white/42">Also supported</p>
               </div>
-              <div className="page-card p-4">
+              <div className="page-card p-3.5">
                 <Search className="h-4 w-4 text-[var(--accent)]" />
-                <p className="mt-4 text-lg font-semibold text-white">Room posts + requests</p>
-                <p className="mt-1 text-xs text-white/42">Same section</p>
+                <p className="mt-3 text-[15px] font-semibold text-white">Posts + requests</p>
+                <p className="mt-1 text-[11px] text-white/42">Same section</p>
               </div>
             </div>
           </div>
 
-          <section className="page-card p-5">
+          <section className="page-card p-4">
             <div className="flex flex-wrap gap-2">
               {postTypes.map((item) => (
                 <button
                   key={item}
                   type="button"
                   onClick={() => setPostType(item)}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  className={`rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition ${
                     postType === item
                       ? "bg-white text-black"
                       : "border border-white/10 bg-white/5 text-white/62 hover:text-white/82"
@@ -288,7 +287,7 @@ export default function RoomSwapPage() {
               ))}
             </div>
 
-            <div className="mt-5">
+            <div className="mt-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--accent)]">
                 Easy Post Template
               </p>
@@ -299,7 +298,7 @@ export default function RoomSwapPage() {
                         key={template.label}
                         type="button"
                         onClick={() => applyOfferTemplate(template)}
-                        className="capsule-secondary px-4 py-2 text-sm font-semibold text-white/74 transition hover:bg-white/6"
+                        className="capsule-secondary px-3.5 py-1.5 text-[13px] font-semibold text-white/74 transition hover:bg-white/6"
                       >
                         {template.label}
                       </button>
@@ -309,7 +308,7 @@ export default function RoomSwapPage() {
                         key={template.label}
                         type="button"
                         onClick={() => applySeekerTemplate(template)}
-                        className="capsule-secondary px-4 py-2 text-sm font-semibold text-white/74 transition hover:bg-white/6"
+                        className="capsule-secondary px-3.5 py-1.5 text-[13px] font-semibold text-white/74 transition hover:bg-white/6"
                       >
                         {template.label}
                       </button>
@@ -317,7 +316,7 @@ export default function RoomSwapPage() {
               </div>
             </div>
 
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <label className="block">
                 <span className="mb-2 block text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">
                   Title
@@ -326,7 +325,7 @@ export default function RoomSwapPage() {
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
                   placeholder="Spring semester sublet near campus"
-                  className="w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/25"
+                  className="w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25"
                 />
               </label>
               <label className="block">
@@ -337,23 +336,23 @@ export default function RoomSwapPage() {
                   value={price}
                   onChange={(event) => setPrice(event.target.value)}
                   placeholder={activeMode === "Short Stay" ? "$28/night" : "$780/month"}
-                  className="w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/25"
+                  className="w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25"
                 />
               </label>
             </div>
 
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <label className="block">
                 <span className="mb-2 block text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">
                   Dates
                 </span>
-                <div className="flex items-center rounded-[14px] border border-white/10 bg-white/5 px-4 py-3">
+                <div className="flex items-center rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5">
                   <CalendarDays className="mr-3 h-4 w-4 text-[var(--accent)]" />
                   <input
                     value={dates}
                     onChange={(event) => setDates(event.target.value)}
                     placeholder="Jan 8 - May 10"
-                    className="w-full bg-transparent text-sm outline-none placeholder:text-white/25"
+                    className="w-full bg-transparent text-[13px] outline-none placeholder:text-white/25"
                   />
                 </div>
               </label>
@@ -361,32 +360,32 @@ export default function RoomSwapPage() {
                 <span className="mb-2 block text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">
                   Location
                 </span>
-                <div className="flex items-center rounded-[14px] border border-white/10 bg-white/5 px-4 py-3">
+                <div className="flex items-center rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5">
                   <MapPin className="mr-3 h-4 w-4 text-[var(--accent)]" />
                   <input
                     value={location}
                     onChange={(event) => setLocation(event.target.value)}
-                    placeholder="Morgan Hall, Charles Library area, Cecil B. Moore"
-                    className="w-full bg-transparent text-sm outline-none placeholder:text-white/25"
+                    placeholder="Morgan Hall, Charles Library area"
+                    className="w-full bg-transparent text-[13px] outline-none placeholder:text-white/25"
                   />
                 </div>
               </label>
             </div>
 
-            <label className="mt-4 block">
+            <label className="mt-3 block">
               <span className="mb-2 block text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">
                 Description
               </span>
               <textarea
-                rows={4}
+                rows={3}
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
                 placeholder="Describe the room, timing, furniture, budget, or what kind of stay you need."
-                className="w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-sm leading-6 outline-none placeholder:text-white/25"
+                className="w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] leading-5 outline-none placeholder:text-white/25"
               />
             </label>
 
-            <label className="mt-5 flex min-h-[160px] cursor-pointer flex-col items-center justify-center rounded-[18px] border border-dashed border-white/15 bg-white/[0.02] px-5 py-8 text-center transition hover:border-white/25">
+            <label className="mt-4 flex min-h-[132px] cursor-pointer flex-col items-center justify-center rounded-[16px] border border-dashed border-white/15 bg-white/[0.02] px-4 py-6 text-center transition hover:border-white/25">
               <input
                 type="file"
                 accept="image/*"
@@ -401,16 +400,16 @@ export default function RoomSwapPage() {
               <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-white/6 text-[var(--accent)]">
                 <ImageUp className="h-5 w-5" />
               </div>
-              <p className="mt-4 text-sm font-semibold text-white">Upload room photos</p>
-              <p className="mt-2 text-xs text-white/38">Tap to add up to 5 photos</p>
-              <p className="mt-4 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/62">
+              <p className="mt-3 text-[13px] font-semibold text-white">Upload room photos</p>
+              <p className="mt-1 text-[11px] text-white/38">Up to 5 photos</p>
+              <p className="mt-3 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] text-white/62">
                 {photos.length ? `${photos.length} photos ready` : "No photos yet"}
               </p>
             </label>
 
             <button
               type="button"
-              className="capsule-primary mt-5 inline-flex w-full items-center justify-center gap-2 px-5 py-3 text-sm font-semibold"
+              className="capsule-primary mt-4 inline-flex w-full items-center justify-center gap-2 px-5 py-2.5 text-[13px] font-semibold"
             >
               Post to Room Swap
               <ChevronRight className="h-4 w-4" />
@@ -418,11 +417,11 @@ export default function RoomSwapPage() {
           </section>
         </section>
 
-        <section className="mt-3">
+        <section className="mt-2">
           <div className="mb-4 flex items-center justify-between px-1">
             <div>
               <p className="section-kicker !mt-0 !px-0">Available Rooms</p>
-              <p className="mt-2 text-sm text-white/42">Semester and few-month stays are prioritized first.</p>
+              <p className="mt-1 text-[12px] text-white/42">Semester and few-month stays first.</p>
             </div>
             <div className="page-chip hidden items-center gap-2 sm:inline-flex">
               <Check className="h-3.5 w-3.5 text-[var(--accent)]" />
@@ -430,15 +429,15 @@ export default function RoomSwapPage() {
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-2">
             {filteredOffers.map((offer) => (
-              <article key={offer.id} className="page-card p-4">
-                <div className="flex h-44 items-center justify-center rounded-[16px] bg-[linear-gradient(135deg,_rgba(51,65,92,0.42),_rgba(18,214,255,0.08))] text-sm font-semibold text-white/70">
+              <article key={offer.id} className="page-card p-3.5">
+                <div className="flex h-32 items-center justify-center rounded-[14px] bg-[linear-gradient(135deg,_rgba(51,65,92,0.42),_rgba(18,214,255,0.08))] text-[13px] font-semibold text-white/70">
                   {offer.photoHint}
                 </div>
                 <div className="mt-4 flex items-center justify-between gap-3">
                   <div>
-                    <h2 className="text-lg font-semibold text-white">{offer.title}</h2>
+                    <h2 className="text-[16px] font-semibold text-white">{offer.title}</h2>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-white/46">
                       <span>{offer.host}</span>
                       <span className="rounded-full border border-[rgba(18,214,255,0.22)] bg-[rgba(18,214,255,0.08)] px-2.5 py-1 font-semibold text-[var(--accent)]">
@@ -448,7 +447,7 @@ export default function RoomSwapPage() {
                   </div>
                   <span className="rounded-full bg-white/6 px-3 py-1 text-xs text-white/66">{offer.stayMode}</span>
                 </div>
-                <div className="mt-4 flex items-center justify-between text-sm">
+                <div className="mt-3 flex items-center justify-between text-[13px]">
                   <span className="font-semibold text-[var(--accent)]">{offer.price}</span>
                   <span className="text-white/42">{offer.dates}</span>
                 </div>
@@ -456,7 +455,7 @@ export default function RoomSwapPage() {
                   <MapPin className="h-3.5 w-3.5 text-[var(--accent)]" />
                   {offer.campus} • {offer.location}
                 </div>
-                <p className="mt-4 text-sm leading-6 text-white/54">{offer.description}</p>
+                <p className="mt-3 text-[13px] leading-5 text-white/54">{offer.description}</p>
                 <button
                   type="button"
                   onClick={() =>
@@ -465,7 +464,7 @@ export default function RoomSwapPage() {
                       `Hi ${offer.host.split(" ")[0]}, I saw your ${offer.stayMode.toLowerCase()} post on MyDormStash. Is it still available?`,
                     )
                   }
-                  className="capsule-primary mt-5 inline-flex w-full items-center justify-center gap-2 px-5 py-3 text-sm font-semibold"
+                  className="capsule-primary mt-4 inline-flex w-full items-center justify-center gap-2 px-5 py-2.5 text-[13px] font-semibold"
                 >
                   Request to Stay
                   <ChevronRight className="h-4 w-4" />
@@ -475,11 +474,11 @@ export default function RoomSwapPage() {
           </div>
         </section>
 
-        <section className="mt-8">
+        <section className="mt-6">
           <div className="mb-4 flex items-center justify-between px-1">
             <div>
               <p className="section-kicker !mt-0 !px-0">Students Looking for a Room</p>
-              <p className="mt-2 text-sm text-white/42">Post requests and match students who still need a place.</p>
+              <p className="mt-1 text-[12px] text-white/42">Match students who still need a place.</p>
             </div>
             <div className="inline-flex items-center gap-2 text-xs text-white/42">
               <Search className="h-3.5 w-3.5 text-[var(--accent)]" />
@@ -487,21 +486,21 @@ export default function RoomSwapPage() {
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-3">
             {filteredRequests.map((request) => (
-              <article key={request.id} className="page-card p-4">
+              <article key={request.id} className="page-card p-3.5">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h2 className="text-base font-semibold text-white">{request.student}</h2>
+                    <h2 className="text-[15px] font-semibold text-white">{request.student}</h2>
                     <p className="mt-2 text-xs text-white/42">{request.campus}</p>
                   </div>
                   <span className="rounded-full bg-white/6 px-3 py-1 text-xs text-white/66">{request.stayMode}</span>
                 </div>
-                <div className="mt-4 space-y-2 text-sm">
+                <div className="mt-3 space-y-1.5 text-[13px]">
                   <p className="text-[var(--accent)]">{request.budget}</p>
                   <p className="text-white/52">{request.location}</p>
                 </div>
-                <p className="mt-4 text-sm leading-6 text-white/54">{request.description}</p>
+                <p className="mt-3 text-[13px] leading-5 text-white/54">{request.description}</p>
                 <button
                   type="button"
                   onClick={() =>
@@ -510,7 +509,7 @@ export default function RoomSwapPage() {
                       `Hi ${request.student.split(" ")[0]}, I may have a ${request.stayMode.toLowerCase()} option that fits your post. Are you still looking?`,
                     )
                   }
-                  className="capsule-secondary mt-5 inline-flex w-full items-center justify-center gap-2 px-5 py-3 text-sm"
+                  className="capsule-secondary mt-4 inline-flex w-full items-center justify-center gap-2 px-5 py-2.5 text-[13px]"
                 >
                   <Send className="h-4 w-4 text-[var(--accent)]" />
                   Message About a Match

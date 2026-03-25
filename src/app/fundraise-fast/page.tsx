@@ -90,19 +90,18 @@ export default function FundraiseFastPage() {
             Fundraise Fast
           </h1>
           <p className="page-copy">
-            Build a clear, campus-ready fundraiser listing with a strong hook, a short why, and
-            fast logistics students can scan in seconds.
+            Build a fundraiser post students can scan fast.
           </p>
         </section>
 
         <div className="mt-7 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-          <section className="page-card px-5 py-5">
+          <section className="page-card px-4 py-4">
             <div className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
               <HandCoins className="h-4 w-4" />
               Listing Prompt
             </div>
 
-            <div className="mt-6 space-y-6">
+            <div className="mt-5 space-y-5">
               <div>
                 <span className="text-[13px] font-semibold text-white">Quick Templates</span>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -111,7 +110,7 @@ export default function FundraiseFastPage() {
                       key={template.label}
                       type="button"
                       onClick={() => applyTemplate(template)}
-                      className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/72 transition hover:border-white/25 hover:bg-white/8"
+                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[13px] font-semibold text-white/72 transition hover:border-white/25 hover:bg-white/8"
                     >
                       {template.label}
                     </button>
@@ -122,7 +121,7 @@ export default function FundraiseFastPage() {
               <label className="block">
                 <span className="text-[13px] font-semibold text-white">Headline (The Hook)</span>
                 <p className="mt-1 text-[12px] leading-5 text-white/38">
-                  Keep it under 50 characters. What are you selling or doing?
+                  Keep it under 50 characters.
                 </p>
                 <input
                   type="text"
@@ -130,7 +129,7 @@ export default function FundraiseFastPage() {
                   value={headline}
                   onChange={(event) => setHeadline(event.target.value)}
                   placeholder="Warm Krispy Kreme Donuts - Science Club"
-                  className="mt-3 w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-[14px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                  className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                 />
                 <p className="mt-2 text-right text-[11px] text-white/28">{headlineCount} / 50</p>
               </label>
@@ -138,14 +137,14 @@ export default function FundraiseFastPage() {
               <label className="block">
                 <span className="text-[13px] font-semibold text-white">The Why (Description)</span>
                 <p className="mt-1 text-[12px] leading-5 text-white/38">
-                  Tell students exactly where their money is going in 2 sentences.
+                  Say where the money goes.
                 </p>
                 <textarea
-                  rows={4}
+                  rows={3}
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
                   placeholder="Help the Robotics Team get to Nationals. All proceeds cover travel kits and competition fees."
-                  className="mt-3 w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-[14px] leading-6 outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                  className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] leading-5 outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                 />
                 <p className="mt-2 text-right text-[11px] text-white/28">{descriptionLines} / 2 sentence target</p>
               </label>
@@ -155,7 +154,7 @@ export default function FundraiseFastPage() {
                   <MapPin className="h-4 w-4 text-[var(--accent)]" />
                   <span className="text-[13px] font-semibold text-white">The Logistics (Quick Info)</span>
                 </div>
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <label className="block">
                     <span className="text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">
                       Price Point
@@ -167,7 +166,7 @@ export default function FundraiseFastPage() {
                         value={price}
                         onChange={(event) => setPrice(event.target.value)}
                         placeholder="Enter amount"
-                        className="w-full bg-transparent py-3 pr-4 text-[14px] outline-none placeholder:text-white/25"
+                        className="w-full bg-transparent py-2.5 pr-3 text-[13px] outline-none placeholder:text-white/25"
                       />
                     </div>
                   </label>
@@ -181,12 +180,12 @@ export default function FundraiseFastPage() {
                       value={location}
                       onChange={(event) => setLocation(event.target.value)}
                       placeholder="Bell Tower, Student Center Lobby"
-                      className="mt-2 w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-[14px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                      className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                     />
                   </label>
                 </div>
 
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <label className="block">
                     <span className="text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">
                       Start Time
@@ -196,7 +195,7 @@ export default function FundraiseFastPage() {
                       value={startTime}
                       onChange={(event) => setStartTime(event.target.value)}
                       placeholder="11:00 AM"
-                      className="mt-2 w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-[14px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                      className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                     />
                   </label>
 
@@ -209,13 +208,13 @@ export default function FundraiseFastPage() {
                       value={endTime}
                       onChange={(event) => setEndTime(event.target.value)}
                       placeholder="2:00 PM"
-                      className="mt-2 w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-[14px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                      className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                     />
                   </label>
                 </div>
 
                 <p className="mt-3 text-[12px] leading-5 text-white/34">
-                  Fast fundraisers usually perform best in a 2 to 4 hour window.
+                  Best in a 2 to 4 hour window.
                 </p>
               </div>
 
@@ -232,7 +231,7 @@ export default function FundraiseFastPage() {
                     return (
                       <label
                         key={option.id}
-                        className={`flex cursor-pointer items-start gap-3 rounded-[16px] border px-4 py-4 transition hover:bg-white/8 ${
+                        className={`flex cursor-pointer items-start gap-3 rounded-[14px] border px-3.5 py-3.5 transition hover:bg-white/8 ${
                           selected ? "border-[rgba(70,191,255,0.28)] bg-[rgba(70,191,255,0.08)]" : "border-white/10 bg-white/5"
                         }`}
                       >
@@ -243,9 +242,9 @@ export default function FundraiseFastPage() {
                           className="mt-1 h-4 w-4 rounded border-white/20 bg-transparent accent-[var(--accent)]"
                         />
                         <div className="min-w-0 flex-1">
-                          <p className="text-[14px] font-semibold text-white">{option.label}</p>
+                          <p className="text-[13px] font-semibold text-white">{option.label}</p>
                           {"detailLabel" in option && selected ? (
-                            <div className="mt-3 flex items-center rounded-[12px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-3 py-2.5">
+                            <div className="mt-3 flex items-center rounded-[12px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-3 py-2">
                               <span className="pr-2 text-[12px] uppercase tracking-[0.04em] text-white/35">
                                 {option.detailLabel}
                               </span>
@@ -268,16 +267,16 @@ export default function FundraiseFastPage() {
           </section>
 
           <aside className="space-y-4">
-            <section className="page-card px-5 py-5">
+            <section className="page-card px-4 py-4">
               <p className="section-kicker !mt-0 !px-0">Preview</p>
               <div className="mt-4 rounded-[18px] border border-[rgba(255,62,165,0.22)] bg-[linear-gradient(180deg,_rgba(255,62,165,0.08)_0%,_rgba(26,29,36,1)_100%)] p-4">
                 <div className="inline-flex rounded-full bg-[rgba(255,255,255,0.08)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--accent)]">
                   Fundraise
                 </div>
-                <h2 className="mt-4 font-display text-[19px] font-bold tracking-[-0.03em] text-white">
+                <h2 className="mt-3 font-display text-[17px] font-bold tracking-[-0.03em] text-white">
                   {headline || "Your fundraiser headline"}
                 </h2>
-                <p className="mt-3 text-[13px] leading-6 text-white/50">
+                <p className="mt-2 text-[12px] leading-5 text-white/50">
                   {description ||
                     "Explain where the money goes and why students should show up. Keep it short, specific, and easy to trust."}
                 </p>
@@ -291,7 +290,7 @@ export default function FundraiseFastPage() {
               </div>
             </section>
 
-            <section className="page-card px-5 py-5">
+            <section className="page-card px-4 py-4">
               <p className="section-kicker !mt-0 !px-0">Checklist</p>
               <div className="mt-4 space-y-3">
                 {[
@@ -311,7 +310,7 @@ export default function FundraiseFastPage() {
                     >
                       <Check className="h-3.5 w-3.5" />
                     </span>
-                    <p className="text-[12px] text-white/55">{item.label}</p>
+                    <p className="text-[11px] text-white/55">{item.label}</p>
                   </div>
                 ))}
               </div>

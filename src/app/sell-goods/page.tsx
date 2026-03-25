@@ -264,53 +264,52 @@ export default function SellGoodsPage() {
           </button>
         </header>
 
-        <section className="grid gap-8 py-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+        <section className="grid gap-5 py-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
           <div>
             <p className="text-xs uppercase tracking-[0.28em] text-white/40">Sell Goods</p>
-            <h1 className="mt-3 font-display text-4xl font-bold tracking-[-0.04em] sm:text-5xl">
-              Student-only marketplace for everyday campus items.
+            <h1 className="mt-2 font-display text-[1.9rem] font-bold tracking-[-0.04em] sm:text-[2.5rem]">
+              Student-only marketplace for campus items.
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-white/56">
-              Only students can upload, post, browse, and buy. Shop new and used cosmetics,
-              accessories, clothes, sneakers, books, dorm essentials, electronics, and other student items.
+            <p className="mt-3 max-w-xl text-[13px] leading-6 text-white/56">
+              Buy and sell student essentials, dorm extras, books, clothes, and electronics.
             </p>
-            <p className="mt-3 text-sm leading-6 text-[var(--accent)]">
-              Home campus: {homeCampus}. Cross-campus shopping helps students compare better prices across schools.
+            <p className="mt-2 text-[12px] leading-5 text-[var(--accent)]">
+              Home campus: {homeCampus}. Browse other campuses for better deals.
             </p>
           </div>
 
-          <div className="rounded-[22px] border border-[var(--border)] bg-[linear-gradient(135deg,_rgba(51,65,92,0.55),_rgba(26,29,36,0.92))] p-5">
+          <div className="rounded-[20px] border border-[var(--border)] bg-[linear-gradient(135deg,_rgba(51,65,92,0.55),_rgba(26,29,36,0.92))] p-3.5">
             <div className="grid gap-3 sm:grid-cols-3">
               {[
                 { label: "Access", value: "Students only" },
                 { label: "Item range", value: "New + used" },
                 { label: "Buying style", value: "Budget-friendly" },
               ].map((stat) => (
-                <div key={stat.label} className="rounded-[16px] border border-white/8 bg-white/5 p-4">
-                  <p className="text-lg font-semibold text-white">{stat.value}</p>
-                  <p className="mt-1 text-xs text-white/45">{stat.label}</p>
+                <div key={stat.label} className="rounded-[14px] border border-white/8 bg-white/5 p-3">
+                  <p className="text-sm font-semibold text-white">{stat.value}</p>
+                  <p className="mt-1 text-[11px] text-white/45">{stat.label}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="rounded-[24px] border border-[var(--border)] bg-[var(--panel)] p-5">
+        <section className="rounded-[20px] border border-[var(--border)] bg-[var(--panel)] p-3.5 sm:p-4">
           <div className="grid gap-3 lg:grid-cols-[2fr_1fr_1fr_1fr]">
-            <label className="flex items-center gap-3 rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3">
+            <label className="flex items-center gap-3 rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5">
               <Search className="h-4 w-4 text-white/35" />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search student items..."
-                className="w-full bg-transparent text-sm outline-none placeholder:text-white/30"
+                placeholder="Search items..."
+                className="w-full bg-transparent text-[13px] outline-none placeholder:text-white/30"
               />
             </label>
 
             <select
               value={category}
               onChange={(event) => setCategory(event.target.value as "All" | GoodsCategory)}
-              className="rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm outline-none"
+              className="rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] outline-none"
             >
               {categories.map((item) => (
                 <option key={item} value={item}>
@@ -322,7 +321,7 @@ export default function SellGoodsPage() {
             <select
               value={condition}
               onChange={(event) => setCondition(event.target.value as "All" | GoodsCondition)}
-              className="rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm outline-none"
+              className="rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] outline-none"
             >
               <option value="All">All conditions</option>
               <option value="New">New</option>
@@ -332,7 +331,7 @@ export default function SellGoodsPage() {
             <select
               value={sortBy}
               onChange={(event) => setSortBy(event.target.value as "newest" | "price-low" | "price-high")}
-              className="rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm outline-none"
+              className="rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] outline-none"
             >
               <option value="newest">Newest first</option>
               <option value="price-low">Price: low to high</option>
@@ -344,7 +343,7 @@ export default function SellGoodsPage() {
             <select
               value={homeCampus}
               onChange={(event) => setHomeCampus(event.target.value as (typeof campuses)[number])}
-              className="rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm outline-none"
+              className="rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] outline-none"
             >
               {campuses.map((campus) => (
                 <option key={campus} value={campus}>
@@ -358,7 +357,7 @@ export default function SellGoodsPage() {
               onChange={(event) =>
                 setBrowseCampus(event.target.value as "Home Campus" | (typeof campuses)[number])
               }
-              className="rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm outline-none"
+              className="rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] outline-none"
             >
               <option value="Home Campus">Browse home campus first</option>
               {campuses.map((campus) => (
@@ -368,7 +367,7 @@ export default function SellGoodsPage() {
               ))}
             </select>
 
-            <label className="inline-flex items-center gap-3 rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm text-white/70">
+            <label className="inline-flex items-center gap-3 rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] text-white/70">
               <input
                 type="checkbox"
                 checked={includeOtherCampuses}
@@ -379,56 +378,56 @@ export default function SellGoodsPage() {
             </label>
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(70,191,255,0.24)] bg-[rgba(70,191,255,0.08)] px-3 py-1.5 text-xs text-[var(--accent)]">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(70,191,255,0.24)] bg-[rgba(70,191,255,0.08)] px-3 py-1.5 text-[11px] text-[var(--accent)]">
               <ShieldCheck className="h-3.5 w-3.5" />
-              Student-only buying and selling
+              Students only
             </div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/60">
-              Campus default: {browseCampus === "Home Campus" ? homeCampus : browseCampus}
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] text-white/60">
+              {browseCampus === "Home Campus" ? homeCampus : browseCampus}
             </div>
             <button
               type="button"
               onClick={() => refreshItems(false)}
-              className="rounded-full border border-[var(--border)] px-3 py-1.5 text-xs text-white/60 transition hover:bg-white/5"
+              className="rounded-full border border-[var(--border)] px-3 py-1.5 text-[11px] text-white/60 transition hover:bg-white/5"
             >
               Refresh
             </button>
             <button
               type="button"
               onClick={() => refreshItems(true)}
-              className="rounded-full border border-[var(--border)] px-3 py-1.5 text-xs text-white/45 transition hover:bg-white/5"
+              className="rounded-full border border-[var(--border)] px-3 py-1.5 text-[11px] text-white/45 transition hover:bg-white/5"
             >
               Test error state
             </button>
           </div>
         </section>
 
-        <section className="mt-6 rounded-[24px] border border-[rgba(70,191,255,0.18)] bg-[rgba(255,255,255,0.03)] p-5 backdrop-blur">
+        <section className="mt-5 rounded-[20px] border border-[rgba(70,191,255,0.18)] bg-[rgba(255,255,255,0.03)] p-3.5 backdrop-blur sm:p-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.24em] text-white/36">AI Shopper Match</p>
-              <h2 className="mt-2 font-display text-2xl font-bold tracking-[-0.03em]">
+              <h2 className="mt-2 font-display text-[1.35rem] font-bold tracking-[-0.03em] sm:text-[1.55rem]">
                 Tell DormStash AI what you need.
               </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/48">
-                Describe the item, budget, style, or pickup area and AI will point you to the best current listings.
+              <p className="mt-2 max-w-xl text-[13px] leading-5 text-white/48">
+                Describe the item, budget, or pickup area.
               </p>
             </div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(70,191,255,0.24)] bg-[rgba(70,191,255,0.08)] px-3 py-1.5 text-xs text-[var(--accent)]">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(70,191,255,0.24)] bg-[rgba(70,191,255,0.08)] px-3 py-1.5 text-[11px] text-[var(--accent)]">
               <Sparkles className="h-3.5 w-3.5" />
-              Real AI recommendations
+              AI match
             </div>
           </div>
 
           <div className="mt-5 grid gap-3 lg:grid-cols-[1fr_auto]">
-            <label className="flex items-center gap-3 rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3">
+            <label className="flex items-center gap-3 rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5">
               <Sparkles className="h-4 w-4 text-[var(--accent)]" />
               <input
                 value={aiShopperQuery}
                 onChange={(event) => setAiShopperQuery(event.target.value)}
-                placeholder="Example: I need a cheap orgo textbook near Charles Library."
-                className="w-full bg-transparent text-sm outline-none placeholder:text-white/30"
+                placeholder="Need a cheap orgo textbook near Charles?"
+                className="w-full bg-transparent text-[13px] outline-none placeholder:text-white/30"
               />
             </label>
 
@@ -436,7 +435,7 @@ export default function SellGoodsPage() {
               type="button"
               onClick={getAIRecommendations}
               disabled={aiShopperLoading}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#14161b] disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 text-[13px] font-semibold text-[#14161b] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {aiShopperLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               {aiShopperLoading ? "Matching..." : "Match with AI"}
@@ -447,17 +446,17 @@ export default function SellGoodsPage() {
 
           {aiShopperResult ? (
             <div className="mt-5 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-              <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
-                <p className="text-sm leading-6 text-white/60">{aiShopperResult.summary}</p>
+              <div className="rounded-[16px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-3.5">
+                <p className="text-[13px] leading-5 text-white/60">{aiShopperResult.summary}</p>
                 <p className="mt-4 text-xs uppercase tracking-[0.16em] text-[var(--accent)]">Next Step</p>
-                <p className="mt-2 text-sm leading-6 text-white/52">{aiShopperResult.nextStep}</p>
+                <p className="mt-2 text-[13px] leading-5 text-white/52">{aiShopperResult.nextStep}</p>
               </div>
 
               <div className="grid gap-3 md:grid-cols-2">
                 {aiRecommendedItems.map((item) => (
                   <article
                     key={item.id}
-                    className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 transition hover:bg-white/5"
+                    className="rounded-[16px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-3.5 transition hover:bg-white/5"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <span className="rounded-full bg-[rgba(70,191,255,0.10)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
@@ -466,10 +465,10 @@ export default function SellGoodsPage() {
                       <span className="rounded-full bg-white/6 px-3 py-1 text-xs text-white/62">
                         {item.campus}
                       </span>
-                      <span className="text-sm font-semibold text-[var(--accent)]">${item.price}</span>
+                      <span className="text-[13px] font-semibold text-[var(--accent)]">${item.price}</span>
                     </div>
                     <Link href={`/sell-goods/${item.id}`} className="block">
-                      <h3 className="mt-4 text-base font-semibold text-white">{item.title}</h3>
+                      <h3 className="mt-3 text-[15px] font-semibold text-white">{item.title}</h3>
                     </Link>
                     <div className="mt-2 flex items-center gap-2 text-[12px] text-white/58">
                       <span>{item.seller}</span>
@@ -479,19 +478,19 @@ export default function SellGoodsPage() {
                         </span>
                       ) : null}
                     </div>
-                    <p className="mt-2 text-sm leading-6 text-white/48">{item.summary}</p>
-                    <p className="mt-3 text-xs text-white/38">
+                    <p className="mt-2 text-[13px] leading-5 text-white/48">{item.summary}</p>
+                    <p className="mt-2 text-[11px] text-white/38">
                       {item.campus} · {item.neighborhood}
                     </p>
                     {getSellerContactHref(item) ? (
                       <a
                         href={getSellerContactHref(item) ?? "#"}
-                        className="mt-4 inline-flex w-full items-center justify-center rounded-full border border-[rgba(148,163,184,0.26)] bg-[rgba(148,163,184,0.10)] px-4 py-3 text-sm font-semibold text-[#d7e5f6] transition hover:bg-[rgba(148,163,184,0.16)]"
+                        className="mt-3 inline-flex w-full items-center justify-center rounded-full border border-[rgba(148,163,184,0.26)] bg-[rgba(148,163,184,0.10)] px-4 py-2.5 text-[13px] font-semibold text-[#d7e5f6] transition hover:bg-[rgba(148,163,184,0.16)]"
                       >
                         Contact Seller
                       </a>
                     ) : (
-                      <span className="mt-4 inline-flex w-full items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/40">
+                      <span className="mt-3 inline-flex w-full items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-[13px] font-semibold text-white/40">
                         Contact unavailable
                       </span>
                     )}
@@ -502,17 +501,15 @@ export default function SellGoodsPage() {
           ) : null}
         </section>
 
-        <section className="mt-8">
-          <div className="mb-4 flex items-center justify-between">
+        <section className="mt-6">
+          <div className="mb-3 flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-white">Marketplace listings</p>
-              <p className="text-sm text-white/42">
-                Browse student goods by category, condition, and price.
-              </p>
+              <p className="text-[15px] font-semibold text-white">Marketplace listings</p>
+              <p className="text-[12px] text-white/42">Browse by category, condition, and price.</p>
             </div>
-            <div className="inline-flex items-center gap-2 text-xs text-white/40">
+            <div className="inline-flex items-center gap-2 text-[11px] text-white/40">
               <SlidersHorizontal className="h-3.5 w-3.5 text-[var(--accent)]" />
-              Student filters active
+              Filters on
             </div>
           </div>
 
@@ -558,30 +555,30 @@ export default function SellGoodsPage() {
           ) : null}
 
           {status === "ready" && filteredItems.length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {filteredItems.map((item) => (
                 <article
                   key={item.id}
-                  className="rounded-[20px] border border-[var(--border)] bg-[var(--panel)] p-5 transition hover:bg-[var(--panel-soft)]"
+                  className="rounded-[18px] border border-[var(--border)] bg-[var(--panel)] p-3.5 transition hover:bg-[var(--panel-soft)]"
                 >
                   <Link href={`/sell-goods/${item.id}`} className="block">
-                    <div className="flex h-36 items-center justify-center rounded-[16px] bg-[linear-gradient(135deg,_rgba(51,65,92,0.42),_rgba(70,191,255,0.08))] text-lg font-semibold text-white/70">
+                    <div className="flex h-28 items-center justify-center rounded-[14px] bg-[linear-gradient(135deg,_rgba(51,65,92,0.42),_rgba(70,191,255,0.08))] text-sm font-semibold text-white/70">
                       {item.imageHint}
                     </div>
 
-                    <div className="mt-4 flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-[rgba(70,191,255,0.10)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+                    <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                      <span className="rounded-full bg-[rgba(70,191,255,0.10)] px-2.5 py-1 text-[10px] font-semibold text-[var(--accent)]">
                         {item.category}
                       </span>
-                      <span className="rounded-full bg-white/6 px-3 py-1 text-xs text-white/62">
+                      <span className="rounded-full bg-white/6 px-2.5 py-1 text-[10px] text-white/62">
                         {item.campus}
                       </span>
-                      <span className="rounded-full bg-white/6 px-3 py-1 text-xs text-white/62">
+                      <span className="rounded-full bg-white/6 px-2.5 py-1 text-[10px] text-white/62">
                         {item.condition}
                       </span>
                     </div>
 
-                    <h3 className="mt-4 text-xl font-semibold">{item.title}</h3>
+                    <h3 className="mt-3 text-[15px] font-semibold leading-5">{item.title}</h3>
                   </Link>
 
                   <div className="mt-2 flex items-center gap-2 text-[12px] text-white/58">
@@ -593,22 +590,22 @@ export default function SellGoodsPage() {
                     ) : null}
                   </div>
 
-                  <p className="mt-3 text-sm leading-6 text-white/48">{item.summary}</p>
+                  <p className="mt-2 text-[13px] leading-5 text-white/48">{item.summary}</p>
 
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-sm text-white/44">{item.neighborhood}</span>
-                    <span className="text-base font-semibold text-[var(--accent)]">${item.price}</span>
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="text-[11px] text-white/44">{item.neighborhood}</span>
+                    <span className="text-[13px] font-semibold text-[var(--accent)]">${item.price}</span>
                   </div>
 
                   {getSellerContactHref(item) ? (
                     <a
                       href={getSellerContactHref(item) ?? "#"}
-                      className="mt-4 inline-flex w-full items-center justify-center rounded-full border border-[rgba(148,163,184,0.26)] bg-[rgba(148,163,184,0.10)] px-4 py-3 text-sm font-semibold text-[#d7e5f6] transition hover:bg-[rgba(148,163,184,0.16)]"
+                      className="mt-3 inline-flex w-full items-center justify-center rounded-full border border-[rgba(148,163,184,0.26)] bg-[rgba(148,163,184,0.10)] px-4 py-2.5 text-[13px] font-semibold text-[#d7e5f6] transition hover:bg-[rgba(148,163,184,0.16)]"
                     >
                       Contact Seller
                     </a>
                   ) : (
-                    <span className="mt-4 inline-flex w-full items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/40">
+                    <span className="mt-3 inline-flex w-full items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-[13px] font-semibold text-white/40">
                       Contact unavailable
                     </span>
                   )}
@@ -618,25 +615,24 @@ export default function SellGoodsPage() {
           ) : null}
         </section>
 
-        <section id="sell-form" className="mt-10 rounded-[24px] border border-[var(--border)] bg-[var(--panel)] p-6">
+        <section id="sell-form" className="mt-7 rounded-[20px] border border-[var(--border)] bg-[var(--panel)] p-4 sm:p-5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.24em] text-white/36">Sell Form</p>
-              <h2 className="mt-2 font-display text-3xl font-bold tracking-[-0.03em]">
-                Upload and post to the student-only marketplace.
+              <h2 className="mt-2 font-display text-[1.5rem] font-bold tracking-[-0.03em] sm:text-[1.9rem]">
+                Upload and post to the student marketplace.
               </h2>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-white/52">
-                Only verified student sellers should post here. Keep listings campus-friendly,
-                budget-aware, and useful for student life.
+              <p className="mt-2 max-w-xl text-[13px] leading-5 text-white/52">
+                Keep it clear, budget-friendly, and student useful.
               </p>
             </div>
-            <div className="rounded-full border border-[rgba(70,191,255,0.22)] bg-[rgba(70,191,255,0.08)] px-4 py-2 text-xs font-medium text-[var(--accent)]">
-              Upload flow included
+            <div className="rounded-full border border-[rgba(70,191,255,0.22)] bg-[rgba(70,191,255,0.08)] px-3 py-1.5 text-[11px] font-medium text-[var(--accent)]">
+              Upload ready
             </div>
           </div>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <label className="relative flex min-h-[140px] cursor-pointer flex-col items-center justify-center gap-3 rounded-[16px] border border-dashed border-[var(--border)] bg-white/4 p-5 text-center transition hover:border-[rgba(70,191,255,0.38)] md:col-span-2">
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            <label className="relative flex min-h-[110px] cursor-pointer flex-col items-center justify-center gap-2 rounded-[14px] border border-dashed border-[var(--border)] bg-white/4 p-4 text-center transition hover:border-[rgba(70,191,255,0.38)] md:col-span-2">
               <input
                 type="file"
                 multiple
@@ -646,10 +642,10 @@ export default function SellGoodsPage() {
                   setSelectedUploads(files.map((file) => file.name));
                 }}
               />
-              <Upload className="h-6 w-6 text-[var(--accent)]" />
+              <Upload className="h-5 w-5 text-[var(--accent)]" />
               <div>
-                <p className="text-sm font-medium text-white/72">Upload product photos</p>
-                <p className="mt-1 text-xs text-white/38">Add up to 4 images for student buyers</p>
+                <p className="text-[13px] font-medium text-white/72">Upload photos</p>
+                <p className="mt-1 text-[11px] text-white/38">Up to 4 images</p>
               </div>
             </label>
 
@@ -658,7 +654,7 @@ export default function SellGoodsPage() {
                 {selectedUploads.map((upload) => (
                   <div
                     key={upload}
-                    className="rounded-full border border-[var(--border)] bg-white/5 px-3 py-1.5 text-xs text-white/65"
+                    className="rounded-full border border-[var(--border)] bg-white/5 px-3 py-1.5 text-[11px] text-white/65"
                   >
                     {upload}
                   </div>
@@ -667,44 +663,44 @@ export default function SellGoodsPage() {
             ) : null}
 
             <label className="block">
-              <span className="mb-2 block text-sm text-white/58">Seller name</span>
+              <span className="mb-1.5 block text-[13px] text-white/58">Seller name</span>
               <input
                 value={sellForm.seller}
                 onChange={(event) => setSellForm((current) => ({ ...current, seller: event.target.value }))}
-                className="w-full rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm outline-none"
+                className="w-full rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] outline-none"
                 placeholder="Your name"
               />
               {formErrors.seller ? <p className="mt-1 text-xs text-[#F09595]">{formErrors.seller}</p> : null}
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm text-white/58">Student email</span>
+              <span className="mb-1.5 block text-[13px] text-white/58">Student email</span>
               <input
                 value={sellForm.email}
                 onChange={(event) => setSellForm((current) => ({ ...current, email: event.target.value }))}
-                className="w-full rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm outline-none"
+                className="w-full rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] outline-none"
                 placeholder="you@temple.edu"
               />
               {formErrors.email ? <p className="mt-1 text-xs text-[#F09595]">{formErrors.email}</p> : null}
             </label>
 
             <label className="block md:col-span-2">
-              <span className="mb-2 block text-sm text-white/58">Product title</span>
+              <span className="mb-1.5 block text-[13px] text-white/58">Product title</span>
               <input
                 value={sellForm.title}
                 onChange={(event) => setSellForm((current) => ({ ...current, title: event.target.value }))}
-                className="w-full rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm outline-none"
-                placeholder="Example: Rare Beauty blush duo"
+                className="w-full rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] outline-none"
+                placeholder="Rare Beauty blush duo"
               />
               {formErrors.title ? <p className="mt-1 text-xs text-[#F09595]">{formErrors.title}</p> : null}
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm text-white/58">Category</span>
+              <span className="mb-1.5 block text-[13px] text-white/58">Category</span>
               <select
                 value={sellForm.category}
                 onChange={(event) => setSellForm((current) => ({ ...current, category: event.target.value as GoodsCategory }))}
-                className="w-full rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm outline-none"
+                className="w-full rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] outline-none"
               >
                 {categories
                   .filter((item): item is GoodsCategory => item !== "All")
@@ -717,11 +713,11 @@ export default function SellGoodsPage() {
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm text-white/58">Condition</span>
+              <span className="mb-1.5 block text-[13px] text-white/58">Condition</span>
               <select
                 value={sellForm.condition}
                 onChange={(event) => setSellForm((current) => ({ ...current, condition: event.target.value as GoodsCondition }))}
-                className="w-full rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm outline-none"
+                className="w-full rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] outline-none"
               >
                 <option value="New">New</option>
                 <option value="Used">Used</option>
@@ -729,37 +725,37 @@ export default function SellGoodsPage() {
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm text-white/58">Price</span>
+              <span className="mb-1.5 block text-[13px] text-white/58">Price</span>
               <input
                 type="number"
                 min="1"
                 value={sellForm.price}
                 onChange={(event) => setSellForm((current) => ({ ...current, price: event.target.value }))}
-                className="w-full rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm outline-none"
+                className="w-full rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] outline-none"
                 placeholder="18"
               />
               {formErrors.price ? <p className="mt-1 text-xs text-[#F09595]">{formErrors.price}</p> : null}
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm text-white/58">Campus meetup area</span>
+              <span className="mb-1.5 block text-[13px] text-white/58">Location</span>
               <input
                 value={sellForm.neighborhood}
                 onChange={(event) => setSellForm((current) => ({ ...current, neighborhood: event.target.value }))}
-                className="w-full rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm outline-none"
-                placeholder="Morgan Hall, Tech Center, Charles Library..."
+                className="w-full rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] outline-none"
+                placeholder="Morgan Hall, Tech Center..."
               />
               {formErrors.neighborhood ? <p className="mt-1 text-xs text-[#F09595]">{formErrors.neighborhood}</p> : null}
             </label>
 
             <label className="block md:col-span-2">
-              <span className="mb-2 block text-sm text-white/58">Short description</span>
+              <span className="mb-1.5 block text-[13px] text-white/58">Description</span>
               <textarea
-                rows={4}
+                rows={3}
                 value={sellForm.summary}
                 onChange={(event) => setSellForm((current) => ({ ...current, summary: event.target.value }))}
-                className="w-full rounded-[14px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm outline-none"
-                placeholder="Add the most important product details for other students."
+                className="w-full rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] outline-none"
+                placeholder="Add the key details students should know."
               />
               {formErrors.summary ? <p className="mt-1 text-xs text-[#F09595]">{formErrors.summary}</p> : null}
             </label>
@@ -767,7 +763,7 @@ export default function SellGoodsPage() {
 
           {formError ? <p className="mt-4 text-sm text-[#F09595]">{formError}</p> : null}
           {formState === "success" ? (
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-[rgba(70,191,255,0.08)] px-4 py-2 text-sm text-[var(--accent)]">
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-[rgba(70,191,255,0.08)] px-4 py-2 text-[13px] text-[var(--accent)]">
               <CheckCircle2 className="h-4 w-4" />
               Item posted to the student marketplace.
             </div>
@@ -777,7 +773,7 @@ export default function SellGoodsPage() {
             type="button"
             onClick={submitSellForm}
             disabled={formState === "submitting"}
-            className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+            className="mt-5 inline-flex items-center gap-2 rounded-full bg-[var(--accent)] px-5 py-2.5 text-[13px] font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
           >
             {formState === "submitting" ? <Loader2 className="h-4 w-4 animate-spin" /> : <PackagePlus className="h-4 w-4" />}
             {formState === "submitting" ? "Posting item..." : "Post this item"}
