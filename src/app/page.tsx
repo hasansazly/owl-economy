@@ -202,12 +202,12 @@ export default function Home() {
             </div>
 
             <h1 className="mt-5 max-w-4xl font-display text-[2.85rem] font-extrabold leading-[0.94] tracking-[-0.06em] sm:text-[4.25rem] lg:text-[5.5rem]">
-              <span className="hero-gradient-title">Dorm life moves fast.</span>
-              <span className="mt-2 block text-[var(--accent)]">MyDormStash keeps up.</span>
+              <span className="hero-gradient-title">Everything campus..</span>
+              <span className="mt-2 block text-[var(--accent)]">All in one place.</span>
             </h1>
             <p className="mt-4 max-w-2xl text-[13px] leading-6 text-white/52 sm:mt-5 sm:text-[15px]">
-              Sell what you no longer need, find quick room options, launch student events, fundraise
-              for your org, and move campus-made items faster.
+              The simplest way to sell what you own, find where you belong, 
+              and launch what you love. Welcome to the new campus standard.
             </p>
 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
