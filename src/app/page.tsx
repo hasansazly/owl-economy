@@ -38,12 +38,10 @@ const quickActions = [
   {
     title: "The Room Swap",
     description:
-      "Need a place for a visiting friend? Or have a couch to spare? We're building the ultimate campus-only stay network.",
+      "Semester sublets, few-month stays, one-month options, and short stays, plus room-wanted posts in one place.",
     icon: BedDouble,
-    badge: "Coming Soon",
-    href: undefined,
-    hypeBadge: "GET READY",
-    disabled: true,
+    badge: "Rooms",
+    href: "/rent-room",
   },
   {
     title: "Launch Events",
