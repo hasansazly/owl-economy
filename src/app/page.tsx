@@ -193,24 +193,23 @@ export default function Home() {
           </div>
         </header>
 
-        <section className="grid gap-6 px-1 pt-8 lg:grid-cols-[1.12fr_0.88fr] lg:items-start">
-          <div>
+        <section className="grid gap-5 px-1 pt-6 lg:grid-cols-[1.12fr_0.88fr] lg:items-start lg:gap-6 lg:pt-8">
+          <div className="order-2 lg:order-1">
             <div className="flex flex-wrap gap-2">
               <div className="startup-chip px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/78">
                 Temple campus live
               </div>
             </div>
 
-            <h1 className="mt-5 max-w-4xl font-display text-[2.85rem] font-extrabold leading-[0.94] tracking-[-0.06em] sm:text-[4.25rem] lg:text-[5.5rem]">
-              <span className="hero-gradient-title">Everything campus..</span>
+            <h1 className="mt-4 max-w-4xl font-display text-[2.35rem] font-extrabold leading-[0.95] tracking-[-0.055em] sm:text-[3.6rem] lg:mt-5 lg:text-[5.5rem]">
+              <span className="hero-gradient-title">Everything campus.</span>
               <span className="mt-2 block text-[var(--accent)]">All in one place.</span>
             </h1>
-            <p className="mt-4 max-w-2xl text-[13px] leading-6 text-white/52 sm:mt-5 sm:text-[15px]">
-              The simplest way to sell what you own, find where you belong, 
-              and launch what you love. Welcome to the new campus standard.
+            <p className="mt-3 max-w-2xl text-[13px] leading-6 text-white/52 sm:mt-4 sm:text-[15px]">
+              The platform for everything campus. Buy, sell, and connect with the students around you instantly.
             </p>
 
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-5 flex flex-col gap-3 sm:mt-6 sm:flex-row">
               <Link
                 href="#top"
                 className="capsule-primary inline-flex items-center justify-center gap-2 px-5 py-3 text-[14px] font-semibold transition hover:opacity-95"
@@ -228,7 +227,7 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="agora-panel mt-7 px-4 py-3">
+            <div className="agora-panel mt-5 px-4 py-3 sm:mt-6">
               <div className="flex items-center gap-3">
                 <Search className="h-4 w-4 text-white/45" />
                 <input
@@ -240,7 +239,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="agora-panel overflow-hidden p-5">
+          <div className="order-1 agora-panel overflow-hidden p-4 sm:p-5 lg:order-2">
             <div className="flex items-start justify-between gap-3">
               <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--accent)]">
                 <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)] shadow-[0_0_18px_rgba(18,214,255,0.85)]" />
