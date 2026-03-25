@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   ArrowLeft,
   CalendarDays,
@@ -16,39 +16,13 @@ import {
   X,
 } from "lucide-react";
 
-type StayMode = "Semester" | "Few Months" | "One Month" | "Short Stay";
-type PostIntent = "I Have a Room" | "I Need a Room";
-
-type RoomOffer = {
-  id: string;
-  title: string;
-  host: string;
-  campus: string;
-  location: string;
-  stayMode: StayMode;
-  price: string;
-  dates: string;
-  description: string;
-  photoHint: string;
-};
-
-type RoomRequest = {
-  id: string;
-  student: string;
-  campus: string;
-  target: StayMode;
-  budget: string;
-  location: string;
-  description: string;
-};
-
-const stayModes: StayMode[] = ["Semester", "Few Months", "One Month", "Short Stay"];
-const postIntents: PostIntent[] = ["I Have a Room", "I Need a Room"];
+const stayModes = ["Semester", "Few Months", "One Month", "Short Stay"] as const;
+const postTypes = ["I Have a Room", "I Need a Room"] as const;
 
 const offerTemplates = [
   {
     label: "Semester sublet",
-    stayMode: "Semester" as StayMode,
+    stayMode: "Semester",
     title: "Spring semester sublet near campus",
     price: "$785/month",
     dates: "Jan 8 - May 10",
@@ -57,7 +31,7 @@ const offerTemplates = [
   },
   {
     label: "Few months stay",
-    stayMode: "Few Months" as StayMode,
+    stayMode: "Few Months",
     title: "3-month furnished room available",
     price: "$760/month",
     dates: "Jun 1 - Aug 31",
@@ -66,7 +40,7 @@ const offerTemplates = [
   },
   {
     label: "Short stay",
-    stayMode: "Short Stay" as StayMode,
+    stayMode: "Short Stay",
     title: "Short stay crash space near campus",
     price: "$28/night",
     dates: "1-2 nights to 1 week",
@@ -78,35 +52,41 @@ const offerTemplates = [
 const seekerTemplates = [
   {
     label: "Semester needed",
-    target: "Semester" as StayMode,
-    budget: "Up to $800/month",
+    stayMode: "Semester",
+    title: "Looking for semester sublet",
+    price: "Up to $800/month",
+    dates: "Full semester",
     location: "Close to main campus",
     description: "Looking for a semester sublet with a desk, quiet vibe, and easy walk to class.",
   },
   {
     label: "Summer room",
-    target: "Few Months" as StayMode,
-    budget: "Up to $750/month",
+    stayMode: "Few Months",
+    title: "Need a summer room",
+    price: "Up to $750/month",
+    dates: "June to August",
     location: "Near library or student center",
     description: "Need a furnished room for summer classes and a campus job from June through August.",
   },
   {
     label: "Short stay request",
-    target: "Short Stay" as StayMode,
-    budget: "Up to $35/night",
+    stayMode: "Short Stay",
+    title: "Need short stay near campus",
+    price: "Up to $35/night",
+    dates: "Flexible",
     location: "Near campus transit",
     description: "Need a short stay for a few nights while waiting on move-in timing.",
   },
 ] as const;
 
-const roomOffers: RoomOffer[] = [
+const roomOffers = [
   {
     id: "offer-1",
+    stayMode: "Semester",
     title: "Semester sublet with desk + closet",
     host: "Maya R.",
     campus: "Temple University",
     location: "Morgan Hall South",
-    stayMode: "Semester",
     price: "$790/month",
     dates: "Jan 10 - May 12",
     description: "Quiet room, furnished, good light, and fast walk to main campus buildings.",
@@ -114,11 +94,11 @@ const roomOffers: RoomOffer[] = [
   },
   {
     id: "offer-2",
+    stayMode: "Few Months",
     title: "Summer room for 3 months",
     host: "Jordan T.",
     campus: "Temple University",
     location: "Cecil B. Moore",
-    stayMode: "Few Months",
     price: "$740/month",
     dates: "May 20 - Aug 20",
     description: "Ideal for internships or summer classes. Clean setup and easy move-in.",
@@ -126,11 +106,11 @@ const roomOffers: RoomOffer[] = [
   },
   {
     id: "offer-3",
+    stayMode: "One Month",
     title: "One-month furnished room",
     host: "Sana L.",
     campus: "Drexel University",
     location: "University City",
-    stayMode: "One Month",
     price: "$820/month",
     dates: "July only",
     description: "Flexible one-month stay with furnished basics and shared kitchen access.",
@@ -138,73 +118,66 @@ const roomOffers: RoomOffer[] = [
   },
   {
     id: "offer-4",
+    stayMode: "Short Stay",
     title: "Crash pad for a few nights",
     host: "Chris D.",
     campus: "Temple University",
     location: "Near Charles Library",
-    stayMode: "Short Stay",
     price: "$30/night",
     dates: "1-2 nights to 1 week",
     description: "Short-stay option for visiting friends, move-in overlap, or quick weekend needs.",
     photoHint: "Couch corner + side table",
   },
-];
+] as const;
 
-const roomRequests: RoomRequest[] = [
+const roomRequests = [
   {
     id: "request-1",
+    stayMode: "Semester",
     student: "Aaliyah P.",
     campus: "Temple University",
-    target: "Semester",
     budget: "Up to $820/month",
     location: "Near main campus",
     description: "Looking for a semester place with a desk and a quiet weekday vibe.",
   },
   {
     id: "request-2",
+    stayMode: "Few Months",
     student: "Devon S.",
     campus: "Temple University",
-    target: "Few Months",
     budget: "Up to $780/month",
     location: "Close to SEPTA or campus",
     description: "Need a summer sublet for classes and part-time work from June to August.",
   },
   {
     id: "request-3",
+    stayMode: "Short Stay",
     student: "Rina M.",
     campus: "Temple University",
-    target: "Short Stay",
     budget: "Up to $35/night",
     location: "Walkable to library",
     description: "Need a short stay for 3 nights while waiting on lease timing.",
   },
-];
+] as const;
 
 export default function RoomSwapPage() {
-  const [activeMode, setActiveMode] = useState<StayMode>("Semester");
-  const [intent, setIntent] = useState<PostIntent>("I Have a Room");
+  const [activeMode, setActiveMode] = useState<(typeof stayModes)[number]>("Semester");
+  const [postType, setPostType] = useState<(typeof postTypes)[number]>("I Have a Room");
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [dates, setDates] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
-  const [photoNames, setPhotoNames] = useState<string[]>([]);
+  const [photos, setPhotos] = useState<string[]>([]);
   const [chatOpen, setChatOpen] = useState(false);
-  const [chatHeading, setChatHeading] = useState("");
+  const [chatTitle, setChatTitle] = useState("");
   const [chatMessage, setChatMessage] = useState("");
 
-  const filteredOffers = useMemo(
-    () => roomOffers.filter((offer) => offer.stayMode === activeMode),
-    [activeMode],
-  );
-
-  const filteredRequests = useMemo(
-    () => roomRequests.filter((request) => request.target === activeMode),
-    [activeMode],
-  );
+  const filteredOffers = roomOffers.filter((offer) => offer.stayMode === activeMode);
+  const filteredRequests = roomRequests.filter((request) => request.stayMode === activeMode);
 
   const applyOfferTemplate = (template: (typeof offerTemplates)[number]) => {
-    setIntent("I Have a Room");
+    setPostType("I Have a Room");
     setActiveMode(template.stayMode);
     setTitle(template.title);
     setPrice(template.price);
@@ -214,37 +187,19 @@ export default function RoomSwapPage() {
   };
 
   const applySeekerTemplate = (template: (typeof seekerTemplates)[number]) => {
-    setIntent("I Need a Room");
-    setActiveMode(template.target);
-    setTitle(`Looking for ${template.target.toLowerCase()} stay`);
-    setPrice(template.budget);
-    setDates(template.target === "Semester" ? "Full semester" : template.target === "Few Months" ? "2-3 months" : "Flexible");
+    setPostType("I Need a Room");
+    setActiveMode(template.stayMode);
+    setTitle(template.title);
+    setPrice(template.price);
+    setDates(template.dates);
     setLocation(template.location);
     setDescription(template.description);
   };
 
-  const handleFiles = (files: FileList | null) => {
-    if (!files) return;
-    const next = Array.from(files).slice(0, 5).map((file) => file.name);
-    setPhotoNames(next);
-  };
-
-  const openOfferChat = (offer: RoomOffer) => {
-    setChatHeading(offer.title);
-    setChatMessage(`Hi ${offer.host.split(" ")[0]}, I saw your ${offer.stayMode.toLowerCase()} post on MyDormStash. Is it still available?`);
+  const openChat = (heading: string, message: string) => {
+    setChatTitle(heading);
+    setChatMessage(message);
     setChatOpen(true);
-  };
-
-  const openRequestChat = (request: RoomRequest) => {
-    setChatHeading(`For ${request.student}`);
-    setChatMessage(`Hi ${request.student.split(" ")[0]}, I may have a ${request.target.toLowerCase()} option that fits your post. Are you still looking?`);
-    setChatOpen(true);
-  };
-
-  const closeChat = () => {
-    setChatOpen(false);
-    setChatHeading("");
-    setChatMessage("");
   };
 
   return (
@@ -297,29 +252,33 @@ export default function RoomSwapPage() {
             </div>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-3">
-              {[
-                { label: "Best for", value: "Semester + few months", icon: CalendarDays },
-                { label: "Also supports", value: "1 month + short stays", icon: Clock3 },
-                { label: "Built for", value: "Room posts and requests", icon: Search },
-              ].map(({ label, value, icon: Icon }) => (
-                <div key={label} className="page-card p-4">
-                  <Icon className="h-4 w-4 text-[var(--accent)]" />
-                  <p className="mt-4 text-lg font-semibold text-white">{value}</p>
-                  <p className="mt-1 text-xs text-white/42">{label}</p>
-                </div>
-              ))}
+              <div className="page-card p-4">
+                <CalendarDays className="h-4 w-4 text-[var(--accent)]" />
+                <p className="mt-4 text-lg font-semibold text-white">Semester + few months</p>
+                <p className="mt-1 text-xs text-white/42">Main focus</p>
+              </div>
+              <div className="page-card p-4">
+                <Clock3 className="h-4 w-4 text-[var(--accent)]" />
+                <p className="mt-4 text-lg font-semibold text-white">1 month + short stays</p>
+                <p className="mt-1 text-xs text-white/42">Also supported</p>
+              </div>
+              <div className="page-card p-4">
+                <Search className="h-4 w-4 text-[var(--accent)]" />
+                <p className="mt-4 text-lg font-semibold text-white">Room posts + requests</p>
+                <p className="mt-1 text-xs text-white/42">Same section</p>
+              </div>
             </div>
           </div>
 
           <section className="page-card p-5">
             <div className="flex flex-wrap gap-2">
-              {postIntents.map((item) => (
+              {postTypes.map((item) => (
                 <button
                   key={item}
                   type="button"
-                  onClick={() => setIntent(item)}
+                  onClick={() => setPostType(item)}
                   className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                    intent === item
+                    postType === item
                       ? "bg-white text-black"
                       : "border border-white/10 bg-white/5 text-white/62 hover:text-white/82"
                   }`}
@@ -333,9 +292,8 @@ export default function RoomSwapPage() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--accent)]">
                 Easy Post Template
               </p>
-
               <div className="mt-3 flex flex-wrap gap-2">
-                {intent === "I Have a Room"
+                {postType === "I Have a Room"
                   ? offerTemplates.map((template) => (
                       <button
                         key={template.label}
@@ -367,11 +325,10 @@ export default function RoomSwapPage() {
                 <input
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
-                  placeholder={intent === "I Have a Room" ? "Spring semester sublet near campus" : "Looking for summer room near campus"}
+                  placeholder="Spring semester sublet near campus"
                   className="w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/25"
                 />
               </label>
-
               <label className="block">
                 <span className="mb-2 block text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">
                   Price / Budget
@@ -395,12 +352,11 @@ export default function RoomSwapPage() {
                   <input
                     value={dates}
                     onChange={(event) => setDates(event.target.value)}
-                    placeholder={activeMode === "Semester" ? "Jan 8 - May 10" : activeMode === "Few Months" ? "Jun 1 - Aug 31" : activeMode === "One Month" ? "July only" : "1-2 nights to 1 week"}
+                    placeholder="Jan 8 - May 10"
                     className="w-full bg-transparent text-sm outline-none placeholder:text-white/25"
                   />
                 </div>
               </label>
-
               <label className="block">
                 <span className="mb-2 block text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">
                   Location
@@ -425,11 +381,7 @@ export default function RoomSwapPage() {
                 rows={4}
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
-                placeholder={
-                  intent === "I Have a Room"
-                    ? "Describe the room, furniture, roommates, walk to campus, and why this is a good fit."
-                    : "Describe what kind of room you need, budget, timing, and preferred setup."
-                }
+                placeholder="Describe the room, timing, furniture, budget, or what kind of stay you need."
                 className="w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-sm leading-6 outline-none placeholder:text-white/25"
               />
             </label>
@@ -440,7 +392,11 @@ export default function RoomSwapPage() {
                 accept="image/*"
                 multiple
                 className="hidden"
-                onChange={(event) => handleFiles(event.target.files)}
+                onChange={(event) => {
+                  const files = event.target.files;
+                  if (!files) return;
+                  setPhotos(Array.from(files).slice(0, 5).map((file) => file.name));
+                }}
               />
               <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-white/6 text-[var(--accent)]">
                 <ImageUp className="h-5 w-5" />
@@ -448,7 +404,7 @@ export default function RoomSwapPage() {
               <p className="mt-4 text-sm font-semibold text-white">Upload room photos</p>
               <p className="mt-2 text-xs text-white/38">Tap to add up to 5 photos</p>
               <p className="mt-4 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/62">
-                {photoNames.length ? `${photoNames.length} photos ready` : "No photos yet"}
+                {photos.length ? `${photos.length} photos ready` : "No photos yet"}
               </p>
             </label>
 
@@ -480,7 +436,6 @@ export default function RoomSwapPage() {
                 <div className="flex h-44 items-center justify-center rounded-[16px] bg-[linear-gradient(135deg,_rgba(51,65,92,0.42),_rgba(18,214,255,0.08))] text-sm font-semibold text-white/70">
                   {offer.photoHint}
                 </div>
-
                 <div className="mt-4 flex items-center justify-between gap-3">
                   <div>
                     <h2 className="text-lg font-semibold text-white">{offer.title}</h2>
@@ -493,22 +448,23 @@ export default function RoomSwapPage() {
                   </div>
                   <span className="rounded-full bg-white/6 px-3 py-1 text-xs text-white/66">{offer.stayMode}</span>
                 </div>
-
                 <div className="mt-4 flex items-center justify-between text-sm">
                   <span className="font-semibold text-[var(--accent)]">{offer.price}</span>
                   <span className="text-white/42">{offer.dates}</span>
                 </div>
-
                 <div className="mt-3 flex items-center gap-2 text-xs text-white/40">
                   <MapPin className="h-3.5 w-3.5 text-[var(--accent)]" />
                   {offer.campus} • {offer.location}
                 </div>
-
                 <p className="mt-4 text-sm leading-6 text-white/54">{offer.description}</p>
-
                 <button
                   type="button"
-                  onClick={() => openOfferChat(offer)}
+                  onClick={() =>
+                    openChat(
+                      offer.title,
+                      `Hi ${offer.host.split(" ")[0]}, I saw your ${offer.stayMode.toLowerCase()} post on MyDormStash. Is it still available?`,
+                    )
+                  }
                   className="capsule-primary mt-5 inline-flex w-full items-center justify-center gap-2 px-5 py-3 text-sm font-semibold"
                 >
                   Request to Stay
@@ -539,19 +495,21 @@ export default function RoomSwapPage() {
                     <h2 className="text-base font-semibold text-white">{request.student}</h2>
                     <p className="mt-2 text-xs text-white/42">{request.campus}</p>
                   </div>
-                  <span className="rounded-full bg-white/6 px-3 py-1 text-xs text-white/66">{request.target}</span>
+                  <span className="rounded-full bg-white/6 px-3 py-1 text-xs text-white/66">{request.stayMode}</span>
                 </div>
-
                 <div className="mt-4 space-y-2 text-sm">
                   <p className="text-[var(--accent)]">{request.budget}</p>
                   <p className="text-white/52">{request.location}</p>
                 </div>
-
                 <p className="mt-4 text-sm leading-6 text-white/54">{request.description}</p>
-
                 <button
                   type="button"
-                  onClick={() => openRequestChat(request)}
+                  onClick={() =>
+                    openChat(
+                      `For ${request.student}`,
+                      `Hi ${request.student.split(" ")[0]}, I may have a ${request.stayMode.toLowerCase()} option that fits your post. Are you still looking?`,
+                    )
+                  }
                   className="capsule-secondary mt-5 inline-flex w-full items-center justify-center gap-2 px-5 py-3 text-sm"
                 >
                   <Send className="h-4 w-4 text-[var(--accent)]" />
@@ -565,7 +523,7 @@ export default function RoomSwapPage() {
 
       {chatOpen ? (
         <div className="fixed inset-0 z-40 bg-[rgba(0,0,0,0.58)]">
-          <button type="button" aria-label="Close chat" className="absolute inset-0" onClick={closeChat} />
+          <button type="button" aria-label="Close chat" className="absolute inset-0" onClick={() => setChatOpen(false)} />
           <aside
             className="page-card absolute right-0 top-0 flex h-full w-full max-w-md flex-col rounded-none border-l border-white/10 bg-[rgba(7,10,15,0.96)] shadow-[0_24px_80px_rgba(0,0,0,0.42)]"
             role="dialog"
@@ -579,12 +537,12 @@ export default function RoomSwapPage() {
                   id="room-swap-chat-title"
                   className="mt-2 font-display text-[1.25rem] font-bold tracking-[-0.03em] text-white"
                 >
-                  {chatHeading}
+                  {chatTitle}
                 </h2>
               </div>
               <button
                 type="button"
-                onClick={closeChat}
+                onClick={() => setChatOpen(false)}
                 className="rounded-full border border-white/10 p-2 text-white/55 transition hover:bg-white/5"
               >
                 <X className="h-4 w-4" />
