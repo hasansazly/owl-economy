@@ -21,13 +21,23 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+type QuickAction = {
+  title: string;
+  description: string;
+  icon: typeof Shirt;
+  badge: string;
+  href?: string;
+  hypeBadge?: string;
+  disabled?: boolean;
+};
+
 const flashDrops = [
   { title: "Valentines party ", location: "1456 N 15th Broad St", time: "10 PM" },
   { title: "Ignite Temple Club fundraiser", location: "Student Center Temple", time: "Live" },
   { title: "Skylar lost her airpod", location: "Charles Library", time: "yesterday" },
 ];
 
-const quickActions = [
+const quickActions: QuickAction[] = [
   {
     title: "Sell Goods",
     description: "Clothes, sneakers, books, and dorm extras students want right now.",
