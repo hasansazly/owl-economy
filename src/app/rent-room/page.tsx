@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
   ArrowLeft,
-  BedDouble,
   CalendarDays,
   Check,
   ChevronRight,
@@ -44,6 +43,7 @@ type RoomRequest = {
 };
 
 const stayModes: StayMode[] = ["Semester", "Few Months", "One Month", "Short Stay"];
+const postIntents: PostIntent[] = ["I Have a Room", "I Need a Room"];
 
 const offerTemplates = [
   {
@@ -53,8 +53,7 @@ const offerTemplates = [
     price: "$785/month",
     dates: "Jan 8 - May 10",
     location: "Morgan Hall / Cecil B. Moore area",
-    description:
-      "Private room available for the full semester with desk space, closet, and easy walk to campus.",
+    description: "Private room for the full semester with desk space, closet, and easy walk to campus.",
   },
   {
     label: "Few months stay",
@@ -63,8 +62,7 @@ const offerTemplates = [
     price: "$760/month",
     dates: "Jun 1 - Aug 31",
     location: "Near Charles Library",
-    description:
-      "Good fit for summer classes, internships, or lease overlap. Quiet setup and student-friendly move-in.",
+    description: "Good fit for summer classes, internships, or lease overlap with a quiet student setup.",
   },
   {
     label: "Short stay",
@@ -73,8 +71,7 @@ const offerTemplates = [
     price: "$28/night",
     dates: "1-2 nights to 1 week",
     location: "Temple Station area",
-    description:
-      "Best for visiting friends, move-in overlap, or quick student stays without hotel prices.",
+    description: "Best for visiting friends, move-in overlap, or quick student stays without hotel prices.",
   },
 ] as const;
 
@@ -192,9 +189,8 @@ export default function RoomSwapPage() {
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
   const [photoNames, setPhotoNames] = useState<string[]>([]);
-  const [dragActive, setDragActive] = useState(false);
-  const [chatTarget, setChatTarget] = useState<RoomOffer | RoomRequest | null>(null);
-  const [chatType, setChatType] = useState<"offer" | "request">("offer");
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatHeading, setChatHeading] = useState("");
   const [chatMessage, setChatMessage] = useState("");
 
   const filteredOffers = useMemo(
@@ -228,24 +224,26 @@ export default function RoomSwapPage() {
   };
 
   const handleFiles = (files: FileList | null) => {
-    if (!files?.length) return;
-    setPhotoNames(Array.from(files).slice(0, 5).map((file) => file.name));
+    if (!files) return;
+    const next = Array.from(files).slice(0, 5).map((file) => file.name);
+    setPhotoNames(next);
   };
 
   const openOfferChat = (offer: RoomOffer) => {
-    setChatType("offer");
-    setChatTarget(offer);
+    setChatHeading(offer.title);
     setChatMessage(`Hi ${offer.host.split(" ")[0]}, I saw your ${offer.stayMode.toLowerCase()} post on MyDormStash. Is it still available?`);
+    setChatOpen(true);
   };
 
   const openRequestChat = (request: RoomRequest) => {
-    setChatType("request");
-    setChatTarget(request);
+    setChatHeading(`For ${request.student}`);
     setChatMessage(`Hi ${request.student.split(" ")[0]}, I may have a ${request.target.toLowerCase()} option that fits your post. Are you still looking?`);
+    setChatOpen(true);
   };
 
   const closeChat = () => {
-    setChatTarget(null);
+    setChatOpen(false);
+    setChatHeading("");
     setChatMessage("");
   };
 
@@ -279,9 +277,8 @@ export default function RoomSwapPage() {
               <span className="hero-gradient-title block"> student stays first.</span>
             </h1>
             <p className="mt-5 max-w-2xl text-[15px] leading-7 text-white/52">
-              Focused on semester sublets, 2 to 3 month stays, one-month room options, and short stays from
-              1 to 2 nights up to a week. Students can post rooms and also post what they are looking for in
-              the same place.
+              Focused on semester sublets, few-month stays, one-month options, and short stays up to a week.
+              Students can post rooms and also post what they are looking for in the same section.
             </p>
 
             <div className="mt-7 inline-flex flex-wrap rounded-full border border-white/10 bg-white/5 p-1.5">
@@ -301,9 +298,9 @@ export default function RoomSwapPage() {
 
             <div className="mt-5 grid gap-3 sm:grid-cols-3">
               {[
-                { label: "Best for", value: "Semester + few months", icon: BedDouble },
+                { label: "Best for", value: "Semester + few months", icon: CalendarDays },
                 { label: "Also supports", value: "1 month + short stays", icon: Clock3 },
-                { label: "Built for", value: "Room posts and room requests", icon: Search },
+                { label: "Built for", value: "Room posts and requests", icon: Search },
               ].map(({ label, value, icon: Icon }) => (
                 <div key={label} className="page-card p-4">
                   <Icon className="h-4 w-4 text-[var(--accent)]" />
@@ -316,7 +313,7 @@ export default function RoomSwapPage() {
 
           <section className="page-card p-5">
             <div className="flex flex-wrap gap-2">
-              {(["I Have a Room", "I Need a Room"] as PostIntent[]).map((item) => (
+              {postIntents.map((item) => (
                 <button
                   key={item}
                   type="button"
@@ -437,30 +434,7 @@ export default function RoomSwapPage() {
               />
             </label>
 
-            <label
-              className={`mt-5 flex min-h-[160px] cursor-pointer flex-col items-center justify-center rounded-[18px] border border-dashed px-5 py-8 text-center transition ${
-                dragActive
-                  ? "border-[rgba(18,214,255,0.45)] bg-[rgba(18,214,255,0.07)]"
-                  : "border-white/15 bg-white/[0.02] hover:border-white/25"
-              }`}
-              onDragEnter={(event) => {
-                event.preventDefault();
-                setDragActive(true);
-              }}
-              onDragOver={(event) => {
-                event.preventDefault();
-                setDragActive(true);
-              }}
-              onDragLeave={(event) => {
-                event.preventDefault();
-                setDragActive(false);
-              }}
-              onDrop={(event) => {
-                event.preventDefault();
-                setDragActive(false);
-                handleFiles(event.dataTransfer.files);
-              }}
-            >
+            <label className="mt-5 flex min-h-[160px] cursor-pointer flex-col items-center justify-center rounded-[18px] border border-dashed border-white/15 bg-white/[0.02] px-5 py-8 text-center transition hover:border-white/25">
               <input
                 type="file"
                 accept="image/*"
@@ -472,7 +446,7 @@ export default function RoomSwapPage() {
                 <ImageUp className="h-5 w-5" />
               </div>
               <p className="mt-4 text-sm font-semibold text-white">Upload room photos</p>
-              <p className="mt-2 text-xs text-white/38">Drag and drop or tap to add up to 5 photos</p>
+              <p className="mt-2 text-xs text-white/38">Tap to add up to 5 photos</p>
               <p className="mt-4 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/62">
                 {photoNames.length ? `${photoNames.length} photos ready` : "No photos yet"}
               </p>
@@ -589,7 +563,7 @@ export default function RoomSwapPage() {
         </section>
       </section>
 
-      {chatTarget ? (
+      {chatOpen ? (
         <div className="fixed inset-0 z-40 bg-[rgba(0,0,0,0.58)]">
           <button type="button" aria-label="Close chat" className="absolute inset-0" onClick={closeChat} />
           <aside
@@ -600,14 +574,12 @@ export default function RoomSwapPage() {
           >
             <div className="flex items-start justify-between border-b border-white/8 px-5 py-5">
               <div>
-                <p className="section-kicker !px-0 !text-white/32">
-                  {chatType === "offer" ? "Request to Stay" : "Room Match Message"}
-                </p>
+                <p className="section-kicker !px-0 !text-white/32">Room Match Message</p>
                 <h2
                   id="room-swap-chat-title"
                   className="mt-2 font-display text-[1.25rem] font-bold tracking-[-0.03em] text-white"
                 >
-                  {chatType === "offer" ? (chatTarget as RoomOffer).title : `For ${(chatTarget as RoomRequest).student}`}
+                  {chatHeading}
                 </h2>
               </div>
               <button
@@ -622,7 +594,7 @@ export default function RoomSwapPage() {
             <div className="flex-1 px-5 py-5">
               <div className="page-card p-4">
                 <p className="text-sm leading-6 text-white/58">
-                  Use this to quickly coordinate timing, room fit, move-in details, or short-stay availability.
+                  Use this to coordinate rent, dates, room fit, roommates, and move-in timing.
                 </p>
               </div>
             </div>
