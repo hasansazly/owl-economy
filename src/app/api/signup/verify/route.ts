@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { createSessionToken, getSessionCookieConfig } from "@/lib/session";
 import { verifyCode } from "@/lib/signup-verification";
 
 export async function POST(request: Request) {
@@ -22,11 +23,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: result.message }, { status: 400 });
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: result.message,
       redirectTo: "/dashboard",
     });
+
+    response.cookies.set(
+      getSessionCookieConfig().name,
+      createSessionToken(email),
+      getSessionCookieConfig(),
+    );
+
+    return response;
   } catch {
     return NextResponse.json({ error: "Verification failed." }, { status: 500 });
   }

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle2, Mail, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+
 const RESEND_WAIT_SECONDS = 60;
 
 type VerifyEmailClientProps = {
@@ -38,6 +40,34 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
       setLoading(true);
       setError("");
 
+      const supabase = getSupabaseBrowserClient();
+
+      if (supabase) {
+        const { data: otpRecord, error: otpError } = await supabase
+          .from("otps")
+          .select("code, access_token, refresh_token")
+          .eq("email", email)
+          .eq("code", code.trim())
+          .maybeSingle();
+
+        if (otpError || !otpRecord?.access_token || !otpRecord?.refresh_token) {
+          throw new Error("Invalid Code");
+        }
+
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: otpRecord.access_token,
+          refresh_token: otpRecord.refresh_token,
+        });
+
+        if (sessionError) {
+          throw new Error("Invalid Code");
+        }
+
+        setVerified(true);
+        router.push("/dashboard");
+        return;
+      }
+
       const response = await fetch("/api/signup/verify", {
         method: "POST",
         headers: {
@@ -59,10 +89,16 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
       }
 
       setVerified(true);
-      router.push(data.redirectTo || "/dashboard");
+      window.location.href = data.redirectTo || "/dashboard";
     } catch (verifyError) {
       setVerified(false);
-      setError(verifyError instanceof Error ? verifyError.message : "Verification failed.");
+      const nextError =
+        verifyError instanceof Error && verifyError.message === "Invalid Code"
+          ? "Invalid Code"
+          : verifyError instanceof Error
+            ? verifyError.message
+            : "Verification failed.";
+      setError(nextError);
     } finally {
       setLoading(false);
     }
