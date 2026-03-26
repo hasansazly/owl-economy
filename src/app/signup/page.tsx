@@ -24,6 +24,8 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const emailState = useMemo(() => {
     const value = email.trim();
@@ -71,14 +73,43 @@ export default function SignupPage() {
     return "text-white/30";
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setSubmitError("");
 
     if (!isFormValid) {
       return;
     }
 
-    router.push(`/verify-email?email=${encodeURIComponent(email.trim())}`);
+    try {
+      setSubmitting(true);
+
+      const response = await fetch("/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          password,
+        }),
+      });
+
+      const data = (await response.json()) as {
+        error?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(data.error || "Signup failed.");
+      }
+
+      router.push(`/verify-email?email=${encodeURIComponent(email.trim())}`);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Signup failed.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -228,11 +259,12 @@ export default function SignupPage() {
 
               <button
                 type="submit"
-                disabled={!isFormValid}
+                disabled={!isFormValid || submitting}
                 className="mt-1 inline-flex w-full items-center justify-center rounded-[12px] bg-[var(--accent)] px-5 py-3 text-[15px] font-bold text-white transition hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-35 disabled:active:scale-100"
               >
-                Create account
+                {submitting ? "Sending code..." : "Create account"}
               </button>
+              {submitError ? <p className="text-[12px] text-[#F09595]">{submitError}</p> : null}
             </form>
           </>
         </div>
