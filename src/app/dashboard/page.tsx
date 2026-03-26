@@ -23,6 +23,13 @@ type ListingForm = {
   description: string;
 };
 
+type ListingInsert = {
+  title: string;
+  price: number;
+  category: string;
+  description: string;
+};
+
 const initialForm: ListingForm = {
   title: "",
   price: "",
@@ -129,14 +136,16 @@ export default function DashboardPage() {
       setPosting(true);
       setPostError("");
 
+      const listingPayload: ListingInsert = {
+        title: form.title.trim(),
+        price: parsedPrice,
+        category: form.category.trim(),
+        description: form.description.trim(),
+      };
+
       const { data, error: insertError } = await supabase
         .from("listings")
-        .insert({
-          title: form.title.trim(),
-          price: parsedPrice,
-          category: form.category.trim(),
-          description: form.description.trim(),
-        })
+        .insert(listingPayload as never)
         .select("id, title, price, category, description")
         .single();
 
