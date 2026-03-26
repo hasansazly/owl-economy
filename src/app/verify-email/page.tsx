@@ -1,173 +1,20 @@
-"use client";
+import { Suspense } from "react";
 
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, CheckCircle2, Mail, RefreshCw } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import VerifyEmailClient from "./verify-email-client";
 
-const RESEND_WAIT_SECONDS = 60;
+type VerifyEmailPageProps = {
+  searchParams?: Promise<{
+    email?: string;
+  }>;
+};
 
-export default function VerifyEmailPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const email = searchParams.get("email")?.trim() ?? "";
-  const [code, setCode] = useState("");
-  const [resendCountdown, setResendCountdown] = useState(0);
-  const [verified, setVerified] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (resendCountdown === 0) return;
-
-    const timer = window.setTimeout(() => {
-      setResendCountdown((current) => Math.max(current - 1, 0));
-    }, 1000);
-
-    return () => window.clearTimeout(timer);
-  }, [resendCountdown]);
-
-  const isCodeReady = useMemo(() => /^\d{6}$/.test(code.trim()), [code]);
-
-  const handleVerify = async () => {
-    if (!isCodeReady || !email) return;
-
-    try {
-      setLoading(true);
-      setError("");
-
-      const response = await fetch("/api/signup/verify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          code: code.trim(),
-        }),
-      });
-
-      const data = (await response.json()) as {
-        error?: string;
-        redirectTo?: string;
-      };
-
-      if (!response.ok) {
-        throw new Error(data.error || "Verification failed.");
-      }
-
-      setVerified(true);
-      router.push(data.redirectTo || "/dashboard");
-    } catch (verifyError) {
-      setVerified(false);
-      setError(verifyError instanceof Error ? verifyError.message : "Verification failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResend = async () => {
-    if (resendCountdown > 0 || !email) return;
-
-    try {
-      setError("");
-
-      const response = await fetch("/api/signup/resend", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = (await response.json()) as {
-        error?: string;
-      };
-
-      if (!response.ok) {
-        throw new Error(data.error || "Could not resend code.");
-      }
-
-      setResendCountdown(RESEND_WAIT_SECONDS);
-      setVerified(false);
-    } catch (resendError) {
-      setError(resendError instanceof Error ? resendError.message : "Could not resend code.");
-    }
-  };
+export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const email = resolvedSearchParams?.email?.trim() ?? "";
 
   return (
-    <main className="page-shell flex min-h-screen items-center justify-center px-4 py-10">
-      <section className="w-full max-w-md">
-        <div className="page-card p-6 sm:p-7">
-          <Link
-            href="/signup"
-            className="inline-flex items-center gap-1.5 text-sm text-white/45 transition hover:text-white/70"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Link>
-
-          <div className="mt-6 flex h-12 w-12 items-center justify-center rounded-2xl border border-[rgba(18,214,255,0.2)] bg-[rgba(18,214,255,0.08)] text-[var(--accent)]">
-            <Mail className="h-5 w-5" />
-          </div>
-
-          <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/42">
-            Verify Your Campus Email
-          </p>
-          <h1 className="mt-2 font-display text-[1.9rem] font-bold tracking-[-0.04em] text-white">
-            Check your .edu inbox
-          </h1>
-          <p className="mt-3 text-[13px] leading-6 text-white/48">
-            We sent a 6-digit code to your student email. Enter it below to join the Temple marketplace.
-          </p>
-          {email ? <p className="mt-2 text-[12px] text-[var(--accent)]">{email}</p> : null}
-
-          <label className="mt-6 block">
-            <span className="mb-2 block text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">
-              Verification Code
-            </span>
-            <input
-              type="text"
-              inputMode="numeric"
-              maxLength={6}
-              value={code}
-              onChange={(event) => setCode(event.target.value.replace(/\D/g, ""))}
-              placeholder="123456"
-              className="w-full rounded-[18px] border border-white/10 bg-white/5 px-5 py-4 text-center font-display text-[2rem] font-semibold tracking-[0.38em] text-white outline-none placeholder:tracking-[0.2em] placeholder:text-white/18 focus:border-[rgba(18,214,255,0.4)]"
-            />
-          </label>
-
-          {verified ? (
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[rgba(18,214,255,0.24)] bg-[rgba(18,214,255,0.08)] px-4 py-2 text-[13px] text-[var(--accent)]">
-              <CheckCircle2 className="h-4 w-4" />
-              Code verified
-            </div>
-          ) : null}
-          {error ? <p className="mt-4 text-[12px] text-[#F09595]">{error}</p> : null}
-
-          <button
-            type="button"
-            onClick={handleVerify}
-            disabled={!isCodeReady || !email || loading}
-            className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-[var(--accent)] px-5 py-3 text-[14px] font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-35"
-          >
-            {loading ? "Verifying..." : "Verify Account"}
-          </button>
-
-          <div className="mt-5 flex items-center justify-between gap-3">
-            <span className="text-[12px] text-white/38">Didn&apos;t get the code?</span>
-            <button
-              type="button"
-              onClick={handleResend}
-              disabled={resendCountdown > 0}
-              className="inline-flex items-center gap-2 text-[12px] font-semibold text-[var(--accent)] transition hover:text-white disabled:cursor-not-allowed disabled:text-white/28"
-            >
-              <RefreshCw className="h-3.5 w-3.5" />
-              {resendCountdown > 0 ? `Resend in ${resendCountdown}s` : "Resend Code"}
-            </button>
-          </div>
-        </div>
-      </section>
-    </main>
+    <Suspense fallback={null}>
+      <VerifyEmailClient email={email} />
+    </Suspense>
   );
 }
