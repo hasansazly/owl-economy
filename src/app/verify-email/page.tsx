@@ -1,15 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, CheckCircle2, Mail, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 const RESEND_WAIT_SECONDS = 60;
 
 export default function VerifyEmailPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email")?.trim() ?? "";
   const [code, setCode] = useState("");
   const [resendCountdown, setResendCountdown] = useState(0);
   const [verified, setVerified] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (resendCountdown === 0) return;
@@ -23,15 +29,70 @@ export default function VerifyEmailPage() {
 
   const isCodeReady = useMemo(() => /^\d{6}$/.test(code.trim()), [code]);
 
-  const handleVerify = () => {
-    if (!isCodeReady) return;
-    setVerified(true);
+  const handleVerify = async () => {
+    if (!isCodeReady || !email) return;
+
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await fetch("/api/signup/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          code: code.trim(),
+        }),
+      });
+
+      const data = (await response.json()) as {
+        error?: string;
+        redirectTo?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(data.error || "Verification failed.");
+      }
+
+      setVerified(true);
+      router.push(data.redirectTo || "/dashboard");
+    } catch (verifyError) {
+      setVerified(false);
+      setError(verifyError instanceof Error ? verifyError.message : "Verification failed.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleResend = () => {
-    if (resendCountdown > 0) return;
-    setResendCountdown(RESEND_WAIT_SECONDS);
-    setVerified(false);
+  const handleResend = async () => {
+    if (resendCountdown > 0 || !email) return;
+
+    try {
+      setError("");
+
+      const response = await fetch("/api/signup/resend", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = (await response.json()) as {
+        error?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(data.error || "Could not resend code.");
+      }
+
+      setResendCountdown(RESEND_WAIT_SECONDS);
+      setVerified(false);
+    } catch (resendError) {
+      setError(resendError instanceof Error ? resendError.message : "Could not resend code.");
+    }
   };
 
   return (
@@ -59,6 +120,7 @@ export default function VerifyEmailPage() {
           <p className="mt-3 text-[13px] leading-6 text-white/48">
             We sent a 6-digit code to your student email. Enter it below to join the Temple marketplace.
           </p>
+          {email ? <p className="mt-2 text-[12px] text-[var(--accent)]">{email}</p> : null}
 
           <label className="mt-6 block">
             <span className="mb-2 block text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">
@@ -81,14 +143,15 @@ export default function VerifyEmailPage() {
               Code verified
             </div>
           ) : null}
+          {error ? <p className="mt-4 text-[12px] text-[#F09595]">{error}</p> : null}
 
           <button
             type="button"
             onClick={handleVerify}
-            disabled={!isCodeReady}
+            disabled={!isCodeReady || !email || loading}
             className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-[var(--accent)] px-5 py-3 text-[14px] font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-35"
           >
-            Verify Account
+            {loading ? "Verifying..." : "Verify Account"}
           </button>
 
           <div className="mt-5 flex items-center justify-between gap-3">

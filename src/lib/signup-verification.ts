@@ -15,6 +15,10 @@ export function generateVerificationCode() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+export function storeVerificationCode(email: string, code: string) {
+  verificationStore.set(email.trim().toLowerCase(), code.trim());
+}
+
 export function createSignupVerification(email: string) {
   const normalizedEmail = email.trim().toLowerCase();
 
@@ -68,6 +72,10 @@ export function verifyCode(email: string, inputCode: string) {
     success: true,
     message: "Email verified successfully.",
   };
+}
+
+export function clearVerificationCode(email: string) {
+  verificationStore.delete(email.trim().toLowerCase());
 }
 
 export function getStoredVerification(email: string): VerificationRecord | null {
