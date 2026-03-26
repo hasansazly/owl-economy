@@ -51,13 +51,13 @@ export default function VerifyEmailPage() {
           </div>
 
           <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/42">
-            Check Your Student Email
+            Verify Your Campus Email
           </p>
           <h1 className="mt-2 font-display text-[1.9rem] font-bold tracking-[-0.04em] text-white">
-            Enter your 6-digit code
+            Check your .edu inbox
           </h1>
           <p className="mt-3 text-[13px] leading-6 text-white/48">
-            We sent a verification code to your student email. Enter it below to finish setup.
+            We sent a 6-digit code to your student email. Enter it below to join the Temple marketplace.
           </p>
 
           <label className="mt-6 block">
@@ -88,7 +88,7 @@ export default function VerifyEmailPage() {
             disabled={!isCodeReady}
             className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-[var(--accent)] px-5 py-3 text-[14px] font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-35"
           >
-            Verify
+            Verify Account
           </button>
 
           <div className="mt-5 flex items-center justify-between gap-3">
