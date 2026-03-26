@@ -13,6 +13,12 @@ type VerifyEmailClientProps = {
   email: string;
 };
 
+type OtpRow = {
+  code: string;
+  access_token: string | null;
+  refresh_token: string | null;
+};
+
 export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
   const router = useRouter();
   const [code, setCode] = useState("");
@@ -43,12 +49,14 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
       const supabase = getSupabaseBrowserClient();
 
       if (supabase) {
-        const { data: otpRecord, error: otpError } = await supabase
+        const { data, error: otpError } = await supabase
           .from("otps")
           .select("code, access_token, refresh_token")
           .eq("email", email)
           .eq("code", code.trim())
           .maybeSingle();
+
+        const otpRecord = data as OtpRow | null;
 
         if (otpError || !otpRecord?.access_token || !otpRecord?.refresh_token) {
           throw new Error("Invalid Code");
