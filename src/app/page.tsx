@@ -28,6 +28,7 @@ type QuickAction = {
 };
 
 const quickPills = [
+  { label: "Feed", href: "/dashboard" },
   { label: "Resell", href: "/sell-goods" },
   { label: "Rooms", href: "/rent-room" },
   { label: "Events", href: "/launch-event" },
@@ -42,6 +43,13 @@ const flashDrops = [
 ];
 
 const quickActions: QuickAction[] = [
+  {
+    title: "Campus Feed",
+    description: "Browse the live dashboard of campus listings.",
+    icon: Search,
+    badge: "Feed",
+    href: "/dashboard",
+  },
   {
     title: "Sell Goods",
     description: "Clothes, books, and dorm extras moving fast.",
