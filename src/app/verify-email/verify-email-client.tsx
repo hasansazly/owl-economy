@@ -19,6 +19,8 @@ type OtpRow = {
   refresh_token: string | null;
 };
 
+const INCORRECT_CODE_MESSAGE = "Incorrect code. Please check your Temple email again.";
+
 export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
   const router = useRouter();
   const [code, setCode] = useState("");
@@ -59,7 +61,7 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
         const otpRecord = data as OtpRow | null;
 
         if (otpError || !otpRecord?.access_token || !otpRecord?.refresh_token) {
-          throw new Error("Invalid Code");
+          throw new Error(INCORRECT_CODE_MESSAGE);
         }
 
         const { error: sessionError } = await supabase.auth.setSession({
@@ -68,7 +70,7 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
         });
 
         if (sessionError) {
-          throw new Error("Invalid Code");
+          throw new Error(INCORRECT_CODE_MESSAGE);
         }
 
         setVerified(true);
@@ -101,8 +103,8 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
     } catch (verifyError) {
       setVerified(false);
       const nextError =
-        verifyError instanceof Error && verifyError.message === "Invalid Code"
-          ? "Invalid Code"
+        verifyError instanceof Error && verifyError.message === INCORRECT_CODE_MESSAGE
+          ? INCORRECT_CODE_MESSAGE
           : verifyError instanceof Error
             ? verifyError.message
             : "Verification failed.";
