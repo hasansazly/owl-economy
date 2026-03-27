@@ -1,105 +1,194 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Brush, Hand, Scissors, Send, Sparkles, Star, Truck, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ArrowLeft, Brush, Hand, Scissors, Sparkles, Star, Truck, Wrench } from "lucide-react";
+import { useMemo, useState } from "react";
 
-type ServiceCategory = {
+type ServiceCategory = "Hair Cutting" | "Braids" | "Nails" | "Makeup" | "Moving Help" | "Tech Support";
+
+type ServiceListing = {
+  id: string;
+  category: ServiceCategory;
   title: string;
-  description: string;
-  icon: typeof Scissors;
   provider: string;
-  handle: string;
+  email: string;
+  location: string;
+  description: string;
   rating: string;
-  accent: string;
 };
 
-const services: ServiceCategory[] = [
+type ServiceForm = {
+  category: ServiceCategory;
+  title: string;
+  provider: string;
+  email: string;
+  location: string;
+  description: string;
+  rating: string;
+};
+
+const categoryMeta: Record<
+  ServiceCategory,
   {
-    title: "Hair Cutting",
-    description: "Sharp trims, shape-ups, and clean-up appointments in dorm-friendly setups.",
+    icon: typeof Scissors;
+    short: string;
+    template: Omit<ServiceForm, "provider" | "email">;
+  }
+> = {
+  "Hair Cutting": {
     icon: Scissors,
-    provider: "Aaliyah R.",
-    handle: "AR",
-    rating: "4.9",
-    accent: "from-[#46bfff] to-[#8ad7ff]",
+    short: "Dorm trims and shape-ups.",
+    template: {
+      category: "Hair Cutting",
+      title: "Dorm haircut appointments",
+      location: "Morgan Hall / nearby campus",
+      description: "Sharp cuts, shape-ups, and quick trims with flexible student hours.",
+      rating: "4.9",
+    },
   },
-  {
-    title: "Braids",
-    description: "Student braiders offering knotless, feed-ins, and quick protective styles.",
+  Braids: {
     icon: Sparkles,
-    provider: "Jada T.",
-    handle: "JT",
-    rating: "4.8",
-    accent: "from-[#ff8ec8] to-[#ffc3e3]",
+    short: "Protective styles and braid installs.",
+    template: {
+      category: "Braids",
+      title: "Student braid appointments",
+      location: "Temple area",
+      description: "Feed-ins, knotless, and quick braid installs with easy campus scheduling.",
+      rating: "4.8",
+    },
   },
-  {
-    title: "Nails",
-    description: "Press-ons, gel sets, and campus-ready nail appointments with easy booking.",
+  Nails: {
     icon: Hand,
-    provider: "Mia C.",
-    handle: "MC",
-    rating: "5.0",
-    accent: "from-[#d7def0] to-[#ffffff]",
+    short: "Nail sets and quick campus bookings.",
+    template: {
+      category: "Nails",
+      title: "Campus nail sets",
+      location: "Near main campus",
+      description: "Press-ons, gel looks, and clean nail appointments with simple scheduling.",
+      rating: "5.0",
+    },
   },
-  {
-    title: "Makeup",
-    description: "Soft glam, event looks, and photoshoot-ready touchups from student artists.",
+  Makeup: {
     icon: Brush,
-    provider: "Sami K.",
-    handle: "SK",
-    rating: "4.9",
-    accent: "from-[#ffb07c] to-[#ffd1ad]",
+    short: "Soft glam and event-ready looks.",
+    template: {
+      category: "Makeup",
+      title: "Student makeup bookings",
+      location: "Temple student center area",
+      description: "Soft glam, photoshoot looks, and event makeup from student artists.",
+      rating: "4.9",
+    },
   },
-  {
-    title: "Moving Help",
-    description: "Book extra hands for mini-fridges, bins, boxes, and move-out day hustle.",
+  "Moving Help": {
     icon: Truck,
-    provider: "Devon P.",
-    handle: "DP",
-    rating: "4.7",
-    accent: "from-[#9fb3d9] to-[#d9e2f3]",
+    short: "Extra hands for move-in and move-out.",
+    template: {
+      category: "Moving Help",
+      title: "Dorm moving help",
+      location: "Temple campus",
+      description: "Help with bins, boxes, mini-fridges, and move-day carrying around campus.",
+      rating: "4.7",
+    },
   },
-];
-
-const quickRequests: Record<string, string> = {
-  "Hair Cutting": "Hey! I’d like to request a haircut this week. What times are you free?",
-  Braids: "Hi! I’m looking to book a braids appointment. Can I request your next openings?",
-  Nails: "Hey! I want to book a nail set soon. What schedule options do you have?",
-  Makeup: "Hi! I’m trying to schedule a makeup session. Do you have availability this week?",
-  "Moving Help": "Hey! I need help moving dorm items. What time slots can I request?",
+  "Tech Support": {
+    icon: Wrench,
+    short: "Laptop, setup, and quick fix help.",
+    template: {
+      category: "Tech Support",
+      title: "Student tech support",
+      location: "Charles Library / campus",
+      description: "Wi-Fi setup, printer help, laptop basics, and quick student tech fixes.",
+      rating: "4.8",
+    },
+  },
 };
+
+const categories = Object.keys(categoryMeta) as ServiceCategory[];
+
+const initialForm: ServiceForm = {
+  category: "Hair Cutting",
+  title: "",
+  provider: "",
+  email: "",
+  location: "",
+  description: "",
+  rating: "4.8",
+};
+
+function buildContactHref(title: string, email: string) {
+  const subject = encodeURIComponent(`Schedule for ${title} on MyDormStash`);
+  const body = encodeURIComponent(
+    "Hi, I saw your service on MyDormStash. Are you available to schedule a time on campus?",
+  );
+  return `mailto:${email}?subject=${subject}&body=${body}`;
+}
 
 export default function CampusServicesPage() {
-  const [selectedService, setSelectedService] = useState<ServiceCategory | null>(null);
-  const [message, setMessage] = useState("");
+  const [activeCategory, setActiveCategory] = useState<ServiceCategory>("Hair Cutting");
+  const [services, setServices] = useState<ServiceListing[]>([]);
+  const [form, setForm] = useState<ServiceForm>(initialForm);
+  const [formError, setFormError] = useState("");
+  const [postedMessage, setPostedMessage] = useState("");
 
-  useEffect(() => {
-    document.body.style.overflow = selectedService ? "hidden" : "";
+  const filteredServices = useMemo(
+    () => services.filter((service) => service.category === activeCategory),
+    [activeCategory, services],
+  );
 
-    return () => {
-      document.body.style.overflow = "";
+  const updateField = <K extends keyof ServiceForm>(field: K, value: ServiceForm[K]) => {
+    setForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const applyTemplate = (category: ServiceCategory) => {
+    const template = categoryMeta[category].template;
+    setForm((current) => ({
+      ...current,
+      category,
+      title: template.title,
+      location: template.location,
+      description: template.description,
+      rating: template.rating,
+    }));
+    setActiveCategory(category);
+    setFormError("");
+    setPostedMessage("");
+  };
+
+  const submitService = () => {
+    setFormError("");
+    setPostedMessage("");
+
+    if (
+      !form.provider.trim() ||
+      !form.email.trim() ||
+      !form.title.trim() ||
+      !form.location.trim() ||
+      !form.description.trim()
+    ) {
+      setFormError("Fill out the service post first.");
+      return;
+    }
+
+    const newListing: ServiceListing = {
+      id: `service-${Date.now()}`,
+      category: form.category,
+      title: form.title.trim(),
+      provider: form.provider.trim(),
+      email: form.email.trim().toLowerCase(),
+      location: form.location.trim(),
+      description: form.description.trim(),
+      rating: form.rating,
     };
-  }, [selectedService]);
 
-  const openChat = (service: ServiceCategory) => {
-    setSelectedService(service);
-    setMessage(`Hi ${service.provider.split(" ")[0]}! I'm interested in ${service.title.toLowerCase()}.`);
-  };
-
-  const closeChat = () => {
-    setSelectedService(null);
-    setMessage("");
-  };
-
-  const requestSchedule = () => {
-    if (!selectedService) return;
-    setMessage(quickRequests[selectedService.title]);
+    setServices((current) => [newListing, ...current]);
+    setActiveCategory(form.category);
+    setPostedMessage("Service live.");
+    setForm(initialForm);
   };
 
   return (
     <main className="page-shell">
-      <section className="page-wrap max-w-5xl">
+      <section className="page-wrap max-w-6xl">
         <header className="page-header">
           <Link
             href="/"
@@ -109,163 +198,258 @@ export default function CampusServicesPage() {
             Back
           </Link>
 
-          <Link href="/" className="font-display text-[1.35rem] font-extrabold tracking-[-0.03em]">
+          <Link href="/" className="page-brand">
             <span className="text-[var(--brand-blue)]">my</span>dormstash<span className="text-white/88">.com</span>
           </Link>
 
-          <div className="page-chip hidden sm:inline-flex">
-            Student pros live
-          </div>
+          <div className="page-chip hidden sm:inline-flex">Service board</div>
         </header>
 
         <section className="page-hero">
           <p className="section-kicker">Campus Services</p>
-          <h1 className="page-title">
-            Campus Services
-          </h1>
-          <p className="page-copy">
-            Message student-led providers for grooming, glam, and move-day help.
-          </p>
+          <h1 className="page-title">Campus Services</h1>
+          <p className="page-copy">Post a student service fast, then let people contact you to schedule.</p>
         </section>
 
-        <section className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {services.map(({ title, description, icon: Icon, provider, handle, rating, accent }) => (
-            <article
-              key={title}
-              className="page-card flex min-h-[220px] flex-col justify-between px-3.5 py-3.5 transition hover:scale-[0.99] hover:bg-white/[0.07]"
-            >
-              <div>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="inline-flex rounded-[12px] border border-white/10 bg-white/5 p-2.5 text-[var(--accent)]">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <div className="inline-flex items-center gap-1 rounded-full bg-white/6 px-2.5 py-1 text-[11px] font-semibold text-white/72">
-                    <Star className="h-3.5 w-3.5 fill-current text-[var(--accent)]" />
-                    {rating}
-                  </div>
-                </div>
+        <section className="mt-4">
+          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {categories.map((category) => {
+              const Icon = categoryMeta[category].icon;
+              const active = activeCategory === category;
 
-                <h2 className="mt-5 font-display text-[15px] font-bold tracking-[-0.02em] text-[var(--foreground)]">
-                  {title}
-                </h2>
-                <p className="mt-1.5 text-[11px] leading-5 text-white/40">{description}</p>
-
-                <div className="mt-4 flex items-center gap-3 rounded-[14px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-3 py-2.5">
-                  <div
-                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${accent} text-[13px] font-bold text-[#0B0E14]`}
-                  >
-                    {handle}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate text-[13px] font-semibold text-white">{provider}</p>
-                    <p className="mt-1 text-[11px] text-white/40">Temple student provider</p>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => openChat({ title, description, icon: Icon, provider, handle, rating, accent })}
-                className="mt-4 inline-flex w-full items-center justify-center rounded-[12px] bg-[var(--accent)] px-4 py-2.5 text-[12px] font-bold text-white transition hover:opacity-90"
-              >
-                Message to Schedule
-              </button>
-            </article>
-          ))}
-        </section>
-      </section>
-
-      {selectedService ? (
-        <div className="fixed inset-0 z-40 bg-[rgba(0,0,0,0.58)]">
-          <button type="button" aria-label="Close chat" className="absolute inset-0" onClick={closeChat} />
-          <aside
-            className="page-card absolute right-0 top-0 flex h-full w-full max-w-md flex-col rounded-none border-l border-white/10 bg-[rgba(7,10,15,0.96)] shadow-[0_24px_80px_rgba(0,0,0,0.42)]"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="campus-services-chat-title"
-          >
-            <div className="flex items-start justify-between border-b border-white/8 px-5 py-5">
-              <div>
-                <p className="section-kicker !px-0 !text-white/32">Schedule Chat</p>
-                <h2
-                  id="campus-services-chat-title"
-                  className="mt-2 font-display text-[1.3rem] font-bold tracking-[-0.03em] text-white"
-                >
-                  {selectedService.title}
-                </h2>
-                <p className="mt-2 text-[13px] text-white/42">Chat with {selectedService.provider}</p>
-              </div>
-              <button
-                type="button"
-                onClick={closeChat}
-                className="rounded-full border border-white/10 p-2 text-white/55 transition hover:bg-white/5"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="flex-1 px-5 py-5">
-              <div className="rounded-[18px] border border-white/10 bg-white/5 p-4">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br ${selectedService.accent} text-[12px] font-bold text-[#0B0E14]`}
-                  >
-                    {selectedService.handle}
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-semibold text-white">{selectedService.provider}</p>
-                    <p className="mt-1 text-[11px] text-white/40">Usually replies in under an hour</p>
-                  </div>
-                </div>
-
-                <p className="mt-4 rounded-[14px] border border-white/8 bg-[rgba(255,255,255,0.03)] px-3 py-3 text-[13px] leading-6 text-white/62">
-                  Let them know what service you need, your preferred day, and any timing details.
-                </p>
-
+              return (
                 <button
+                  key={category}
                   type="button"
-                  onClick={requestSchedule}
-                  className="mt-4 inline-flex rounded-full border border-[rgba(70,191,255,0.3)] bg-[rgba(70,191,255,0.08)] px-4 py-2 text-[12px] font-semibold text-[var(--accent)] transition hover:bg-[rgba(70,191,255,0.14)]"
+                  onClick={() => setActiveCategory(category)}
+                  className={`shrink-0 rounded-full border px-3.5 py-2 text-[12px] font-semibold transition ${
+                    active
+                      ? "border-cyan-400/30 bg-cyan-400/10 text-cyan-300"
+                      : "border-white/10 bg-white/5 text-white/70 hover:border-white/25 hover:text-white"
+                  }`}
                 >
-                  Request Schedule
+                  <span className="inline-flex items-center gap-2">
+                    <Icon className="h-3.5 w-3.5" />
+                    {category}
+                  </span>
                 </button>
-              </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <div className="mt-5 grid gap-4 lg:grid-cols-[0.96fr_1.04fr]">
+          <section className="page-card px-4 py-4">
+            <div className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
+              <Sparkles className="h-4 w-4" />
+              Post a Service
             </div>
 
-            <div className="border-t border-white/8 px-5 py-4">
+            <div className="mt-5 space-y-5">
+              <div>
+                <span className="text-[13px] font-semibold text-white">Quick Templates</span>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {categories.map((category) => (
+                    <button
+                      key={category}
+                      type="button"
+                      onClick={() => applyTemplate(category)}
+                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[12px] font-semibold text-white/72 transition hover:border-white/25 hover:bg-white/[0.08]"
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <label className="block">
-                <span className="mb-2 block text-xs font-medium uppercase tracking-[0.04em] text-white/45">
-                  Message
-                </span>
-                <textarea
-                  rows={4}
-                  value={message}
-                  onChange={(event) => setMessage(event.target.value)}
-                  placeholder="Type your availability, service request, and any notes..."
-                  className="w-full rounded-[14px] border border-white/10 bg-white/5 px-4 py-3 text-sm leading-6 text-white outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                <span className="text-[13px] font-semibold text-white">Service Category</span>
+                <select
+                  value={form.category}
+                  onChange={(event) => updateField("category", event.target.value as ServiceCategory)}
+                  className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] text-white outline-none focus:border-[rgba(70,191,255,0.35)]"
+                >
+                  {categories.map((category) => (
+                    <option key={category} value={category} className="bg-[#0b0e14] text-white">
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block">
+                <span className="text-[13px] font-semibold text-white">Title</span>
+                <input
+                  type="text"
+                  value={form.title}
+                  onChange={(event) => updateField("title", event.target.value)}
+                  placeholder="Dorm haircut appointments"
+                  className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                 />
               </label>
 
-              <div className="mt-4 flex items-center gap-3">
-                <button
-                  type="button"
-                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-[12px] bg-[var(--accent)] px-4 py-3 text-[12px] font-bold text-white transition hover:opacity-90"
-                >
-                  <Send className="h-4 w-4" />
-                  Send Message
-                </button>
-                <button
-                  type="button"
-                  onClick={closeChat}
-                  className="rounded-[12px] border border-white/10 bg-white/5 px-4 py-3 text-[12px] font-semibold text-white/70 transition hover:bg-white/8"
-                >
-                  Close
-                </button>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="block">
+                  <span className="text-[13px] font-semibold text-white">Your Name</span>
+                  <input
+                    type="text"
+                    value={form.provider}
+                    onChange={(event) => updateField("provider", event.target.value)}
+                    placeholder="Aaliyah R."
+                    className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="text-[13px] font-semibold text-white">Contact Email</span>
+                  <input
+                    type="email"
+                    value={form.email}
+                    onChange={(event) => updateField("email", event.target.value)}
+                    placeholder="you@temple.edu"
+                    className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                  />
+                </label>
+              </div>
+
+              <label className="block">
+                <span className="text-[13px] font-semibold text-white">Location</span>
+                <input
+                  type="text"
+                  value={form.location}
+                  onChange={(event) => updateField("location", event.target.value)}
+                  placeholder="Student Center / Morgan Hall"
+                  className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-[13px] font-semibold text-white">Description</span>
+                <textarea
+                  rows={4}
+                  value={form.description}
+                  onChange={(event) => updateField("description", event.target.value)}
+                  placeholder="Say what you offer, when you’re free, and what students should know."
+                  className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] leading-5 outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                />
+              </label>
+
+              <div>
+                <span className="text-[13px] font-semibold text-white">Rating</span>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {["4.5", "4.7", "4.8", "4.9", "5.0"].map((value) => {
+                    const active = form.rating === value;
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => updateField("rating", value)}
+                        className={`rounded-full border px-3 py-1.5 text-[12px] font-semibold transition ${
+                          active
+                            ? "border-cyan-400/30 bg-cyan-400/10 text-cyan-300"
+                            : "border-white/10 bg-white/5 text-white/64 hover:border-white/25 hover:text-white"
+                        }`}
+                      >
+                        <span className="inline-flex items-center gap-1.5">
+                          <Star className={`h-3.5 w-3.5 ${active ? "fill-current" : ""}`} />
+                          {value}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {formError ? (
+                <div className="rounded-[14px] border border-[rgba(240,80,80,0.22)] bg-[rgba(240,80,80,0.08)] px-3 py-3 text-[12px] text-[#F09595]">
+                  {formError}
+                </div>
+              ) : null}
+
+              {postedMessage ? (
+                <div className="rounded-[14px] border border-cyan-400/20 bg-cyan-400/8 px-3 py-3 text-[12px] font-semibold text-cyan-300">
+                  {postedMessage}
+                </div>
+              ) : null}
+
+              <button
+                type="button"
+                onClick={submitService}
+                className="capsule-primary inline-flex w-full items-center justify-center px-5 py-3 text-[13px] font-semibold"
+              >
+                Post Service
+              </button>
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <div className="page-card px-4 py-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="section-kicker !mt-0 !px-0">Live Services</p>
+                  <p className="mt-2 text-[13px] text-white/48">{categoryMeta[activeCategory].short}</p>
+                </div>
+                <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold text-white/70">
+                  {activeCategory}
+                </div>
               </div>
             </div>
-          </aside>
+
+            {filteredServices.length === 0 ? (
+              <div className="page-card px-4 py-8 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04]">
+                  <Sparkles className="h-5 w-5 text-[var(--accent)]" />
+                </div>
+                <h2 className="mt-4 text-[18px] font-semibold text-white">No services posted yet</h2>
+                <p className="mx-auto mt-2 max-w-md text-[13px] leading-6 text-white/46">
+                  This category is empty right now. Use the form to post the first service listing.
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-3">
+                {filteredServices.map((service) => {
+                  const Icon = categoryMeta[service.category].icon;
+
+                  return (
+                    <article key={service.id} className="page-card flex flex-col gap-4 px-4 py-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-[var(--accent)]">
+                            <Icon className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <h3 className="text-[15px] font-semibold text-white">{service.title}</h3>
+                            <p className="mt-1 text-[12px] text-white/42">{service.provider}</p>
+                          </div>
+                        </div>
+
+                        <div className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-white/72">
+                          <Star className="h-3.5 w-3.5 fill-current text-[var(--accent)]" />
+                          {service.rating}
+                        </div>
+                      </div>
+
+                      <p className="text-[13px] leading-6 text-white/54">{service.description}</p>
+
+                      <div className="flex flex-wrap items-center gap-2 text-[11px] text-white/45">
+                        <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">{service.category}</span>
+                        <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">{service.location}</span>
+                      </div>
+
+                      <a
+                        href={buildContactHref(service.title, service.email)}
+                        className="inline-flex w-full items-center justify-center rounded-[12px] border border-cyan-400/20 bg-cyan-400/10 px-4 py-2.5 text-[12px] font-semibold text-cyan-300 transition hover:bg-cyan-400/14"
+                      >
+                        Contact to Schedule
+                      </a>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </section>
         </div>
-      ) : null}
+      </section>
     </main>
   );
 }
