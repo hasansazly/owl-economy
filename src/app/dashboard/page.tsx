@@ -2,10 +2,19 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Home, Mail, Plus, Search, Settings, X } from "lucide-react";
+import { ArrowLeft, Bell, Bookmark, Home, Mail, Plus, Search, Settings, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { getStudentProfile, isVerifiedStudentLoggedIn } from "@/lib/app-auth";
+import {
+  buildCampusNotifications,
+  getCampusNotifications,
+  incrementListingView,
+  isSavedListing,
+  markCampusNotificationsRead,
+  toggleSavedListing,
+  type CampusNotification,
+} from "@/lib/campus-notifications";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const feedFilters = ["All", "Events", "Marketplace", "Lost & Found", "Services"] as const;
@@ -138,6 +147,12 @@ export default function DashboardPage() {
   const [selectedItem, setSelectedItem] = useState<ListingRow | null>(null);
   const [form, setForm] = useState<ListingForm>(initialForm);
   const profile = useMemo(() => getStudentProfile(), []);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<CampusNotification[]>([]);
+  const [savedItemIds, setSavedItemIds] = useState<Record<string, boolean>>({});
+  const profileEmail = profile.email;
+  const profileEventAlerts = profile.eventAlerts;
+  const profileLostFoundAlerts = profile.lostFoundAlerts;
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
@@ -165,7 +180,19 @@ export default function DashboardPage() {
         setError("Could not load campus listings right now.");
         setListings([]);
       } else {
-        setListings(sortListingsNewest((listingsResponse.data as ListingRow[]) || []));
+        const nextListings = sortListingsNewest((listingsResponse.data as ListingRow[]) || []);
+        setListings(nextListings);
+        setNotifications(
+          buildCampusNotifications({
+            listings: nextListings,
+            currentEmail: profileEmail,
+            eventAlerts: profileEventAlerts,
+            lostFoundAlerts: profileLostFoundAlerts,
+          }),
+        );
+        setSavedItemIds(
+          Object.fromEntries(nextListings.map((item) => [String(item.id), isSavedListing(item.id)])),
+        );
       }
 
       setLoading(false);
@@ -182,6 +209,10 @@ export default function DashboardPage() {
       mounted = false;
       authListener.subscription.unsubscribe();
     };
+  }, [profileEmail, profileEventAlerts, profileLostFoundAlerts]);
+
+  useEffect(() => {
+    setNotifications(getCampusNotifications());
   }, []);
 
   useEffect(() => {
@@ -222,6 +253,21 @@ export default function DashboardPage() {
       items: sortListingsNewest(items),
     }));
   }, [visibleListings]);
+
+  const unreadCount = useMemo(
+    () => notifications.filter((item) => !item.read).length,
+    [notifications],
+  );
+
+  const openListingDetail = (item: ListingRow) => {
+    incrementListingView(item, profile.email);
+    setSelectedItem(item);
+  };
+
+  const handleToggleSavedItem = (item: ListingRow) => {
+    const saved = toggleSavedListing(item);
+    setSavedItemIds((current) => ({ ...current, [String(item.id)]: saved }));
+  };
 
   const handlePostItem = async () => {
     const supabase = getSupabaseBrowserClient();
@@ -299,6 +345,25 @@ export default function DashboardPage() {
           </div>
 
           <div className="mt-4 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                const nextOpen = !notificationsOpen;
+                setNotificationsOpen(nextOpen);
+                if (nextOpen) {
+                  setNotifications(markCampusNotificationsRead());
+                }
+              }}
+              className="relative inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[12px] font-semibold text-white/74 transition hover:border-white/20 hover:bg-white/[0.08]"
+            >
+              <Bell className="h-3.5 w-3.5" />
+              Alerts
+              {unreadCount > 0 ? (
+                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-cyan-400 px-1.5 text-[10px] font-bold text-black">
+                  {unreadCount}
+                </span>
+              ) : null}
+            </button>
             <Link
               href="/"
               className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[12px] font-semibold text-white/74 transition hover:border-white/20 hover:bg-white/[0.08]"
@@ -325,6 +390,33 @@ export default function DashboardPage() {
               className="w-full bg-transparent text-[14px] outline-none placeholder:text-white/28"
             />
           </label>
+
+          {notificationsOpen ? (
+            <div className="mt-4 rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-3 shadow-[0_16px_36px_rgba(0,0,0,0.2)] backdrop-blur-xl">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/46">Campus Alerts</p>
+                <button
+                  type="button"
+                  onClick={() => setNotificationsOpen(false)}
+                  className="text-[11px] text-white/38 transition hover:text-white/70"
+                >
+                  Close
+                </button>
+              </div>
+              {notifications.length === 0 ? (
+                <p className="text-[12px] leading-5 text-white/42">No alerts yet. As your feed gets more active, notifications will show up here.</p>
+              ) : (
+                <div className="space-y-2">
+                  {notifications.slice(0, 6).map((item) => (
+                    <div key={item.id} className="rounded-[14px] border border-white/10 bg-white/[0.03] px-3 py-3">
+                      <p className="text-[12px] font-semibold text-white">{item.title}</p>
+                      <p className="mt-1 text-[12px] leading-5 text-white/46">{item.body}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : null}
         </header>
 
         <section className="pt-5">
@@ -396,7 +488,7 @@ export default function DashboardPage() {
                         key={String(item.id)}
                         className="min-w-[268px] max-w-[268px] rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-3.5 shadow-[0_16px_36px_rgba(0,0,0,0.2)] backdrop-blur-xl"
                       >
-                        <button type="button" onClick={() => setSelectedItem(item)} className="block w-full text-left">
+                        <button type="button" onClick={() => openListingDetail(item)} className="block w-full text-left">
                           <div className="relative">
                             <div className="flex h-32 items-center justify-center rounded-[14px] bg-[linear-gradient(135deg,_rgba(35,42,54,0.88),_rgba(18,214,255,0.08))] px-4 text-center text-[13px] font-semibold text-white/70">
                               {category}
@@ -436,7 +528,7 @@ export default function DashboardPage() {
                         ) : (
                           <button
                             type="button"
-                            onClick={() => setSelectedItem(item)}
+                            onClick={() => openListingDetail(item)}
                             className="mt-3 inline-flex w-full items-center justify-center rounded-[12px] border border-white/10 bg-white/5 px-3 py-2 text-[12px] font-semibold text-white/74 transition hover:border-white/20 hover:bg-white/[0.08]"
                           >
                             View
@@ -599,10 +691,23 @@ export default function DashboardPage() {
               <p>Contact: {selectedItem.contact_email || selectedItem.email || "Contact in original section"}</p>
             </div>
 
+            <button
+              type="button"
+              onClick={() => handleToggleSavedItem(selectedItem)}
+              className={`mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full border px-5 py-3 text-[13px] font-semibold transition ${
+                savedItemIds[String(selectedItem.id)]
+                  ? "border-cyan-400/30 bg-cyan-400/10 text-cyan-300"
+                  : "border-white/10 bg-white/5 text-white/74 hover:border-white/20 hover:bg-white/[0.08]"
+              }`}
+            >
+              <Bookmark className="h-4 w-4" />
+              {savedItemIds[String(selectedItem.id)] ? "Saved for price drops" : "Save item"}
+            </button>
+
             {getContactHref(selectedItem) ? (
               <a
                 href={getContactHref(selectedItem)}
-                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-cyan-400 px-5 py-3 text-[14px] font-semibold text-black transition hover:opacity-95"
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-cyan-400 px-5 py-3 text-[14px] font-semibold text-black transition hover:opacity-95"
               >
                 <Mail className="h-4 w-4" />
                 Contact
