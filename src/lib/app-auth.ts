@@ -7,6 +7,9 @@ export type StudentProfile = {
   phone: string;
   major: string;
   classYear: string;
+  homeBuilding: string;
+  followedBuildings: string[];
+  followedMajors: string[];
   privacyMode: boolean;
   eventAlerts: boolean;
   lostFoundAlerts: boolean;
@@ -18,6 +21,9 @@ const defaultProfile: StudentProfile = {
   phone: "",
   major: "",
   classYear: "2028",
+  homeBuilding: "",
+  followedBuildings: [],
+  followedMajors: [],
   privacyMode: true,
   eventAlerts: true,
   lostFoundAlerts: true,

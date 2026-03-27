@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Bell, LogOut, ScrollText, ShieldCheck, User } from "lucide-react";
+import { ArrowLeft, Bell, Building2, LogOut, ScrollText, ShieldCheck, User } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import {
@@ -13,6 +13,7 @@ import {
   saveStudentProfile,
   type StudentProfile,
 } from "@/lib/app-auth";
+import { normalizeTagList } from "@/lib/campus-identity";
 import { isVerifiedTempleEmail } from "@/lib/security";
 
 const classYears = ["2028", "2027", "2026", "2025", "Graduate"] as const;
@@ -25,6 +26,9 @@ export default function AccountPage() {
     phone: "",
     major: "",
     classYear: "2028",
+    homeBuilding: "",
+    followedBuildings: [],
+    followedMajors: [],
     privacyMode: true,
     eventAlerts: true,
     lostFoundAlerts: true,
@@ -161,6 +165,45 @@ export default function AccountPage() {
           </section>
 
           <section className="space-y-4">
+            <article className="page-card p-5">
+              <div className="flex items-center gap-3">
+                <Building2 className="h-5 w-5 text-cyan-400" />
+                <h2 className="text-[16px] font-semibold text-white">Feed Preferences</h2>
+              </div>
+
+              <div className="mt-5 space-y-4">
+                <label className="block">
+                  <span className="mb-2 block text-[12px] text-white/48">Home Building</span>
+                  <input
+                    value={profile.homeBuilding}
+                    onChange={(event) => updateField("homeBuilding", event.target.value)}
+                    className="w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none"
+                    placeholder="Morgan Hall"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-[12px] text-white/48">Follow Buildings</span>
+                  <input
+                    value={profile.followedBuildings.join(", ")}
+                    onChange={(event) => updateField("followedBuildings", normalizeTagList(event.target.value))}
+                    className="w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none"
+                    placeholder="Morgan Hall, 1300, Johnson"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-[12px] text-white/48">Follow Majors</span>
+                  <input
+                    value={profile.followedMajors.join(", ")}
+                    onChange={(event) => updateField("followedMajors", normalizeTagList(event.target.value))}
+                    className="w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none"
+                    placeholder="Computer Science, Biology"
+                  />
+                </label>
+              </div>
+            </article>
+
             <article className="page-card p-5">
               <div className="flex items-center gap-3">
                 <ShieldCheck className="h-5 w-5 text-cyan-400" />

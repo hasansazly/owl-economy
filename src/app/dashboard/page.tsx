@@ -7,6 +7,12 @@ import { useEffect, useMemo, useState } from "react";
 
 import { getStudentProfile, isVerifiedStudentLoggedIn } from "@/lib/app-auth";
 import {
+  computeCampusKarma,
+  countMutualClassmates,
+  getCampusKarmaLabel,
+  getPreferencePriority,
+} from "@/lib/campus-identity";
+import {
   buildCampusNotifications,
   getCampusNotifications,
   incrementListingView,
@@ -235,8 +241,25 @@ export default function DashboardPage() {
       return matchesFilter && matchesQuery;
     });
 
-    return sortListingsNewest(next);
-  }, [activeFilter, listings, query]);
+    return [...sortListingsNewest(next)].sort((a, b) => {
+      const priorityA = getPreferencePriority(a, {
+        homeBuilding: profile.homeBuilding,
+        followedBuildings: profile.followedBuildings,
+        followedMajors: profile.followedMajors,
+      });
+      const priorityB = getPreferencePriority(b, {
+        homeBuilding: profile.homeBuilding,
+        followedBuildings: profile.followedBuildings,
+        followedMajors: profile.followedMajors,
+      });
+
+      if (priorityA !== priorityB) return priorityB - priorityA;
+
+      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return dateB - dateA;
+    });
+  }, [activeFilter, listings, profile.followedBuildings, profile.followedMajors, profile.homeBuilding, query]);
 
   const groupedListings = useMemo(() => {
     const groups = new Map<string, ListingRow[]>();
@@ -258,6 +281,22 @@ export default function DashboardPage() {
     () => notifications.filter((item) => !item.read).length,
     [notifications],
   );
+
+  const mutualConnections = useMemo(
+    () =>
+      countMutualClassmates(listings, {
+        currentEmail: profile.email,
+        classYear: profile.classYear,
+        major: profile.major,
+      }),
+    [listings, profile.classYear, profile.email, profile.major],
+  );
+
+  const getItemKarma = (item: ListingRow) => {
+    const email = item.contact_email || item.email || "";
+    const score = computeCampusKarma(listings, email);
+    return { score, label: getCampusKarmaLabel(score) };
+  };
 
   const openListingDetail = (item: ListingRow) => {
     incrementListingView(item, profile.email);
@@ -420,6 +459,36 @@ export default function DashboardPage() {
         </header>
 
         <section className="pt-5">
+          <div className="mb-4 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/44">Following First</p>
+              <p className="mt-2 text-[13px] text-white/74">
+                {profile.homeBuilding
+                  ? `${profile.homeBuilding} listings show up first.`
+                  : "Set your home building to rank nearby listings first."}
+              </p>
+              {(profile.followedBuildings.length || profile.followedMajors.length) ? (
+                <p className="mt-1 text-[12px] text-white/46">
+                  {[
+                    profile.followedBuildings.length ? `${profile.followedBuildings.length} building follow${profile.followedBuildings.length === 1 ? "" : "s"}` : "",
+                    profile.followedMajors.length ? `${profile.followedMajors.length} major follow${profile.followedMajors.length === 1 ? "" : "s"}` : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/44">Campus Connections</p>
+              <p className="mt-2 text-[13px] text-white/74">
+                {mutualConnections > 0
+                  ? `${mutualConnections} of your classmates also use MyDormStash.`
+                  : "As classmates post, your mutual connections will appear here."}
+              </p>
+            </div>
+          </div>
+
           <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {feedFilters.map((filter) => (
               <button
@@ -482,6 +551,7 @@ export default function DashboardPage() {
                 <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {items.map((item) => {
                     const contactHref = getContactHref(item);
+                    const karma = getItemKarma(item);
 
                     return (
                       <article
@@ -504,6 +574,9 @@ export default function DashboardPage() {
                             {item.major ? ` · ${item.major}` : ""}
                             {item.class_year ? ` · ${item.class_year}` : ""}
                           </p>
+                          <div className="mt-2 inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-300">
+                            Campus Karma {karma.score} · {karma.label}
+                          </div>
                           <p className="mt-2 line-clamp-2 text-[12px] leading-5 text-white/42">
                             {item.description || "Campus listing"}
                           </p>
@@ -685,6 +758,9 @@ export default function DashboardPage() {
                 Posted by: {selectedItem.poster_name || "Temple Student"}
                 {selectedItem.major ? ` · ${selectedItem.major}` : ""}
                 {selectedItem.class_year ? ` · ${selectedItem.class_year}` : ""}
+              </p>
+              <p>
+                Campus Karma: {getItemKarma(selectedItem).score} · {getItemKarma(selectedItem).label}
               </p>
               <p>Location: {selectedItem.location || "Temple Main Campus"}</p>
               <p>Price: {selectedItem.price !== null && selectedItem.price !== undefined ? `$${selectedItem.price}` : "Not listed"}</p>

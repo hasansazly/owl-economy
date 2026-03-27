@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import { computeCampusKarma, getCampusKarmaLabel } from "@/lib/campus-identity";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 type QuickAction = {
@@ -112,6 +113,8 @@ type RecentListing = {
   poster_name?: string | null;
   major?: string | null;
   class_year?: string | null;
+  contact_email?: string | null;
+  email?: string | null;
   location?: string | null;
   created_at?: string | null;
 };
@@ -210,13 +213,13 @@ export default function Home() {
     const loadRecentListings = async () => {
       const { data, error } = await supabase
         .from("listings")
-        .select("id, title, price, category, description, poster_name, major, class_year, location, created_at")
+        .select("id, title, price, category, description, poster_name, major, class_year, contact_email, email, location, created_at")
         .order("created_at", { ascending: false })
         .limit(4);
 
       const { data: campusLiveData, error: campusLiveFetchError } = await supabase
         .from("listings")
-        .select("id, title, price, category, description, poster_name, major, class_year, location, created_at")
+        .select("id, title, price, category, description, poster_name, major, class_year, contact_email, email, location, created_at")
         .in("category", [...campusLiveOrder])
         .order("created_at", { ascending: false });
 
@@ -319,6 +322,15 @@ export default function Home() {
     () => recentListings.find((listing) => listing.title === activePreview) ?? recentListings[0] ?? null,
     [activePreview, recentListings],
   );
+  const allVisibleIdentityListings = useMemo(
+    () => [...recentListings, ...campusLiveItems],
+    [campusLiveItems, recentListings],
+  );
+
+  const getKarma = (item: RecentListing | CampusLiveItem) => {
+    const score = computeCampusKarma(allVisibleIdentityListings, item.contact_email || item.email || "");
+    return { score, label: getCampusKarmaLabel(score) };
+  };
 
   return (
     <main id="top" className="relative overflow-hidden bg-[#000000] pb-28 text-white">
@@ -432,6 +444,9 @@ export default function Home() {
                       {item.poster_name || "Temple Student"}
                       {item.major ? ` · ${item.major}` : ""}
                       {item.class_year ? ` · ${item.class_year}` : ""}
+                    </p>
+                    <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-cyan-300/90">
+                      Campus Karma {getKarma(item).score} · {getKarma(item).label}
                     </p>
                     <div className="mt-1 flex items-center gap-1.5 text-[12px] text-white/42">
                       <MapPin className="h-3.5 w-3.5 shrink-0 text-white/34" />
@@ -568,6 +583,11 @@ export default function Home() {
                     {previewItem?.major ? ` · ${previewItem.major}` : ""}
                     {previewItem?.class_year ? ` · ${previewItem.class_year}` : ""}
                   </p>
+                  {previewItem ? (
+                    <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-cyan-300/90">
+                      Campus Karma {getKarma(previewItem).score} · {getKarma(previewItem).label}
+                    </p>
+                  ) : null}
                   <p className="mt-1 text-[12px] text-white/42">{previewItem?.location || "Temple Main Campus"}</p>
                   <p className="mt-3 text-[12px] leading-6 text-white/52">
                     {previewItem?.description || "Open the feed to view the full post details."}
