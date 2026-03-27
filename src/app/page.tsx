@@ -20,6 +20,13 @@ import {
 import { useEffect, useMemo, useState } from "react";
 
 import { computeCampusKarma, getCampusKarmaLabel } from "@/lib/campus-identity";
+import {
+  getExpiryCountdown,
+  getMoveOutCountdown,
+  getRecentViewerCount,
+  getRelativePostLabel,
+  parseUrgencyMeta,
+} from "@/lib/listing-urgency";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 type QuickAction = {
@@ -196,6 +203,7 @@ export default function Home() {
   const [campusLiveLoading, setCampusLiveLoading] = useState(true);
   const [campusLiveError, setCampusLiveError] = useState("");
   const [activePreview, setActivePreview] = useState<string | null>(null);
+  const moveOutCountdown = useMemo(() => getMoveOutCountdown(), []);
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
@@ -417,6 +425,11 @@ export default function Home() {
             </p>
             <span className="campus-live-badge">{campusLiveItems.length} active</span>
           </div>
+          {moveOutCountdown ? (
+            <div className="mb-3 rounded-[16px] border border-cyan-400/20 bg-cyan-400/8 px-4 py-3 text-[12px] text-white/78">
+              <span className="font-semibold text-cyan-300">Move-Out Mode:</span> {moveOutCountdown}
+            </div>
+          ) : null}
           {campusLiveLoading ? (
             <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 text-[13px] text-white/42">
               Loading Campus Live...
@@ -448,6 +461,31 @@ export default function Home() {
                     <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-cyan-300/90">
                       Campus Karma {getKarma(item).score} · {getKarma(item).label}
                     </p>
+                    <p className="mt-1 text-[11px] text-white/46">{getRelativePostLabel(item.created_at)}</p>
+                    {getRecentViewerCount(item.id) > 0 ? (
+                      <p className="mt-1 text-[11px] font-semibold text-amber-300">
+                        🔥 {getRecentViewerCount(item.id)} people are viewing this
+                      </p>
+                    ) : null}
+                    {parseUrgencyMeta(item.description).flashSale || parseUrgencyMeta(item.description).moveOutMode ? (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {parseUrgencyMeta(item.description).flashSale ? (
+                          <span className="rounded-full border border-rose-400/20 bg-rose-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-rose-300">
+                            Flash Sale
+                          </span>
+                        ) : null}
+                        {parseUrgencyMeta(item.description).moveOutMode ? (
+                          <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-300">
+                            Move-Out
+                          </span>
+                        ) : null}
+                        {getExpiryCountdown(parseUrgencyMeta(item.description).expiresAt) ? (
+                          <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/74">
+                            {getExpiryCountdown(parseUrgencyMeta(item.description).expiresAt)}
+                          </span>
+                        ) : null}
+                      </div>
+                    ) : null}
                     <div className="mt-1 flex items-center gap-1.5 text-[12px] text-white/42">
                       <MapPin className="h-3.5 w-3.5 shrink-0 text-white/34" />
                       <span className="truncate">{item.location || "Temple Main Campus"}</span>
@@ -556,9 +594,14 @@ export default function Home() {
                       onClick={() => setActivePreview(listing.title ?? null)}
                       className="flex w-full items-center justify-between rounded-[16px] border border-transparent px-2 py-3 text-left transition hover:border-white/8 hover:bg-white/[0.03]"
                     >
-                      <span className="min-w-0 truncate text-[14px] font-medium tracking-[0.01em] text-white">
-                        {listing.price !== null && listing.price !== undefined ? `$${listing.price}` : listing.category || "Post"} -{" "}
-                        {listing.title || "Campus listing"} - {listing.location || "Temple Main Campus"}
+                      <span className="min-w-0">
+                        <span className="block truncate text-[14px] font-medium tracking-[0.01em] text-white">
+                          {listing.price !== null && listing.price !== undefined ? `$${listing.price}` : listing.category || "Post"} -{" "}
+                          {listing.title || "Campus listing"} - {listing.location || "Temple Main Campus"}
+                        </span>
+                        <span className="mt-1 block truncate text-[11px] text-white/46">
+                          {getRelativePostLabel(listing.created_at)}
+                        </span>
                       </span>
                       <span className="ml-3 shrink-0 rounded-full border border-white/12 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/66">
                         Peek
@@ -588,9 +631,36 @@ export default function Home() {
                       Campus Karma {getKarma(previewItem).score} · {getKarma(previewItem).label}
                     </p>
                   ) : null}
+                  {previewItem ? (
+                    <p className="mt-1 text-[11px] text-white/46">{getRelativePostLabel(previewItem.created_at)}</p>
+                  ) : null}
+                  {previewItem && getRecentViewerCount(previewItem.id) > 0 ? (
+                    <p className="mt-1 text-[11px] font-semibold text-amber-300">
+                      🔥 {getRecentViewerCount(previewItem.id)} people are viewing this
+                    </p>
+                  ) : null}
+                  {previewItem && (parseUrgencyMeta(previewItem.description).flashSale || parseUrgencyMeta(previewItem.description).moveOutMode) ? (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {parseUrgencyMeta(previewItem.description).flashSale ? (
+                        <span className="rounded-full border border-rose-400/20 bg-rose-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-rose-300">
+                          Flash Sale
+                        </span>
+                      ) : null}
+                      {parseUrgencyMeta(previewItem.description).moveOutMode ? (
+                        <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-300">
+                          Move-Out
+                        </span>
+                      ) : null}
+                      {getExpiryCountdown(parseUrgencyMeta(previewItem.description).expiresAt) ? (
+                        <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/74">
+                          {getExpiryCountdown(parseUrgencyMeta(previewItem.description).expiresAt)}
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
                   <p className="mt-1 text-[12px] text-white/42">{previewItem?.location || "Temple Main Campus"}</p>
                   <p className="mt-3 text-[12px] leading-6 text-white/52">
-                    {previewItem?.description || "Open the feed to view the full post details."}
+                    {parseUrgencyMeta(previewItem?.description).cleanDescription || "Open the feed to view the full post details."}
                   </p>
                 </aside>
               </>

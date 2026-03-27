@@ -13,6 +13,15 @@ import {
   getPreferencePriority,
 } from "@/lib/campus-identity";
 import {
+  embedUrgencyMeta,
+  getExpiryCountdown,
+  getMoveOutCountdown,
+  getRecentViewerCount,
+  getRelativePostLabel,
+  parseUrgencyMeta,
+  recordUrgencyView,
+} from "@/lib/listing-urgency";
+import {
   buildCampusNotifications,
   getCampusNotifications,
   incrementListingView,
@@ -49,6 +58,9 @@ type ListingForm = {
   category: string;
   description: string;
   major: string;
+  flashSale: boolean;
+  moveOutMode: boolean;
+  expiresInHours: string;
 };
 
 type ListingInsert = {
@@ -69,6 +81,9 @@ const initialForm: ListingForm = {
   category: "Textbooks",
   description: "",
   major: "",
+  flashSale: false,
+  moveOutMode: false,
+  expiresInHours: "",
 };
 
 function getFeedGroup(category: string) {
@@ -281,6 +296,7 @@ export default function DashboardPage() {
     () => notifications.filter((item) => !item.read).length,
     [notifications],
   );
+  const moveOutCountdown = useMemo(() => getMoveOutCountdown(), []);
 
   const mutualConnections = useMemo(
     () =>
@@ -300,6 +316,7 @@ export default function DashboardPage() {
 
   const openListingDetail = (item: ListingRow) => {
     incrementListingView(item, profile.email);
+    recordUrgencyView(item.id);
     setSelectedItem(item);
   };
 
@@ -341,7 +358,13 @@ export default function DashboardPage() {
         title: form.title.trim(),
         price: parsedPrice,
         category: form.category.trim(),
-        description: form.description.trim(),
+        description: embedUrgencyMeta(form.description.trim(), {
+          flashSale: form.flashSale,
+          moveOutMode: form.moveOutMode,
+          expiresAt: form.expiresInHours
+            ? new Date(Date.now() + Number(form.expiresInHours) * 60 * 60 * 1000).toISOString()
+            : null,
+        }),
         poster_name: profile.name.trim() || "Temple Student",
         major: profile.major.trim() || form.major.trim() || null,
         class_year: profile.classYear.trim() || null,
@@ -489,6 +512,13 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {moveOutCountdown ? (
+            <div className="mb-4 rounded-[18px] border border-cyan-400/20 bg-cyan-400/8 px-4 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-300">Move-Out Mode</p>
+              <p className="mt-2 text-[13px] text-white/78">{moveOutCountdown}</p>
+            </div>
+          ) : null}
+
           <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {feedFilters.map((filter) => (
               <button
@@ -552,6 +582,9 @@ export default function DashboardPage() {
                   {items.map((item) => {
                     const contactHref = getContactHref(item);
                     const karma = getItemKarma(item);
+                    const urgency = parseUrgencyMeta(item.description);
+                    const viewerCount = getRecentViewerCount(item.id);
+                    const expiryCountdown = getExpiryCountdown(urgency.expiresAt);
 
                     return (
                       <article
@@ -577,8 +610,35 @@ export default function DashboardPage() {
                           <div className="mt-2 inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-300">
                             Campus Karma {karma.score} · {karma.label}
                           </div>
+                          <p className="mt-2 text-[11px] text-white/46">
+                            {getRelativePostLabel(item.created_at)}
+                          </p>
+                          {viewerCount > 0 ? (
+                            <p className="mt-1 text-[11px] font-semibold text-amber-300">
+                              🔥 {viewerCount} people are viewing this
+                            </p>
+                          ) : null}
+                          {urgency.flashSale || urgency.moveOutMode ? (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {urgency.flashSale ? (
+                                <span className="rounded-full border border-rose-400/20 bg-rose-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-rose-300">
+                                  Flash Sale
+                                </span>
+                              ) : null}
+                              {urgency.moveOutMode ? (
+                                <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-300">
+                                  Move-Out Mode
+                                </span>
+                              ) : null}
+                              {expiryCountdown ? (
+                                <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/74">
+                                  {expiryCountdown}
+                                </span>
+                              ) : null}
+                            </div>
+                          ) : null}
                           <p className="mt-2 line-clamp-2 text-[12px] leading-5 text-white/42">
-                            {item.description || "Campus listing"}
+                            {urgency.cleanDescription || "Campus listing"}
                           </p>
                         </button>
 
@@ -713,6 +773,38 @@ export default function DashboardPage() {
                       placeholder="Computer Science"
                     />
                   </label>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <label className="flex items-center justify-between rounded-[14px] border border-white/10 bg-white/[0.03] px-4 py-3">
+                      <span className="text-[13px] text-white/78">Flash sale</span>
+                      <input
+                        type="checkbox"
+                        checked={form.flashSale}
+                        onChange={(event) => setForm((current) => ({ ...current, flashSale: event.target.checked }))}
+                        className="h-4 w-4 accent-[var(--accent)]"
+                      />
+                    </label>
+
+                    <label className="flex items-center justify-between rounded-[14px] border border-white/10 bg-white/[0.03] px-4 py-3">
+                      <span className="text-[13px] text-white/78">Move-Out Mode</span>
+                      <input
+                        type="checkbox"
+                        checked={form.moveOutMode}
+                        onChange={(event) => setForm((current) => ({ ...current, moveOutMode: event.target.checked }))}
+                        className="h-4 w-4 accent-[var(--accent)]"
+                      />
+                    </label>
+                  </div>
+
+                  <label className="block">
+                    <span className="mb-1.5 block text-[12px] text-white/48">Limited-time hours (optional)</span>
+                    <input
+                      value={form.expiresInHours}
+                      onChange={(event) => setForm((current) => ({ ...current, expiresInHours: event.target.value }))}
+                      className="w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none"
+                      placeholder="12"
+                    />
+                  </label>
                 </div>
 
                 {postError ? <p className="mt-3 text-[12px] text-[#F09595]">{postError}</p> : null}
@@ -765,6 +857,15 @@ export default function DashboardPage() {
               <p>Location: {selectedItem.location || "Temple Main Campus"}</p>
               <p>Price: {selectedItem.price !== null && selectedItem.price !== undefined ? `$${selectedItem.price}` : "Not listed"}</p>
               <p>Contact: {selectedItem.contact_email || selectedItem.email || "Contact in original section"}</p>
+              <p>{getRelativePostLabel(selectedItem.created_at)}</p>
+              {getRecentViewerCount(selectedItem.id) > 0 ? (
+                <p className="text-amber-300">🔥 {getRecentViewerCount(selectedItem.id)} people are viewing this</p>
+              ) : null}
+              {parseUrgencyMeta(selectedItem.description).flashSale ? <p>Flash Sale active</p> : null}
+              {parseUrgencyMeta(selectedItem.description).moveOutMode ? <p>Move-Out Mode listing</p> : null}
+              {getExpiryCountdown(parseUrgencyMeta(selectedItem.description).expiresAt) ? (
+                <p>{getExpiryCountdown(parseUrgencyMeta(selectedItem.description).expiresAt)}</p>
+              ) : null}
             </div>
 
             <button
