@@ -73,7 +73,7 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
         .eq("code", code.trim());
 
       setVerified(true);
-      router.push("/");
+      router.push("/dashboard");
     } catch (verifyError) {
       setVerified(false);
       const nextError =

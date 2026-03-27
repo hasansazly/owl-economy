@@ -78,7 +78,6 @@ type SendStudentVerificationEmailResult =
 
 export async function sendStudentVerificationEmail(
   email: string,
-  codeOverride?: string,
 ): Promise<SendStudentVerificationEmailResult> {
   const normalizedEmail = email.trim().toLowerCase();
 
@@ -98,7 +97,7 @@ export async function sendStudentVerificationEmail(
     };
   }
 
-  const code = codeOverride ?? generateSixDigitVerificationCode();
+  const code = generateSixDigitVerificationCode();
   const dbUpdateCommand = {
     sql: "UPDATE users SET verification_code = ?, verification_status = ? WHERE email = ?",
     params: [code, "pending", normalizedEmail] as [string, string, string],

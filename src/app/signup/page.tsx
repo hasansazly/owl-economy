@@ -5,9 +5,6 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, GraduationCap, LockKeyhole, Mail, User } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { generateSixDigitVerificationCode } from "@/lib/brevo-student-verification";
-import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
-
 function getStrength(password: string) {
   let score = 0;
   if (password.length >= 8) score += 1;
@@ -87,28 +84,6 @@ export default function SignupPage() {
     try {
       setSubmitting(true);
 
-      const supabase = getSupabaseBrowserClient();
-
-      if (!supabase) {
-        throw new Error("Supabase is not configured.");
-      }
-
-      const normalizedEmail = email.trim().toLowerCase();
-      const code = generateSixDigitVerificationCode();
-
-      const { error: otpError } = await supabase.from("otps").upsert(
-        {
-          email: normalizedEmail,
-          code,
-          verified: false,
-        } as never,
-        { onConflict: "email" },
-      );
-
-      if (otpError) {
-        throw new Error("Could not create verification code.");
-      }
-
       const response = await fetch("/api/signup", {
         method: "POST",
         headers: {
@@ -116,9 +91,8 @@ export default function SignupPage() {
         },
         body: JSON.stringify({
           name: name.trim(),
-          email: normalizedEmail,
+          email: email.trim(),
           password,
-          code,
         }),
       });
 
@@ -130,7 +104,7 @@ export default function SignupPage() {
         throw new Error(data.error || "Signup failed.");
       }
 
-      router.push(`/verify-email?email=${encodeURIComponent(normalizedEmail)}`);
+      router.push(`/verify-email?email=${encodeURIComponent(email.trim())}`);
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : "Signup failed.");
     } finally {
