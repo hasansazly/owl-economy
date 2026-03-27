@@ -17,7 +17,9 @@ import {
   Shirt,
   Sparkles,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 type QuickAction = {
   title: string;
@@ -107,32 +109,15 @@ const quickActions: QuickAction[] = [
   },
 ];
 
-const recentListings = [
-  {
-    title: "Mini Fridge",
-    meta: "Morgan Hall",
-    price: "$40",
-    preview: "Compact fridge with clean white finish and quick dorm pickup.",
-  },
-  {
-    title: "Crash Space",
-    meta: "Cecil B. Moore",
-    price: "$28",
-    preview: "Short-stay setup for a quick overnight near campus.",
-  },
-  {
-    title: "Cookie Drop",
-    meta: "Pickup after 4 PM",
-    price: "$12",
-    preview: "Fresh fundraiser box posted by a student org.",
-  },
-  {
-    title: "Owl Sticker Set",
-    meta: "Tyler student",
-    price: "$9",
-    preview: "Creator-made sticker pack with campus-style artwork.",
-  },
-];
+type RecentListing = {
+  id: string | number;
+  title?: string | null;
+  price?: number | string | null;
+  category?: string | null;
+  description?: string | null;
+  location?: string | null;
+  created_at?: string | null;
+};
 
 const supportCards = [
   {
@@ -169,7 +154,49 @@ export default function Home() {
     suggestedRoute: string;
     suggestedAction: string;
   } | null>(null);
-  const [activePreview, setActivePreview] = useState(recentListings[0].title);
+  const [recentListings, setRecentListings] = useState<RecentListing[]>([]);
+  const [recentLoading, setRecentLoading] = useState(true);
+  const [recentError, setRecentError] = useState("");
+  const [activePreview, setActivePreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = getSupabaseBrowserClient();
+
+    if (!supabase) {
+      setRecentLoading(false);
+      setRecentError("");
+      return;
+    }
+
+    let mounted = true;
+
+    const loadRecentListings = async () => {
+      const { data, error } = await supabase
+        .from("listings")
+        .select("id, title, price, category, description, location, created_at")
+        .order("created_at", { ascending: false })
+        .limit(4);
+
+      if (!mounted) return;
+
+      if (error) {
+        setRecentError("Could not load recent listings.");
+        setRecentListings([]);
+      } else {
+        const items = (data as RecentListing[]) || [];
+        setRecentListings(items);
+        setActivePreview(items[0]?.title ?? null);
+      }
+
+      setRecentLoading(false);
+    };
+
+    loadRecentListings();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const askAssistant = async () => {
     setAssistantError("");
@@ -212,8 +239,10 @@ export default function Home() {
     }
   };
 
-  const previewItem =
-    recentListings.find((listing) => listing.title === activePreview) ?? recentListings[0];
+  const previewItem = useMemo(
+    () => recentListings.find((listing) => listing.title === activePreview) ?? recentListings[0] ?? null,
+    [activePreview, recentListings],
+  );
 
   return (
     <main id="top" className="relative overflow-hidden bg-[#000000] pb-28 text-white">
@@ -381,43 +410,65 @@ export default function Home() {
         <section id="recent" className="border-t border-white/8 px-1 py-5">
           <div className="mb-3 flex items-center justify-between">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/54">Recent Listings</p>
-            <Link href="#top" className="text-[12px] text-white/38 transition hover:text-white/62">
+            <Link href="/dashboard" className="text-[12px] text-white/38 transition hover:text-white/62">
               See all
             </Link>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-[1fr_260px]">
-            <div className="space-y-1">
-              {recentListings.map((listing) => (
-                <button
-                  key={listing.title}
-                  type="button"
-                  onMouseEnter={() => setActivePreview(listing.title)}
-                  onFocus={() => setActivePreview(listing.title)}
-                  onClick={() => setActivePreview(listing.title)}
-                  className="flex w-full items-center justify-between rounded-[16px] border border-transparent px-2 py-3 text-left transition hover:border-white/8 hover:bg-white/[0.03]"
-                >
-                  <span className="min-w-0 truncate text-[14px] font-medium tracking-[0.01em] text-white">
-                    {listing.price} - {listing.title} - {listing.meta}
-                  </span>
-                  <span className="ml-3 shrink-0 rounded-full border border-white/12 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/66">
-                    Peek
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            <aside className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 backdrop-blur-xl">
-              <div className="flex h-32 items-center justify-center rounded-[14px] border border-white/8 bg-[linear-gradient(135deg,_rgba(158,27,50,0.18),_rgba(255,255,255,0.03))] text-center text-sm font-semibold text-white/72">
-                {previewItem.title}
+            {recentLoading ? (
+              <div className="lg:col-span-2 rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 text-[13px] text-white/42">
+                Loading recent listings...
               </div>
-              <p className="mt-4 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
-                Preview
-              </p>
-              <p className="mt-2 text-sm text-white">{previewItem.price} - {previewItem.title}</p>
-              <p className="mt-1 text-[12px] text-white/42">{previewItem.meta}</p>
-              <p className="mt-3 text-[12px] leading-6 text-white/52">{previewItem.preview}</p>
-            </aside>
+            ) : recentError ? (
+              <div className="lg:col-span-2 rounded-[18px] border border-[rgba(240,80,80,0.22)] bg-[rgba(240,80,80,0.08)] p-4 text-[13px] text-[#F09595]">
+                {recentError}
+              </div>
+            ) : recentListings.length === 0 ? (
+              <div className="lg:col-span-2 rounded-[18px] border border-dashed border-white/12 bg-[rgba(255,255,255,0.02)] p-6 text-center text-[13px] text-white/42">
+                No recent listings yet. When students post, they’ll appear here automatically.
+              </div>
+            ) : (
+              <>
+                <div className="space-y-1">
+                  {recentListings.map((listing) => (
+                    <button
+                      key={String(listing.id)}
+                      type="button"
+                      onMouseEnter={() => setActivePreview(listing.title ?? null)}
+                      onFocus={() => setActivePreview(listing.title ?? null)}
+                      onClick={() => setActivePreview(listing.title ?? null)}
+                      className="flex w-full items-center justify-between rounded-[16px] border border-transparent px-2 py-3 text-left transition hover:border-white/8 hover:bg-white/[0.03]"
+                    >
+                      <span className="min-w-0 truncate text-[14px] font-medium tracking-[0.01em] text-white">
+                        {listing.price !== null && listing.price !== undefined ? `$${listing.price}` : listing.category || "Post"} -{" "}
+                        {listing.title || "Campus listing"} - {listing.location || "Temple Main Campus"}
+                      </span>
+                      <span className="ml-3 shrink-0 rounded-full border border-white/12 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/66">
+                        Peek
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                <aside className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 backdrop-blur-xl">
+                  <div className="flex h-32 items-center justify-center rounded-[14px] border border-white/8 bg-[linear-gradient(135deg,_rgba(18,214,255,0.12),_rgba(255,255,255,0.03))] px-4 text-center text-sm font-semibold text-white/72">
+                    {previewItem?.category || "Listing"}
+                  </div>
+                  <p className="mt-4 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
+                    Preview
+                  </p>
+                  <p className="mt-2 text-sm text-white">
+                    {previewItem?.price !== null && previewItem?.price !== undefined ? `$${previewItem?.price} - ` : ""}
+                    {previewItem?.title || "Campus listing"}
+                  </p>
+                  <p className="mt-1 text-[12px] text-white/42">{previewItem?.location || "Temple Main Campus"}</p>
+                  <p className="mt-3 text-[12px] leading-6 text-white/52">
+                    {previewItem?.description || "Open the feed to view the full post details."}
+                  </p>
+                </aside>
+              </>
+            )}
           </div>
         </section>
 
