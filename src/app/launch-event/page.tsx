@@ -135,7 +135,7 @@ export default function LaunchEventPage() {
       startTime: template.startTime,
       endTime: template.endTime,
     }));
-    setExtras(template.extras as string[]);
+    setExtras([...template.extras]);
   };
 
   const liveHeadline = form.headline || "Your event headline";
