@@ -13,12 +13,6 @@ type VerifyEmailClientProps = {
   email: string;
 };
 
-type OtpRow = {
-  code: string;
-  access_token: string | null;
-  refresh_token: string | null;
-};
-
 const INCORRECT_CODE_MESSAGE = "Incorrect code. Please check your Temple email again.";
 
 export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
@@ -50,56 +44,22 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
 
       const supabase = getSupabaseBrowserClient();
 
-      if (supabase) {
-        const { data, error: otpError } = await supabase
-          .from("otps")
-          .select("code, access_token, refresh_token")
-          .eq("email", email)
-          .eq("code", code.trim())
-          .maybeSingle();
-
-        const otpRecord = data as OtpRow | null;
-
-        if (otpError || !otpRecord?.access_token || !otpRecord?.refresh_token) {
-          throw new Error(INCORRECT_CODE_MESSAGE);
-        }
-
-        const { error: sessionError } = await supabase.auth.setSession({
-          access_token: otpRecord.access_token,
-          refresh_token: otpRecord.refresh_token,
-        });
-
-        if (sessionError) {
-          throw new Error(INCORRECT_CODE_MESSAGE);
-        }
-
-        setVerified(true);
-        router.push("/dashboard");
-        return;
+      if (!supabase) {
+        throw new Error("Supabase is not configured.");
       }
 
-      const response = await fetch("/api/signup/verify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          code: code.trim(),
-        }),
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        email,
+        token: code.trim(),
+        type: "signup",
       });
 
-      const data = (await response.json()) as {
-        error?: string;
-        redirectTo?: string;
-      };
-
-      if (!response.ok) {
-        throw new Error(data.error || "Verification failed.");
+      if (verifyError) {
+        throw new Error(INCORRECT_CODE_MESSAGE);
       }
 
       setVerified(true);
-      window.location.href = data.redirectTo || "/dashboard";
+      router.push("/");
     } catch (verifyError) {
       setVerified(false);
       const nextError =
