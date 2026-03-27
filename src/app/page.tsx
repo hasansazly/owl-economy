@@ -20,6 +20,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 
 import { computeCampusKarma, getCampusKarmaLabel } from "@/lib/campus-identity";
+import { buildWeeklyLeaderboard, getCampusBadges } from "@/lib/campus-identity";
 import {
   getExpiryCountdown,
   getMoveOutCountdown,
@@ -334,6 +335,7 @@ export default function Home() {
     () => [...recentListings, ...campusLiveItems],
     [campusLiveItems, recentListings],
   );
+  const leaderboardPreview = useMemo(() => buildWeeklyLeaderboard(allVisibleIdentityListings), [allVisibleIdentityListings]);
 
   const getKarma = (item: RecentListing | CampusLiveItem) => {
     const score = computeCampusKarma(allVisibleIdentityListings, item.contact_email || item.email || "");
@@ -693,6 +695,34 @@ export default function Home() {
                 <div key={title}>{content}</div>
               );
             })}
+          </div>
+          <div className="mt-4 rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/46">Top Sellers This Week</p>
+            {leaderboardPreview.length > 0 ? (
+              <div className="mt-3 space-y-2">
+                {leaderboardPreview.slice(0, 3).map((entry, index) => (
+                  <div key={entry.email} className="flex items-center justify-between gap-3 rounded-[14px] border border-white/10 bg-white/[0.03] px-3 py-3">
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-semibold text-white">
+                        #{index + 1} {entry.name}
+                      </p>
+                      <p className="mt-1 truncate text-[12px] text-white/48">
+                        {entry.major || "Temple student"}
+                        {entry.classYear ? ` · ${entry.classYear}` : ""}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[13px] font-semibold text-cyan-300">{entry.karma} pts</p>
+                      {getCampusBadges(allVisibleIdentityListings, entry.email).length > 0 ? (
+                        <p className="text-[11px] text-white/44">{getCampusBadges(allVisibleIdentityListings, entry.email)[0]?.label}</p>
+                      ) : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-3 text-[12px] text-white/42">The weekly leaderboard appears automatically when students start posting this week.</p>
+            )}
           </div>
         </section>
 

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Bell, Building2, LogOut, ScrollText, ShieldCheck, User } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   clearStudentProfile,
@@ -13,8 +13,9 @@ import {
   saveStudentProfile,
   type StudentProfile,
 } from "@/lib/app-auth";
-import { normalizeTagList } from "@/lib/campus-identity";
+import { buildWeeklyLeaderboard, computeCampusKarma, getCampusBadges, normalizeTagList } from "@/lib/campus-identity";
 import { isVerifiedTempleEmail } from "@/lib/security";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const classYears = ["2028", "2027", "2026", "2025", "Graduate"] as const;
 
@@ -35,6 +36,18 @@ export default function AccountPage() {
   });
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [listings, setListings] = useState<
+    Array<{
+      contact_email?: string | null;
+      email?: string | null;
+      category?: string | null;
+      poster_name?: string | null;
+      major?: string | null;
+      class_year?: string | null;
+      created_at?: string | null;
+      id: string | number;
+    }>
+  >([]);
 
   useEffect(() => {
     const email = getVerifiedStudentEmail();
@@ -46,6 +59,25 @@ export default function AccountPage() {
 
     setProfile(getStudentProfile());
   }, [router]);
+
+  useEffect(() => {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return;
+
+    supabase
+      .from("listings")
+      .select("id, contact_email, email, category, poster_name, major, class_year, created_at")
+      .then(({ data }) => {
+        setListings((data as typeof listings) || []);
+      });
+  }, []);
+
+  const myKarma = useMemo(() => computeCampusKarma(listings, profile.email), [listings, profile.email]);
+  const myBadges = useMemo(() => getCampusBadges(listings, profile.email), [listings, profile.email]);
+  const leaderboardRank = useMemo(() => {
+    const leaderboard = buildWeeklyLeaderboard(listings);
+    return leaderboard.findIndex((entry) => entry.email === profile.email) + 1;
+  }, [listings, profile.email]);
 
   const updateField = <K extends keyof StudentProfile>(field: K, value: StudentProfile[K]) => {
     setProfile((current) => ({ ...current, [field]: value }));
@@ -97,6 +129,21 @@ export default function AccountPage() {
           <p className="mt-3 max-w-2xl text-[13px] leading-6 text-white/48">
             Edit your student info, class year, privacy settings, and feed preferences.
           </p>
+        </section>
+
+        <section className="mb-4 grid gap-3 px-1 sm:grid-cols-3">
+          <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/44">Campus Karma</p>
+            <p className="mt-2 text-[22px] font-bold text-white">{myKarma}</p>
+          </div>
+          <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/44">Temple Rank</p>
+            <p className="mt-2 text-[22px] font-bold text-white">{leaderboardRank > 0 ? `#${leaderboardRank}` : "Unranked"}</p>
+          </div>
+          <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/44">Badges</p>
+            <p className="mt-2 text-[22px] font-bold text-white">{myBadges.length}</p>
+          </div>
         </section>
 
         <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
@@ -246,6 +293,21 @@ export default function AccountPage() {
                 <ScrollText className="h-5 w-5 text-cyan-400" />
                 <h2 className="text-[16px] font-semibold text-white">Quick Links</h2>
               </div>
+
+              {myBadges.length > 0 ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {myBadges.map((badge) => (
+                    <span
+                      key={badge.id}
+                      className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-cyan-300"
+                    >
+                      {badge.label}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-4 text-[12px] text-white/42">Badges unlock from real selling, events, and helping students on campus.</p>
+              )}
 
               <div className="mt-5 grid gap-3">
                 <Link

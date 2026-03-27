@@ -7,8 +7,10 @@ import { useEffect, useMemo, useState } from "react";
 
 import { getStudentProfile, isVerifiedStudentLoggedIn } from "@/lib/app-auth";
 import {
+  buildWeeklyLeaderboard,
   computeCampusKarma,
   countMutualClassmates,
+  getCampusBadges,
   getCampusKarmaLabel,
   getPreferencePriority,
 } from "@/lib/campus-identity";
@@ -307,6 +309,9 @@ export default function DashboardPage() {
       }),
     [listings, profile.classYear, profile.email, profile.major],
   );
+  const leaderboard = useMemo(() => buildWeeklyLeaderboard(listings), [listings]);
+  const myBadges = useMemo(() => getCampusBadges(listings, profile.email), [listings, profile.email]);
+  const myKarma = useMemo(() => computeCampusKarma(listings, profile.email), [listings, profile.email]);
 
   const getItemKarma = (item: ListingRow) => {
     const email = item.contact_email || item.email || "";
@@ -512,6 +517,55 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          <div className="mb-4 grid gap-3 lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/44">Your Campus Reputation</p>
+              <p className="mt-2 text-[22px] font-bold text-white">{myKarma}</p>
+              <p className="mt-1 text-[13px] text-white/58">Karma points from real campus activity.</p>
+              {myBadges.length > 0 ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {myBadges.map((badge) => (
+                    <span
+                      key={badge.id}
+                      className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-cyan-300"
+                    >
+                      {badge.label}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-4 text-[12px] text-white/42">Badges unlock automatically when you post, sell, or help people on campus.</p>
+              )}
+            </div>
+
+            <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/44">Top Sellers This Week on Temple Campus</p>
+              {leaderboard.length > 0 ? (
+                <div className="mt-4 space-y-3">
+                  {leaderboard.map((entry, index) => (
+                    <div key={entry.email} className="flex items-center justify-between gap-3 rounded-[14px] border border-white/10 bg-white/[0.03] px-3 py-3">
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-semibold text-white">
+                          #{index + 1} {entry.name}
+                        </p>
+                        <p className="mt-1 truncate text-[12px] text-white/48">
+                          {entry.major || "Temple student"}
+                          {entry.classYear ? ` · ${entry.classYear}` : ""}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[13px] font-semibold text-cyan-300">{entry.karma} pts</p>
+                        <p className="text-[11px] text-white/44">{entry.listings} listing{entry.listings === 1 ? "" : "s"}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-4 text-[12px] text-white/42">The leaderboard will fill as students post real listings this week.</p>
+              )}
+            </div>
+          </div>
+
           {moveOutCountdown ? (
             <div className="mb-4 rounded-[18px] border border-cyan-400/20 bg-cyan-400/8 px-4 py-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-300">Move-Out Mode</p>
@@ -610,6 +664,20 @@ export default function DashboardPage() {
                           <div className="mt-2 inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-300">
                             Campus Karma {karma.score} · {karma.label}
                           </div>
+                          {getCampusBadges(listings, item.contact_email || item.email || "").length > 0 ? (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {getCampusBadges(listings, item.contact_email || item.email || "")
+                                .slice(0, 2)
+                                .map((badge) => (
+                                  <span
+                                    key={badge.id}
+                                    className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/74"
+                                  >
+                                    {badge.label}
+                                  </span>
+                                ))}
+                            </div>
+                          ) : null}
                           <p className="mt-2 text-[11px] text-white/46">
                             {getRelativePostLabel(item.created_at)}
                           </p>
@@ -854,6 +922,13 @@ export default function DashboardPage() {
               <p>
                 Campus Karma: {getItemKarma(selectedItem).score} · {getItemKarma(selectedItem).label}
               </p>
+              {getCampusBadges(listings, selectedItem.contact_email || selectedItem.email || "").length > 0 ? (
+                <p>
+                  Badges: {getCampusBadges(listings, selectedItem.contact_email || selectedItem.email || "")
+                    .map((badge) => badge.label)
+                    .join(" · ")}
+                </p>
+              ) : null}
               <p>Location: {selectedItem.location || "Temple Main Campus"}</p>
               <p>Price: {selectedItem.price !== null && selectedItem.price !== undefined ? `$${selectedItem.price}` : "Not listed"}</p>
               <p>Contact: {selectedItem.contact_email || selectedItem.email || "Contact in original section"}</p>
