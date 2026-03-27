@@ -216,7 +216,7 @@ export default function Home() {
     recentListings.find((listing) => listing.title === activePreview) ?? recentListings[0];
 
   return (
-    <main id="top" className="relative min-h-screen overflow-hidden bg-[#000000] pb-36 text-white">
+    <main id="top" className="relative overflow-hidden bg-[#000000] pb-28 text-white">
       <div className="startup-orb left-[-160px] top-[60px] h-[220px] w-[220px] bg-[rgba(140,29,64,0.22)]" />
       <div className="startup-orb right-[-120px] top-[120px] h-[260px] w-[260px] bg-[rgba(255,255,255,0.04)]" />
       <div className="startup-grid absolute inset-0 opacity-40" />

@@ -60,6 +60,7 @@ type EventForm = {
   location: string;
   startTime: string;
   endTime: string;
+  major: string;
 };
 
 type EventListingInsert = {
@@ -67,6 +68,7 @@ type EventListingInsert = {
   price: number;
   category: string;
   description: string;
+  major: string | null;
   event_type: string;
   vibe: string;
   event_date: string;
@@ -83,6 +85,7 @@ const initialForm: EventForm = {
   location: "",
   startTime: "",
   endTime: "",
+  major: "",
 };
 
 export default function LaunchEventPage() {
@@ -194,6 +197,7 @@ export default function LaunchEventPage() {
         ]
           .filter(Boolean)
           .join(" | "),
+        major: form.major.trim() || null,
         event_type: form.eventType,
         vibe: form.vibe.trim(),
         event_date: form.eventDate.trim(),
@@ -332,6 +336,17 @@ export default function LaunchEventPage() {
                     value={form.location}
                     onChange={(event) => updateField("location", event.target.value)}
                     placeholder="Student Center / Off Broad"
+                    className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">Major (optional)</span>
+                  <input
+                    type="text"
+                    value={form.major}
+                    onChange={(event) => updateField("major", event.target.value)}
+                    placeholder="Computer Science"
                     className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                   />
                 </label>

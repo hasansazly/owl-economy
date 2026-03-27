@@ -1,19 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Plus, Search, X } from "lucide-react";
+import { ArrowLeft, Mail, Plus, Search, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
-const categories = ["All", "Textbooks", "Mini-Fridges", "Electronics", "Sublets", "Event"] as const;
+const feedFilters = ["All", "Events", "Marketplace", "Lost & Found", "Services"] as const;
+const postCategories = ["Textbooks", "Mini-Fridges", "Electronics", "Sublets", "Event"] as const;
+
+type FeedFilter = (typeof feedFilters)[number];
 
 type ListingRow = {
   id: string | number;
-  title: string;
-  price: number | string;
-  category: string;
-  description: string | null;
+  title?: string | null;
+  price?: number | string | null;
+  category?: string | null;
+  description?: string | null;
+  major?: string | null;
+  contact_email?: string | null;
+  email?: string | null;
+  location?: string | null;
+  created_at?: string | null;
 };
 
 type ListingForm = {
@@ -21,6 +29,7 @@ type ListingForm = {
   price: string;
   category: string;
   description: string;
+  major: string;
 };
 
 type ListingInsert = {
@@ -28,6 +37,7 @@ type ListingInsert = {
   price: number;
   category: string;
   description: string;
+  major: string | null;
 };
 
 const initialForm: ListingForm = {
@@ -35,11 +45,80 @@ const initialForm: ListingForm = {
   price: "",
   category: "Textbooks",
   description: "",
+  major: "",
 };
+
+function getFeedGroup(category: string) {
+  const value = category.toLowerCase();
+
+  if (value.includes("event")) return "Events";
+  if (value.includes("lost") || value.includes("found") || value.includes("id") || value.includes("key")) {
+    return "Lost & Found";
+  }
+  if (
+    value.includes("service") ||
+    value.includes("hair") ||
+    value.includes("braid") ||
+    value.includes("nail") ||
+    value.includes("makeup") ||
+    value.includes("moving") ||
+    value.includes("tech support")
+  ) {
+    return "Services";
+  }
+  return "Marketplace";
+}
+
+function getBadgeStyles(category: string) {
+  const group = getFeedGroup(category);
+
+  if (group === "Events") {
+    return "border border-red-400/25 bg-red-400/12 text-red-300";
+  }
+
+  if (group === "Services") {
+    return "border border-cyan-400/25 bg-cyan-400/12 text-cyan-300";
+  }
+
+  if (group === "Lost & Found") {
+    return "border border-amber-300/25 bg-amber-300/12 text-amber-200";
+  }
+
+  return "border border-emerald-400/25 bg-emerald-400/12 text-emerald-300";
+}
+
+function getContactHref(item: ListingRow) {
+  const email = item.contact_email || item.email;
+
+  if (!email) return "";
+
+  const subject = encodeURIComponent(`Interest in ${item.title || "listing"} on MyDormStash`);
+  const body = encodeURIComponent(
+    "Hi, I saw your post on MyDormStash. Is this still available to connect on campus?",
+  );
+
+  return `mailto:${email}?subject=${subject}&body=${body}`;
+}
+
+function sortListingsNewest(items: ListingRow[]) {
+  return [...items].sort((a, b) => {
+    const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+
+    if (dateA !== dateB) return dateB - dateA;
+
+    const idA = Number(a.id);
+    const idB = Number(b.id);
+
+    if (!Number.isNaN(idA) && !Number.isNaN(idB)) return idB - idA;
+
+    return String(b.id).localeCompare(String(a.id));
+  });
+}
 
 export default function DashboardPage() {
   const [query, setQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState<(typeof categories)[number]>("All");
+  const [activeFilter, setActiveFilter] = useState<FeedFilter>("All");
   const [listings, setListings] = useState<ListingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -47,6 +126,7 @@ export default function DashboardPage() {
   const [postOpen, setPostOpen] = useState(false);
   const [posting, setPosting] = useState(false);
   const [postError, setPostError] = useState("");
+  const [selectedItem, setSelectedItem] = useState<ListingRow | null>(null);
   const [form, setForm] = useState<ListingForm>(initialForm);
 
   useEffect(() => {
@@ -63,7 +143,7 @@ export default function DashboardPage() {
     const loadDashboard = async () => {
       const [{ data: sessionData }, listingsResponse] = await Promise.all([
         supabase.auth.getSession(),
-        supabase.from("listings").select("id, title, price, category, description"),
+        supabase.from("listings").select("*"),
       ]);
 
       if (!mounted) return;
@@ -74,7 +154,7 @@ export default function DashboardPage() {
         setError("Could not load campus listings right now.");
         setListings([]);
       } else {
-        setListings((listingsResponse.data as ListingRow[]) || []);
+        setListings(sortListingsNewest((listingsResponse.data as ListingRow[]) || []));
       }
 
       setLoading(false);
@@ -93,19 +173,38 @@ export default function DashboardPage() {
     };
   }, []);
 
-  const filteredListings = useMemo(() => {
-    return listings.filter((item) => {
-      const matchesCategory = activeCategory === "All" || item.category === activeCategory;
-      const matchesQuery =
-        !query.trim() ||
-        [item.title, item.category, item.description ?? ""]
-          .join(" ")
-          .toLowerCase()
-          .includes(query.trim().toLowerCase());
+  const visibleListings = useMemo(() => {
+    const next = listings.filter((item) => {
+      const category = item.category || "Marketplace";
+      const group = getFeedGroup(category);
+      const matchesFilter = activeFilter === "All" || group === activeFilter;
+      const haystack = [item.title || "", category, item.description || "", item.location || ""]
+        .concat(item.major || "")
+        .join(" ")
+        .toLowerCase();
+      const matchesQuery = !query.trim() || haystack.includes(query.trim().toLowerCase());
 
-      return matchesCategory && matchesQuery;
+      return matchesFilter && matchesQuery;
     });
-  }, [activeCategory, listings, query]);
+
+    return sortListingsNewest(next);
+  }, [activeFilter, listings, query]);
+
+  const groupedListings = useMemo(() => {
+    const groups = new Map<string, ListingRow[]>();
+
+    for (const item of visibleListings) {
+      const category = item.category || "Other";
+      const current = groups.get(category) || [];
+      current.push(item);
+      groups.set(category, current);
+    }
+
+    return Array.from(groups.entries()).map(([category, items]) => ({
+      category,
+      items: sortListingsNewest(items),
+    }));
+  }, [visibleListings]);
 
   const handlePostItem = async () => {
     const supabase = getSupabaseBrowserClient();
@@ -127,7 +226,7 @@ export default function DashboardPage() {
 
     const parsedPrice = Number(form.price);
 
-    if (Number.isNaN(parsedPrice) || parsedPrice <= 0) {
+    if (Number.isNaN(parsedPrice) || parsedPrice < 0) {
       setPostError("Please enter a valid price.");
       return;
     }
@@ -141,19 +240,16 @@ export default function DashboardPage() {
         price: parsedPrice,
         category: form.category.trim(),
         description: form.description.trim(),
+        major: form.major.trim() || null,
       };
 
-      const { data, error: insertError } = await supabase
-        .from("listings")
-        .insert(listingPayload as never)
-        .select("id, title, price, category, description")
-        .single();
+      const { data, error: insertError } = await supabase.from("listings").insert(listingPayload as never).select("*").single();
 
       if (insertError || !data) {
         throw new Error("Could not post the item.");
       }
 
-      setListings((current) => [data as ListingRow, ...current]);
+      setListings((current) => sortListingsNewest([data as ListingRow, ...current]));
       setForm(initialForm);
       setPostOpen(false);
     } catch (postItemError) {
@@ -195,33 +291,39 @@ export default function DashboardPage() {
 
         <section className="pt-5">
           <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {categories.map((category) => (
+            {feedFilters.map((filter) => (
               <button
-                key={category}
+                key={filter}
                 type="button"
-                onClick={() => setActiveCategory(category)}
+                onClick={() => setActiveFilter(filter)}
                 className={`shrink-0 rounded-full border px-4 py-2 text-[13px] font-semibold transition ${
-                  activeCategory === category
+                  activeFilter === filter
                     ? "border-cyan-400/30 bg-cyan-400/10 text-cyan-300"
                     : "border-white/10 bg-white/5 text-white/74 hover:border-cyan-400/30 hover:bg-cyan-400/10 hover:text-cyan-300"
                 }`}
               >
-                {category}
+                {filter}
               </button>
             ))}
           </div>
         </section>
 
         {loading ? (
-          <section className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {[0, 1, 2, 3].map((item) => (
-              <div
-                key={item}
-                className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-3.5"
-              >
-                <div className="h-36 animate-pulse rounded-[14px] bg-white/10" />
-                <div className="mt-3 h-5 w-2/3 animate-pulse rounded bg-white/10" />
-                <div className="mt-3 h-6 w-24 animate-pulse rounded-full bg-white/10" />
+          <section className="mt-5 space-y-5">
+            {[0, 1, 2].map((item) => (
+              <div key={item}>
+                <div className="mb-3 h-5 w-32 animate-pulse rounded bg-white/10" />
+                <div className="-mx-1 flex gap-3 overflow-hidden px-1">
+                  {[0, 1].map((card) => (
+                    <div
+                      key={card}
+                      className="min-w-[260px] rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-3.5"
+                    >
+                      <div className="h-32 animate-pulse rounded-[14px] bg-white/10" />
+                      <div className="mt-3 h-5 w-2/3 animate-pulse rounded bg-white/10" />
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </section>
@@ -234,42 +336,78 @@ export default function DashboardPage() {
         ) : null}
 
         {!loading && !error ? (
-          <section className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {filteredListings.map((item) => (
-              <article
-                key={String(item.id)}
-                className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-3.5 shadow-[0_16px_36px_rgba(0,0,0,0.2)] backdrop-blur-xl"
-              >
-                <div className="relative">
-                  <div className="flex h-36 items-center justify-center rounded-[14px] bg-[linear-gradient(135deg,_rgba(35,42,54,0.88),_rgba(18,214,255,0.08))] px-4 text-center text-[13px] font-semibold text-white/70">
-                    {item.category}
+          <section className="mt-5 space-y-6">
+            {groupedListings.map(({ category, items }) => (
+              <div key={category}>
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-[15px] font-semibold text-white">{category}</h2>
+                    <p className="mt-1 text-[12px] text-white/38">{items.length} post{items.length === 1 ? "" : "s"}</p>
                   </div>
-                  <span
-                    className={`absolute right-2.5 top-2.5 rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                      item.category === "Event"
-                        ? "border border-cyan-400/30 bg-cyan-400/12 text-cyan-300"
-                        : "bg-cyan-400 text-black"
-                    }`}
-                  >
-                    {item.category === "Event" ? "Event" : `$${item.price}`}
+                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${getBadgeStyles(category)}`}>
+                    {getFeedGroup(category)}
                   </span>
                 </div>
 
-                <h2 className="mt-3 text-[15px] font-semibold leading-5 text-white">{item.title}</h2>
-                <p className="mt-2 line-clamp-2 text-[12px] leading-5 text-white/42">
-                  {item.description || "Campus listing"}
-                </p>
+                <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {items.map((item) => {
+                    const contactHref = getContactHref(item);
 
-                <div className="mt-3">
-                  <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-white/58">
-                    Temple Main Campus
-                  </span>
+                    return (
+                      <article
+                        key={String(item.id)}
+                        className="min-w-[268px] max-w-[268px] rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-3.5 shadow-[0_16px_36px_rgba(0,0,0,0.2)] backdrop-blur-xl"
+                      >
+                        <button type="button" onClick={() => setSelectedItem(item)} className="block w-full text-left">
+                          <div className="relative">
+                            <div className="flex h-32 items-center justify-center rounded-[14px] bg-[linear-gradient(135deg,_rgba(35,42,54,0.88),_rgba(18,214,255,0.08))] px-4 text-center text-[13px] font-semibold text-white/70">
+                              {category}
+                            </div>
+                            <span className={`absolute right-2.5 top-2.5 rounded-full px-2.5 py-1 text-[10px] font-semibold ${getBadgeStyles(category)}`}>
+                              {category}
+                            </span>
+                          </div>
+
+                          <h3 className="mt-3 text-[15px] font-semibold leading-5 text-white">{item.title || "Campus listing"}</h3>
+                          <p className="mt-2 line-clamp-2 text-[12px] leading-5 text-white/42">
+                            {item.description || "Campus listing"}
+                          </p>
+                        </button>
+
+                        <div className="mt-3 flex items-center justify-between gap-2">
+                          <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-white/58">
+                            {item.location || "Temple Main Campus"}
+                          </span>
+                          {item.price !== null && item.price !== undefined && category !== "Event" ? (
+                            <span className="text-[13px] font-semibold text-cyan-300">${item.price}</span>
+                          ) : null}
+                        </div>
+
+                        {contactHref ? (
+                          <a
+                            href={contactHref}
+                            className="mt-3 inline-flex w-full items-center justify-center rounded-[12px] border border-white/10 bg-white/5 px-3 py-2 text-[12px] font-semibold text-white/74 transition hover:border-white/20 hover:bg-white/[0.08]"
+                          >
+                            Contact
+                          </a>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedItem(item)}
+                            className="mt-3 inline-flex w-full items-center justify-center rounded-[12px] border border-white/10 bg-white/5 px-3 py-2 text-[12px] font-semibold text-white/74 transition hover:border-white/20 hover:bg-white/[0.08]"
+                          >
+                            View
+                          </button>
+                        )}
+                      </article>
+                    );
+                  })}
                 </div>
-              </article>
+              </div>
             ))}
 
-            {filteredListings.length === 0 ? (
-              <div className="rounded-[18px] border border-dashed border-white/12 bg-[rgba(255,255,255,0.02)] p-6 text-center text-[13px] text-white/42 sm:col-span-2 xl:col-span-4">
+            {groupedListings.length === 0 ? (
+              <div className="rounded-[18px] border border-dashed border-white/12 bg-[rgba(255,255,255,0.02)] p-6 text-center text-[13px] text-white/42">
                 No listings found yet.
               </div>
             ) : null}
@@ -299,9 +437,7 @@ export default function DashboardPage() {
               <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-lg rounded-t-[24px] border border-white/10 bg-[#090909] p-5 shadow-[0_-16px_48px_rgba(0,0,0,0.42)]">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/42">
-                      Post an Item
-                    </p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/42">Post an Item</p>
                     <h2 className="mt-1 text-[20px] font-semibold text-white">New listing</h2>
                   </div>
                   <button
@@ -341,7 +477,7 @@ export default function DashboardPage() {
                       onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}
                       className="w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none"
                     >
-                      {categories.filter((item) => item !== "All").map((category) => (
+                      {postCategories.map((category) => (
                         <option key={category} value={category}>
                           {category}
                         </option>
@@ -354,11 +490,19 @@ export default function DashboardPage() {
                     <textarea
                       rows={3}
                       value={form.description}
-                      onChange={(event) =>
-                        setForm((current) => ({ ...current, description: event.target.value }))
-                      }
+                      onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
                       className="w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none"
                       placeholder="Great for dorm storage and still runs cold."
+                    />
+                  </label>
+
+                  <label className="block">
+                    <span className="mb-1.5 block text-[12px] text-white/48">Major (optional)</span>
+                    <input
+                      value={form.major}
+                      onChange={(event) => setForm((current) => ({ ...current, major: event.target.value }))}
+                      className="w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none"
+                      placeholder="Computer Science"
                     />
                   </label>
                 </div>
@@ -377,6 +521,48 @@ export default function DashboardPage() {
             </div>
           ) : null}
         </>
+      ) : null}
+
+      {selectedItem ? (
+        <div className="fixed inset-0 z-50 bg-[rgba(0,0,0,0.72)]">
+          <button type="button" className="absolute inset-0" aria-label="Close detail view" onClick={() => setSelectedItem(null)} />
+          <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-lg rounded-t-[24px] border border-white/10 bg-[#090909] p-5 shadow-[0_-16px_48px_rgba(0,0,0,0.42)]">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${getBadgeStyles(selectedItem.category || "Marketplace")}`}>
+                  {selectedItem.category || "Listing"}
+                </span>
+                <h2 className="mt-3 text-[20px] font-semibold text-white">{selectedItem.title || "Campus listing"}</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedItem(null)}
+                className="rounded-full border border-white/10 p-2 text-white/55 transition hover:bg-white/5"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <p className="mt-4 text-[13px] leading-6 text-white/58">{selectedItem.description || "No description added yet."}</p>
+
+            <div className="mt-4 space-y-2 text-[12px] text-white/48">
+              <p>Location: {selectedItem.location || "Temple Main Campus"}</p>
+              <p>Price: {selectedItem.price !== null && selectedItem.price !== undefined ? `$${selectedItem.price}` : "Not listed"}</p>
+              <p>Major: {selectedItem.major || "Not shared"}</p>
+              <p>Contact: {selectedItem.contact_email || selectedItem.email || "Contact in original section"}</p>
+            </div>
+
+            {getContactHref(selectedItem) ? (
+              <a
+                href={getContactHref(selectedItem)}
+                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-cyan-400 px-5 py-3 text-[14px] font-semibold text-black transition hover:opacity-95"
+              >
+                <Mail className="h-4 w-4" />
+                Contact
+              </a>
+            ) : null}
+          </div>
+        </div>
       ) : null}
     </main>
   );
