@@ -136,6 +136,18 @@ function getCampusLiveTime(createdAt?: string | null) {
   return days === 1 ? "Yesterday" : `${days}d ago`;
 }
 
+function isFratPriorityWindow(now: Date) {
+  const day = now.getDay();
+  const hour = now.getHours();
+
+  return (day === 4 && hour >= 18) || day === 5 || day === 6 || (day === 0 && hour < 6);
+}
+
+function isFratPartyItem(item: CampusLiveItem) {
+  const text = `${item.title || ""} ${item.description || ""}`.toLowerCase();
+  return text.includes("frat");
+}
+
 const supportCards = [
   {
     title: "Move-Out Mode",
@@ -222,11 +234,22 @@ export default function Home() {
         setCampusLiveError("Could not load Campus Live.");
         setCampusLiveItems([]);
       } else {
+        const now = new Date();
+
         const items = ((campusLiveData as CampusLiveItem[]) || []).sort((a, b) => {
           const categoryA = a.category || "";
           const categoryB = b.category || "";
+          const fratPriorityActive = isFratPriorityWindow(now);
+          const fratA = fratPriorityActive && categoryA === "Event" && isFratPartyItem(a);
+          const fratB = fratPriorityActive && categoryB === "Event" && isFratPartyItem(b);
           const orderA = campusLiveOrder.indexOf(categoryA as (typeof campusLiveOrder)[number]);
           const orderB = campusLiveOrder.indexOf(categoryB as (typeof campusLiveOrder)[number]);
+
+          if (fratA !== fratB) {
+            if (categoryA === "Lost & Found") return -1;
+            if (categoryB === "Lost & Found") return 1;
+            return fratA ? -1 : 1;
+          }
 
           if (orderA !== orderB) return orderA - orderB;
 
