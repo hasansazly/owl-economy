@@ -96,13 +96,14 @@ export default function SignupPage() {
       const normalizedEmail = email.trim().toLowerCase();
       const code = generateSixDigitVerificationCode();
 
-      const { error: otpError } = await supabase.from("otps").insert([
+      const { error: otpError } = await supabase.from("otps").upsert(
         {
           email: normalizedEmail,
           code,
           verified: false,
         } as never,
-      ]);
+        { onConflict: "email" },
+      );
 
       if (otpError) {
         throw new Error("Could not create verification code.");
