@@ -12,6 +12,7 @@ import {
   MapPin,
   Palette,
   PartyPopper,
+  PenSquare,
   Scissors,
   Search,
   Shirt,
@@ -47,6 +48,7 @@ const quickPills = [
   { label: "Events", href: "/launch-event" },
   { label: "Lost", href: "/lost-and-found" },
   { label: "Book", href: "/campus-services" },
+  { label: "Wall", href: "/campus-wall" },
 ];
 
 const quickActions: QuickAction[] = [
@@ -109,6 +111,13 @@ const quickActions: QuickAction[] = [
     icon: Scissors,
     badge: "Book",
     href: "/campus-services",
+  },
+  {
+    title: "Campus Wall",
+    description: "Moments, memes, dorm tips, and campus updates.",
+    icon: PenSquare,
+    badge: "Scroll",
+    href: "/campus-wall",
   },
 ];
 
