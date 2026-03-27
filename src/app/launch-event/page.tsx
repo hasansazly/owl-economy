@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, CalendarDays, Clock3, MapPin, PartyPopper, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import { isVerifiedStudentLoggedIn } from "@/lib/app-auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const eventTypes = ["Frat Party", "Club Meeting", "Study Jam", "Student Assoc. Event"] as const;
@@ -100,18 +101,21 @@ export default function LaunchEventPage() {
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
 
-    if (!supabase) return;
+    if (!supabase) {
+      setIsLoggedIn(isVerifiedStudentLoggedIn());
+      return;
+    }
 
     let mounted = true;
 
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
-      setIsLoggedIn(Boolean(data.session));
+      setIsLoggedIn(Boolean(data.session) || isVerifiedStudentLoggedIn());
     });
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!mounted) return;
-      setIsLoggedIn(Boolean(session));
+      setIsLoggedIn(Boolean(session) || isVerifiedStudentLoggedIn());
     });
 
     return () => {

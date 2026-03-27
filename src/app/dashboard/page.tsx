@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, Mail, Plus, Search, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import { isVerifiedStudentLoggedIn } from "@/lib/app-auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const feedFilters = ["All", "Events", "Marketplace", "Lost & Found", "Services"] as const;
@@ -134,6 +135,7 @@ export default function DashboardPage() {
 
     if (!supabase) {
       setLoading(false);
+      setIsLoggedIn(isVerifiedStudentLoggedIn());
       setError("Supabase is not configured.");
       return;
     }
@@ -148,7 +150,7 @@ export default function DashboardPage() {
 
       if (!mounted) return;
 
-      setIsLoggedIn(Boolean(sessionData.session));
+      setIsLoggedIn(Boolean(sessionData.session) || isVerifiedStudentLoggedIn());
 
       if (listingsResponse.error) {
         setError("Could not load campus listings right now.");
@@ -164,7 +166,7 @@ export default function DashboardPage() {
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!mounted) return;
-      setIsLoggedIn(Boolean(session));
+      setIsLoggedIn(Boolean(session) || isVerifiedStudentLoggedIn());
     });
 
     return () => {

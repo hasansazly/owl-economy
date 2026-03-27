@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle2, Mail, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import { setVerifiedStudentEmail } from "@/lib/app-auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const RESEND_WAIT_SECONDS = 60;
@@ -73,6 +74,7 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
         .eq("code", code.trim());
 
       setVerified(true);
+      setVerifiedStudentEmail(email);
       router.push("/dashboard");
     } catch (verifyError) {
       setVerified(false);
