@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle2, Mail, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import { saveStudentProfile, setVerifiedStudentEmail } from "@/lib/app-auth";
+import { getStudentProfile, saveStudentProfile, setVerifiedStudentEmail } from "@/lib/app-auth";
 import { isVerifiedTempleEmail } from "@/lib/security";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
@@ -81,15 +81,10 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
 
       setVerified(true);
       setVerifiedStudentEmail(normalizedEmail);
+      const currentProfile = getStudentProfile();
       saveStudentProfile({
-        name: "",
+        ...currentProfile,
         email: normalizedEmail,
-        phone: "",
-        major: "",
-        classYear: "2028",
-        privacyMode: true,
-        eventAlerts: true,
-        lostFoundAlerts: true,
       });
       router.push("/dashboard");
     } catch (verifyError) {

@@ -109,6 +109,9 @@ type RecentListing = {
   price?: number | string | null;
   category?: string | null;
   description?: string | null;
+  poster_name?: string | null;
+  major?: string | null;
+  class_year?: string | null;
   location?: string | null;
   created_at?: string | null;
 };
@@ -207,13 +210,13 @@ export default function Home() {
     const loadRecentListings = async () => {
       const { data, error } = await supabase
         .from("listings")
-        .select("id, title, price, category, description, location, created_at")
+        .select("id, title, price, category, description, poster_name, major, class_year, location, created_at")
         .order("created_at", { ascending: false })
         .limit(4);
 
       const { data: campusLiveData, error: campusLiveFetchError } = await supabase
         .from("listings")
-        .select("id, title, price, category, description, location, created_at")
+        .select("id, title, price, category, description, poster_name, major, class_year, location, created_at")
         .in("category", [...campusLiveOrder])
         .order("created_at", { ascending: false });
 
@@ -425,6 +428,11 @@ export default function Home() {
                     <h2 className="truncate text-[15px] font-semibold tracking-[0.01em] text-white">
                       {item.title || item.category || "Campus post"}
                     </h2>
+                    <p className="mt-1 truncate text-[11px] text-white/52">
+                      {item.poster_name || "Temple Student"}
+                      {item.major ? ` · ${item.major}` : ""}
+                      {item.class_year ? ` · ${item.class_year}` : ""}
+                    </p>
                     <div className="mt-1 flex items-center gap-1.5 text-[12px] text-white/42">
                       <MapPin className="h-3.5 w-3.5 shrink-0 text-white/34" />
                       <span className="truncate">{item.location || "Temple Main Campus"}</span>
@@ -554,6 +562,11 @@ export default function Home() {
                   <p className="mt-2 text-sm text-white">
                     {previewItem?.price !== null && previewItem?.price !== undefined ? `$${previewItem?.price} - ` : ""}
                     {previewItem?.title || "Campus listing"}
+                  </p>
+                  <p className="mt-1 text-[11px] text-white/52">
+                    {previewItem?.poster_name || "Temple Student"}
+                    {previewItem?.major ? ` · ${previewItem.major}` : ""}
+                    {previewItem?.class_year ? ` · ${previewItem.class_year}` : ""}
                   </p>
                   <p className="mt-1 text-[12px] text-white/42">{previewItem?.location || "Temple Main Campus"}</p>
                   <p className="mt-3 text-[12px] leading-6 text-white/52">

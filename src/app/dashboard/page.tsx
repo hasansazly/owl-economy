@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Home, Mail, Plus, Search, Settings, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import { isVerifiedStudentLoggedIn } from "@/lib/app-auth";
+import { getStudentProfile, isVerifiedStudentLoggedIn } from "@/lib/app-auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const feedFilters = ["All", "Events", "Marketplace", "Lost & Found", "Services"] as const;
@@ -19,7 +19,9 @@ type ListingRow = {
   price?: number | string | null;
   category?: string | null;
   description?: string | null;
+  poster_name?: string | null;
   major?: string | null;
+  class_year?: string | null;
   contact_email?: string | null;
   email?: string | null;
   location?: string | null;
@@ -39,7 +41,11 @@ type ListingInsert = {
   price: number;
   category: string;
   description: string;
+  poster_name: string;
   major: string | null;
+  class_year: string | null;
+  contact_email: string | null;
+  email: string | null;
 };
 
 const initialForm: ListingForm = {
@@ -131,6 +137,7 @@ export default function DashboardPage() {
   const [postError, setPostError] = useState("");
   const [selectedItem, setSelectedItem] = useState<ListingRow | null>(null);
   const [form, setForm] = useState<ListingForm>(initialForm);
+  const profile = useMemo(() => getStudentProfile(), []);
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
@@ -250,7 +257,11 @@ export default function DashboardPage() {
         price: parsedPrice,
         category: form.category.trim(),
         description: form.description.trim(),
-        major: form.major.trim() || null,
+        poster_name: profile.name.trim() || "Temple Student",
+        major: profile.major.trim() || form.major.trim() || null,
+        class_year: profile.classYear.trim() || null,
+        contact_email: profile.email.trim() || null,
+        email: profile.email.trim() || null,
       };
 
       const { data, error: insertError } = await supabase.from("listings").insert(listingPayload as never).select("*").single();
@@ -396,6 +407,11 @@ export default function DashboardPage() {
                           </div>
 
                           <h3 className="mt-3 text-[15px] font-semibold leading-5 text-white">{item.title || "Campus listing"}</h3>
+                          <p className="mt-1 text-[11px] text-white/52">
+                            {item.poster_name || "Temple Student"}
+                            {item.major ? ` · ${item.major}` : ""}
+                            {item.class_year ? ` · ${item.class_year}` : ""}
+                          </p>
                           <p className="mt-2 line-clamp-2 text-[12px] leading-5 text-white/42">
                             {item.description || "Campus listing"}
                           </p>
@@ -573,9 +589,13 @@ export default function DashboardPage() {
             <p className="mt-4 text-[13px] leading-6 text-white/58">{selectedItem.description || "No description added yet."}</p>
 
             <div className="mt-4 space-y-2 text-[12px] text-white/48">
+              <p>
+                Posted by: {selectedItem.poster_name || "Temple Student"}
+                {selectedItem.major ? ` · ${selectedItem.major}` : ""}
+                {selectedItem.class_year ? ` · ${selectedItem.class_year}` : ""}
+              </p>
               <p>Location: {selectedItem.location || "Temple Main Campus"}</p>
               <p>Price: {selectedItem.price !== null && selectedItem.price !== undefined ? `$${selectedItem.price}` : "Not listed"}</p>
-              <p>Major: {selectedItem.major || "Not shared"}</p>
               <p>Contact: {selectedItem.contact_email || selectedItem.email || "Contact in original section"}</p>
             </div>
 

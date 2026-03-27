@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, HandCoins, MapPin, Wallet } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
+import { getStudentProfile, isVerifiedStudentLoggedIn } from "@/lib/app-auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const paymentOptions = [
@@ -36,6 +37,7 @@ const quickFundraisers = [
 
 export default function FundraiseFastPage() {
   const router = useRouter();
+  const profile = useMemo(() => getStudentProfile(), []);
   const [headline, setHeadline] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -82,6 +84,11 @@ export default function FundraiseFastPage() {
       return;
     }
 
+    if (!isVerifiedStudentLoggedIn()) {
+      setPostError("Log in with your Temple account to post a fundraiser.");
+      return;
+    }
+
     const parsedPrice = Number(price);
 
     if (Number.isNaN(parsedPrice) || parsedPrice <= 0) {
@@ -98,6 +105,11 @@ export default function FundraiseFastPage() {
         title: headline.trim(),
         price: parsedPrice,
         category: "Fundraise",
+        poster_name: profile.name.trim() || "Temple Student",
+        major: profile.major.trim() || null,
+        class_year: profile.classYear.trim() || null,
+        contact_email: profile.email.trim() || null,
+        email: profile.email.trim() || null,
         description: `${description.trim()} | Time: ${startTime.trim()} to ${endTime.trim()} | Payment: ${
           paymentMethod.length ? paymentMethod.join(", ") : "Not listed"
         }${venmoHandle.trim() ? ` | Venmo: ${venmoHandle.trim()}` : ""}`,
@@ -354,6 +366,11 @@ export default function FundraiseFastPage() {
                 <h2 className="mt-3 font-display text-[17px] font-bold tracking-[-0.03em] text-white">
                   {headline || "Your fundraiser headline"}
                 </h2>
+                <p className="mt-1 text-[11px] text-white/54">
+                  {profile.name || "Temple Student"}
+                  {profile.major ? ` · ${profile.major}` : ""}
+                  {profile.classYear ? ` · ${profile.classYear}` : ""}
+                </p>
                 <p className="mt-2 text-[12px] leading-5 text-white/50">
                   {description ||
                     "Explain where the money goes and why students should show up. Keep it short, specific, and easy to trust."}

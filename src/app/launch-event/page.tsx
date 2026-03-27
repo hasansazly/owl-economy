@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, CalendarDays, Clock3, MapPin, PartyPopper, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import { isVerifiedStudentLoggedIn } from "@/lib/app-auth";
+import { getStudentProfile, isVerifiedStudentLoggedIn } from "@/lib/app-auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const eventTypes = ["Frat Party", "Club Meeting", "Study Jam", "Student Assoc. Event"] as const;
@@ -69,7 +69,11 @@ type EventListingInsert = {
   price: number;
   category: string;
   description: string;
+  poster_name: string;
   major: string | null;
+  class_year: string | null;
+  contact_email: string | null;
+  email: string | null;
   event_type: string;
   vibe: string;
   event_date: string;
@@ -97,6 +101,7 @@ export default function LaunchEventPage() {
   const [posting, setPosting] = useState(false);
   const [postError, setPostError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const profile = useMemo(() => getStudentProfile(), []);
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
@@ -201,7 +206,11 @@ export default function LaunchEventPage() {
         ]
           .filter(Boolean)
           .join(" | "),
-        major: form.major.trim() || null,
+        poster_name: profile.name.trim() || "Temple Student",
+        major: profile.major.trim() || form.major.trim() || null,
+        class_year: profile.classYear.trim() || null,
+        contact_email: profile.email.trim() || null,
+        email: profile.email.trim() || null,
         event_type: form.eventType,
         vibe: form.vibe.trim(),
         event_date: form.eventDate.trim(),
@@ -436,6 +445,11 @@ export default function LaunchEventPage() {
                   {form.eventType}
                 </div>
                 <h2 className="mt-3 font-display text-[17px] font-bold tracking-[-0.03em] text-white">{liveHeadline}</h2>
+                <p className="mt-1 text-[11px] text-white/54">
+                  {profile.name || "Temple Student"}
+                  {profile.major ? ` · ${profile.major}` : ""}
+                  {profile.classYear ? ` · ${profile.classYear}` : ""}
+                </p>
                 <p className="mt-2 text-[12px] leading-5 text-white/56">{liveVibe}</p>
 
                 <div className="mt-5 space-y-2 text-[12px] text-white/60">

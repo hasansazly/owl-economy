@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, GraduationCap, LockKeyhole, Mail, User } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { saveStudentProfile } from "@/lib/app-auth";
+
 function getStrength(password: string) {
   let score = 0;
   if (password.length >= 8) score += 1;
@@ -103,6 +105,17 @@ export default function SignupPage() {
       if (!response.ok) {
         throw new Error(data.error || "Signup failed.");
       }
+
+      saveStudentProfile({
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        phone: "",
+        major: "",
+        classYear: "2028",
+        privacyMode: true,
+        eventAlerts: true,
+        lostFoundAlerts: true,
+      });
 
       router.push(`/verify-email?email=${encodeURIComponent(email.trim())}`);
     } catch (error) {

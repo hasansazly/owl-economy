@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, Clock3, KeyRound, MapPin, Search, ShieldCheck, Sparkles, Wallet, Wifi } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { getStudentProfile, isVerifiedStudentLoggedIn } from "@/lib/app-auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 type ReportCategory = "IDs" | "Keys" | "Tech" | "Accessories" | "Dorm Items";
@@ -13,6 +14,9 @@ type ReportItem = {
   type: "Lost" | "Found";
   category: ReportCategory;
   itemName: string;
+  posterName: string;
+  major: string;
+  classYear: string;
   location: string;
   time: string;
   details: string;
@@ -59,6 +63,7 @@ const categoryIcons: Record<ReportCategory, typeof Wallet> = {
 };
 
 export default function LostAndFoundPage() {
+  const profile = useMemo(() => getStudentProfile(), []);
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [activeCategory, setActiveCategory] = useState<(typeof categories)[number]>("All");
   const [search, setSearch] = useState("");
@@ -109,6 +114,11 @@ export default function LostAndFoundPage() {
       return;
     }
 
+    if (!isVerifiedStudentLoggedIn()) {
+      setFormError("Log in with your Temple account to post a report.");
+      return;
+    }
+
     const supabase = getSupabaseBrowserClient();
 
     if (!supabase) {
@@ -121,6 +131,9 @@ export default function LostAndFoundPage() {
       type: reportType,
       category: reportCategory,
       itemName: itemName.trim(),
+      posterName: profile.name.trim() || "Temple Student",
+      major: profile.major.trim(),
+      classYear: profile.classYear.trim(),
       location: reportLocation.trim(),
       time: reportTime.trim(),
       details: reportDetails.trim(),
@@ -130,6 +143,11 @@ export default function LostAndFoundPage() {
       title: `${reportType}: ${newReport.itemName}`,
       price: 0,
       category: "Lost & Found",
+      poster_name: newReport.posterName,
+      major: newReport.major || null,
+      class_year: newReport.classYear || null,
+      contact_email: profile.email.trim() || null,
+      email: profile.email.trim() || null,
       description: `${newReport.details} | ${newReport.category} | ${newReport.time} | ${newReport.type}`,
       location: newReport.location,
     } as never);
@@ -363,6 +381,11 @@ export default function LostAndFoundPage() {
                                 {report.category}
                               </span>
                             </div>
+                            <p className="mt-1 text-[11px] text-white/52">
+                              {report.posterName}
+                              {report.major ? ` · ${report.major}` : ""}
+                              {report.classYear ? ` · ${report.classYear}` : ""}
+                            </p>
                             <p className="mt-2 text-[12px] leading-5 text-white/46">{report.details}</p>
                           </div>
                         </div>
