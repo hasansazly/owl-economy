@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, HandCoins, MapPin, Wallet } from "lucide-react";
 import { useState } from "react";
+
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const paymentOptions = [
   { id: "venmo", label: "Venmo", detailLabel: "Handle", placeholder: "@scienceclub" },
@@ -32,6 +35,7 @@ const quickFundraisers = [
 ] as const;
 
 export default function FundraiseFastPage() {
+  const router = useRouter();
   const [headline, setHeadline] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -40,6 +44,9 @@ export default function FundraiseFastPage() {
   const [endTime, setEndTime] = useState("");
   const [venmoHandle, setVenmoHandle] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<string[]>(["venmo"]);
+  const [posting, setPosting] = useState(false);
+  const [postError, setPostError] = useState("");
+  const [postedMessage, setPostedMessage] = useState("");
 
   const togglePaymentMethod = (method: string) => {
     setPaymentMethod((current) =>
@@ -61,6 +68,56 @@ export default function FundraiseFastPage() {
     .split(".")
     .map((part) => part.trim())
     .filter(Boolean).length;
+
+  const postFundraiser = async () => {
+    const supabase = getSupabaseBrowserClient();
+
+    if (!supabase) {
+      setPostError("Supabase is not configured.");
+      return;
+    }
+
+    if (!headline.trim() || !description.trim() || !price.trim() || !location.trim() || !startTime.trim() || !endTime.trim()) {
+      setPostError("Fill out the fundraiser first.");
+      return;
+    }
+
+    const parsedPrice = Number(price);
+
+    if (Number.isNaN(parsedPrice) || parsedPrice <= 0) {
+      setPostError("Enter a valid price.");
+      return;
+    }
+
+    try {
+      setPosting(true);
+      setPostError("");
+      setPostedMessage("");
+
+      const { error } = await supabase.from("listings").insert({
+        title: headline.trim(),
+        price: parsedPrice,
+        category: "Fundraise",
+        description: `${description.trim()} | Time: ${startTime.trim()} to ${endTime.trim()} | Payment: ${
+          paymentMethod.length ? paymentMethod.join(", ") : "Not listed"
+        }${venmoHandle.trim() ? ` | Venmo: ${venmoHandle.trim()}` : ""}`,
+        location: location.trim(),
+      } as never);
+
+      if (error) {
+        throw new Error("Could not post the fundraiser.");
+      }
+
+      setPostedMessage("Fundraiser live.");
+      setTimeout(() => {
+        router.push("/");
+      }, 900);
+    } catch (fundraiseError) {
+      setPostError(fundraiseError instanceof Error ? fundraiseError.message : "Could not post the fundraiser.");
+    } finally {
+      setPosting(false);
+    }
+  };
 
   return (
     <main className="page-shell">
@@ -263,6 +320,27 @@ export default function FundraiseFastPage() {
                   })}
                 </div>
               </div>
+
+              {postError ? (
+                <div className="rounded-[14px] border border-[rgba(240,80,80,0.22)] bg-[rgba(240,80,80,0.08)] px-3 py-3 text-[12px] text-[#F09595]">
+                  {postError}
+                </div>
+              ) : null}
+
+              {postedMessage ? (
+                <div className="rounded-[14px] border border-cyan-400/20 bg-cyan-400/8 px-3 py-3 text-[12px] font-semibold text-cyan-300">
+                  {postedMessage}
+                </div>
+              ) : null}
+
+              <button
+                type="button"
+                onClick={postFundraiser}
+                disabled={posting}
+                className="capsule-primary inline-flex w-full items-center justify-center px-5 py-3 text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {posting ? "Posting..." : "Post Fundraiser"}
+              </button>
             </div>
           </section>
 

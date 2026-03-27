@@ -40,12 +40,6 @@ const quickPills = [
   { label: "Book", href: "/campus-services" },
 ];
 
-const flashDrops = [
-  { title: "Valentines party", location: "1456 N 15th Broad St", time: "10 PM" },
-  { title: "Ignite Temple Club fundraiser", location: "Student Center Temple", time: "Live" },
-  { title: "Skylar lost her airpod", location: "Charles Library", time: "Yesterday" },
-];
-
 const quickActions: QuickAction[] = [
   {
     title: "Campus Feed",
@@ -119,6 +113,29 @@ type RecentListing = {
   created_at?: string | null;
 };
 
+type CampusLiveItem = RecentListing;
+
+const campusLiveOrder = ["Lost & Found", "Fundraise", "Event"] as const;
+
+function getCampusLiveLabel(category: string) {
+  if (category === "Lost & Found") return "Lost";
+  if (category === "Fundraise") return "Fundraise";
+  return "Events";
+}
+
+function getCampusLiveTime(createdAt?: string | null) {
+  if (!createdAt) return "Live";
+
+  const diff = Date.now() - new Date(createdAt).getTime();
+  const minutes = Math.max(1, Math.floor(diff / 60000));
+
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return days === 1 ? "Yesterday" : `${days}d ago`;
+}
+
 const supportCards = [
   {
     title: "Move-Out Mode",
@@ -157,6 +174,9 @@ export default function Home() {
   const [recentListings, setRecentListings] = useState<RecentListing[]>([]);
   const [recentLoading, setRecentLoading] = useState(true);
   const [recentError, setRecentError] = useState("");
+  const [campusLiveItems, setCampusLiveItems] = useState<CampusLiveItem[]>([]);
+  const [campusLiveLoading, setCampusLiveLoading] = useState(true);
+  const [campusLiveError, setCampusLiveError] = useState("");
   const [activePreview, setActivePreview] = useState<string | null>(null);
 
   useEffect(() => {
@@ -165,6 +185,8 @@ export default function Home() {
     if (!supabase) {
       setRecentLoading(false);
       setRecentError("");
+      setCampusLiveLoading(false);
+      setCampusLiveError("");
       return;
     }
 
@@ -176,6 +198,12 @@ export default function Home() {
         .select("id, title, price, category, description, location, created_at")
         .order("created_at", { ascending: false })
         .limit(4);
+
+      const { data: campusLiveData, error: campusLiveFetchError } = await supabase
+        .from("listings")
+        .select("id, title, price, category, description, location, created_at")
+        .in("category", [...campusLiveOrder])
+        .order("created_at", { ascending: false });
 
       if (!mounted) return;
 
@@ -189,6 +217,28 @@ export default function Home() {
       }
 
       setRecentLoading(false);
+
+      if (campusLiveFetchError) {
+        setCampusLiveError("Could not load Campus Live.");
+        setCampusLiveItems([]);
+      } else {
+        const items = ((campusLiveData as CampusLiveItem[]) || []).sort((a, b) => {
+          const categoryA = a.category || "";
+          const categoryB = b.category || "";
+          const orderA = campusLiveOrder.indexOf(categoryA as (typeof campusLiveOrder)[number]);
+          const orderB = campusLiveOrder.indexOf(categoryB as (typeof campusLiveOrder)[number]);
+
+          if (orderA !== orderB) return orderA - orderB;
+
+          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return dateB - dateA;
+        });
+
+        setCampusLiveItems(items);
+      }
+
+      setCampusLiveLoading(false);
     };
 
     loadRecentListings();
@@ -319,39 +369,51 @@ export default function Home() {
               <span className="campus-live-dot" aria-hidden="true" />
               Campus Live
             </p>
-            <span className="campus-live-badge">3 active</span>
+            <span className="campus-live-badge">{campusLiveItems.length} active</span>
           </div>
-          <div className="space-y-2">
-            {flashDrops.map((drop) => (
-              <article
-                key={drop.title}
-                className="flex items-center justify-between rounded-[18px] border border-transparent px-3 py-3 transition hover:border-white/8 hover:bg-white/[0.03]"
-              >
-                <div className="min-w-0 pr-3">
-                  <h2 className="truncate text-[15px] font-semibold tracking-[0.01em] text-white">{drop.title}</h2>
-                  <div className="mt-1 flex items-center gap-1.5 text-[12px] text-white/42">
-                    <MapPin className="h-3.5 w-3.5 shrink-0 text-white/34" />
-                    <span className="truncate">{drop.location}</span>
+          {campusLiveLoading ? (
+            <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 text-[13px] text-white/42">
+              Loading Campus Live...
+            </div>
+          ) : campusLiveError ? (
+            <div className="rounded-[18px] border border-[rgba(240,80,80,0.22)] bg-[rgba(240,80,80,0.08)] px-4 py-4 text-[13px] text-[#F09595]">
+              {campusLiveError}
+            </div>
+          ) : campusLiveItems.length === 0 ? (
+            <div className="rounded-[18px] border border-dashed border-white/12 bg-[rgba(255,255,255,0.02)] px-4 py-6 text-center text-[13px] text-white/42">
+              No live lost and found, fundraiser, or event posts yet.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {campusLiveItems.map((item) => (
+                <article
+                  key={String(item.id)}
+                  className="flex items-center justify-between rounded-[18px] border border-transparent px-3 py-3 transition hover:border-white/8 hover:bg-white/[0.03]"
+                >
+                  <div className="min-w-0 pr-3">
+                    <h2 className="truncate text-[15px] font-semibold tracking-[0.01em] text-white">
+                      {item.title || item.category || "Campus post"}
+                    </h2>
+                    <div className="mt-1 flex items-center gap-1.5 text-[12px] text-white/42">
+                      <MapPin className="h-3.5 w-3.5 shrink-0 text-white/34" />
+                      <span className="truncate">{item.location || "Temple Main Campus"}</span>
+                    </div>
                   </div>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <button
-                    type="button"
-                    className="rounded-full border border-white/12 bg-white/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70 transition hover:border-white/20 hover:bg-white/[0.08]"
-                  >
-                    {drop.title.includes("party")
-                      ? "Events"
-                      : drop.title.includes("fundraiser")
-                        ? "Fundraise"
-                        : "Lost"}
-                  </button>
-                  <span className="rounded-full border border-white/10 bg-[rgba(18,214,255,0.08)] px-2.5 py-1 text-[11px] font-semibold text-[var(--accent)]">
-                    {drop.time}
-                  </span>
-                </div>
-              </article>
-            ))}
-          </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <button
+                      type="button"
+                      className="rounded-full border border-white/12 bg-white/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70"
+                    >
+                      {getCampusLiveLabel(item.category || "Event")}
+                    </button>
+                    <span className="rounded-full border border-white/10 bg-[rgba(18,214,255,0.08)] px-2.5 py-1 text-[11px] font-semibold text-[var(--accent)]">
+                      {getCampusLiveTime(item.created_at)}
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
 
         <section id="launcher" className="border-t border-white/8 px-1 py-5">

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { ArrowLeft, Clock3, KeyRound, MapPin, Search, ShieldCheck, Sparkles, Wallet, Wifi } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+
 type ReportCategory = "IDs" | "Keys" | "Tech" | "Accessories" | "Dorm Items";
 
 type ReportItem = {
@@ -95,11 +97,22 @@ export default function LostAndFoundPage() {
   };
 
   const submitReport = () => {
+    void submitReportAsync();
+  };
+
+  const submitReportAsync = async () => {
     setFormError("");
     setPostedMessage("");
 
     if (!itemName.trim() || !reportLocation.trim() || !reportTime.trim() || !reportDetails.trim()) {
       setFormError("Fill out the report first.");
+      return;
+    }
+
+    const supabase = getSupabaseBrowserClient();
+
+    if (!supabase) {
+      setFormError("Supabase is not configured.");
       return;
     }
 
@@ -112,6 +125,19 @@ export default function LostAndFoundPage() {
       time: reportTime.trim(),
       details: reportDetails.trim(),
     };
+
+    const { error } = await supabase.from("listings").insert({
+      title: `${reportType}: ${newReport.itemName}`,
+      price: 0,
+      category: "Lost & Found",
+      description: `${newReport.details} | ${newReport.category} | ${newReport.time} | ${newReport.type}`,
+      location: newReport.location,
+    } as never);
+
+    if (error) {
+      setFormError("Could not post the report.");
+      return;
+    }
 
     setReports((current) => [newReport, ...current]);
     setActiveCategory(reportCategory);
