@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Bell, Bookmark, Home, Mail, Plus, Search, Settings, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { getStudentProfile, isVerifiedStudentLoggedIn } from "@/lib/app-auth";
 import {
@@ -36,6 +36,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const feedFilters = ["All", "Events", "Marketplace", "Lost & Found", "Services"] as const;
 const postCategories = ["Textbooks", "Mini-Fridges", "Electronics", "Sublets", "Event"] as const;
+const FEED_PAGE_SIZE = 8;
 
 type FeedFilter = (typeof feedFilters)[number];
 
@@ -158,6 +159,7 @@ function sortListingsNewest(items: ListingRow[]) {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<FeedFilter>("All");
   const [listings, setListings] = useState<ListingRow[]>([]);
@@ -169,6 +171,7 @@ export default function DashboardPage() {
   const [postError, setPostError] = useState("");
   const [selectedItem, setSelectedItem] = useState<ListingRow | null>(null);
   const [form, setForm] = useState<ListingForm>(initialForm);
+  const [visibleCount, setVisibleCount] = useState(FEED_PAGE_SIZE);
   const profile = useMemo(() => getStudentProfile(), []);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState<CampusNotification[]>([]);
@@ -245,6 +248,21 @@ export default function DashboardPage() {
   }, [isLoggedIn, loading, router]);
 
   const visibleListings = useMemo(() => {
+    const getRankingScore = (item: ListingRow) => {
+      const preferenceScore = getPreferencePriority(item, {
+        homeBuilding: profile.homeBuilding,
+        followedBuildings: profile.followedBuildings,
+        followedMajors: profile.followedMajors,
+      });
+      const createdAt = item.created_at ? new Date(item.created_at).getTime() : 0;
+      const ageInHours = Math.max(1, (Date.now() - createdAt) / (1000 * 60 * 60));
+      const recencyScore = 120 / ageInHours;
+      const engagementScore = getRecentViewerCount(item.id) * 12;
+      const categoryBoost = getFeedGroup(item.category || "Marketplace") === "Lost & Found" ? 8 : 0;
+
+      return preferenceScore * 100 + recencyScore + engagementScore + categoryBoost;
+    };
+
     const next = listings.filter((item) => {
       const category = item.category || "Marketplace";
       const group = getFeedGroup(category);
@@ -258,41 +276,12 @@ export default function DashboardPage() {
       return matchesFilter && matchesQuery;
     });
 
-    return [...sortListingsNewest(next)].sort((a, b) => {
-      const priorityA = getPreferencePriority(a, {
-        homeBuilding: profile.homeBuilding,
-        followedBuildings: profile.followedBuildings,
-        followedMajors: profile.followedMajors,
-      });
-      const priorityB = getPreferencePriority(b, {
-        homeBuilding: profile.homeBuilding,
-        followedBuildings: profile.followedBuildings,
-        followedMajors: profile.followedMajors,
-      });
-
-      if (priorityA !== priorityB) return priorityB - priorityA;
-
-      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-      return dateB - dateA;
-    });
+    return [...sortListingsNewest(next)].sort((a, b) => getRankingScore(b) - getRankingScore(a));
   }, [activeFilter, listings, profile.followedBuildings, profile.followedMajors, profile.homeBuilding, query]);
-
-  const groupedListings = useMemo(() => {
-    const groups = new Map<string, ListingRow[]>();
-
-    for (const item of visibleListings) {
-      const category = item.category || "Other";
-      const current = groups.get(category) || [];
-      current.push(item);
-      groups.set(category, current);
-    }
-
-    return Array.from(groups.entries()).map(([category, items]) => ({
-      category,
-      items: sortListingsNewest(items),
-    }));
-  }, [visibleListings]);
+  const renderedListings = useMemo(
+    () => visibleListings.slice(0, visibleCount),
+    [visibleCount, visibleListings],
+  );
 
   const unreadCount = useMemo(
     () => notifications.filter((item) => !item.read).length,
@@ -318,6 +307,30 @@ export default function DashboardPage() {
     const score = computeCampusKarma(listings, email);
     return { score, label: getCampusKarmaLabel(score) };
   };
+
+  useEffect(() => {
+    setVisibleCount(FEED_PAGE_SIZE);
+  }, [activeFilter, query]);
+
+  useEffect(() => {
+    const node = loadMoreRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+
+        if (entry?.isIntersecting) {
+          setVisibleCount((current) => Math.min(current + FEED_PAGE_SIZE, visibleListings.length));
+        }
+      },
+      { rootMargin: "300px 0px" },
+    );
+
+    observer.observe(node);
+
+    return () => observer.disconnect();
+  }, [visibleListings.length]);
 
   const openListingDetail = (item: ListingRow) => {
     incrementListingView(item, profile.email);
@@ -619,132 +632,148 @@ export default function DashboardPage() {
         ) : null}
 
         {!loading && isLoggedIn && !error ? (
-          <section className="mt-5 space-y-6">
-            {groupedListings.map(({ category, items }) => (
-              <div key={category}>
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <div>
-                    <h2 className="text-[15px] font-semibold text-white">{category}</h2>
-                    <p className="mt-1 text-[12px] text-white/38">{items.length} post{items.length === 1 ? "" : "s"}</p>
-                  </div>
-                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${getBadgeStyles(category)}`}>
-                    {getFeedGroup(category)}
-                  </span>
-                </div>
+          <section className="mt-5 space-y-4">
+            <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/44">Campus Feed</p>
+              <p className="mt-2 text-[13px] text-white/74">
+                Ranked by recency, your building and major preferences, and real student engagement.
+              </p>
+            </div>
 
-                <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                  {items.map((item) => {
-                    const contactHref = getContactHref(item);
-                    const karma = getItemKarma(item);
-                    const urgency = parseUrgencyMeta(item.description);
-                    const viewerCount = getRecentViewerCount(item.id);
-                    const expiryCountdown = getExpiryCountdown(urgency.expiresAt);
+            {renderedListings.map((item) => {
+              const category = item.category || "Other";
+              const contactHref = getContactHref(item);
+              const karma = getItemKarma(item);
+              const urgency = parseUrgencyMeta(item.description);
+              const viewerCount = getRecentViewerCount(item.id);
+              const expiryCountdown = getExpiryCountdown(urgency.expiresAt);
+              const badges = getCampusBadges(listings, item.contact_email || item.email || "");
 
-                    return (
-                      <article
-                        key={String(item.id)}
-                        className="min-w-[268px] max-w-[268px] rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-3.5 shadow-[0_16px_36px_rgba(0,0,0,0.2)] backdrop-blur-xl"
-                      >
-                        <button type="button" onClick={() => openListingDetail(item)} className="block w-full text-left">
-                          <div className="relative">
-                            <div className="flex h-32 items-center justify-center rounded-[14px] bg-[linear-gradient(135deg,_rgba(35,42,54,0.88),_rgba(18,214,255,0.08))] px-4 text-center text-[13px] font-semibold text-white/70">
-                              {category}
-                            </div>
-                            <span className={`absolute right-2.5 top-2.5 rounded-full px-2.5 py-1 text-[10px] font-semibold ${getBadgeStyles(category)}`}>
-                              {category}
-                            </span>
-                          </div>
-
-                          <h3 className="mt-3 text-[15px] font-semibold leading-5 text-white">{item.title || "Campus listing"}</h3>
-                          <p className="mt-1 text-[11px] text-white/52">
-                            {item.poster_name || "Temple Student"}
-                            {item.major ? ` · ${item.major}` : ""}
-                            {item.class_year ? ` · ${item.class_year}` : ""}
-                          </p>
-                          <div className="mt-2 inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-300">
-                            Campus Karma {karma.score} · {karma.label}
-                          </div>
-                          {getCampusBadges(listings, item.contact_email || item.email || "").length > 0 ? (
-                            <div className="mt-2 flex flex-wrap gap-2">
-                              {getCampusBadges(listings, item.contact_email || item.email || "")
-                                .slice(0, 2)
-                                .map((badge) => (
-                                  <span
-                                    key={badge.id}
-                                    className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/74"
-                                  >
-                                    {badge.label}
-                                  </span>
-                                ))}
-                            </div>
-                          ) : null}
-                          <p className="mt-2 text-[11px] text-white/46">
-                            {getRelativePostLabel(item.created_at)}
-                          </p>
-                          {viewerCount > 0 ? (
-                            <p className="mt-1 text-[11px] font-semibold text-amber-300">
-                              🔥 {viewerCount} people are viewing this
-                            </p>
-                          ) : null}
-                          {urgency.flashSale || urgency.moveOutMode ? (
-                            <div className="mt-2 flex flex-wrap gap-2">
-                              {urgency.flashSale ? (
-                                <span className="rounded-full border border-rose-400/20 bg-rose-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-rose-300">
-                                  Flash Sale
-                                </span>
-                              ) : null}
-                              {urgency.moveOutMode ? (
-                                <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-300">
-                                  Move-Out Mode
-                                </span>
-                              ) : null}
-                              {expiryCountdown ? (
-                                <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/74">
-                                  {expiryCountdown}
-                                </span>
-                              ) : null}
-                            </div>
-                          ) : null}
-                          <p className="mt-2 line-clamp-2 text-[12px] leading-5 text-white/42">
-                            {urgency.cleanDescription || "Campus listing"}
-                          </p>
-                        </button>
-
-                        <div className="mt-3 flex items-center justify-between gap-2">
-                          <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-white/58">
-                            {item.location || "Temple Main Campus"}
+              return (
+                <article
+                  key={String(item.id)}
+                  className="rounded-[20px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 shadow-[0_16px_36px_rgba(0,0,0,0.2)] backdrop-blur-xl"
+                >
+                  <button type="button" onClick={() => openListingDetail(item)} className="block w-full text-left">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${getBadgeStyles(category)}`}>
+                            {getFeedGroup(category)}
                           </span>
                           {item.price !== null && item.price !== undefined && category !== "Event" ? (
                             <span className="text-[13px] font-semibold text-cyan-300">${item.price}</span>
                           ) : null}
                         </div>
+                        <h2 className="mt-3 text-[16px] font-semibold leading-6 text-white">{item.title || "Campus listing"}</h2>
+                        <p className="mt-1 text-[12px] text-white/52">
+                          {item.poster_name || "Temple Student"}
+                          {item.major ? ` · ${item.major}` : ""}
+                          {item.class_year ? ` · ${item.class_year}` : ""}
+                        </p>
+                      </div>
+                      <div className="shrink-0 rounded-[14px] border border-white/10 bg-[linear-gradient(135deg,_rgba(35,42,54,0.88),_rgba(18,214,255,0.08))] px-4 py-8 text-center text-[11px] font-semibold text-white/65">
+                        {category}
+                      </div>
+                    </div>
 
-                        {contactHref ? (
-                          <a
-                            href={contactHref}
-                            className="mt-3 inline-flex w-full items-center justify-center rounded-[12px] border border-white/10 bg-white/5 px-3 py-2 text-[12px] font-semibold text-white/74 transition hover:border-white/20 hover:bg-white/[0.08]"
-                          >
-                            Contact
-                          </a>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => openListingDetail(item)}
-                            className="mt-3 inline-flex w-full items-center justify-center rounded-[12px] border border-white/10 bg-white/5 px-3 py-2 text-[12px] font-semibold text-white/74 transition hover:border-white/20 hover:bg-white/[0.08]"
-                          >
-                            View
-                          </button>
-                        )}
-                      </article>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+                    <div className="mt-3 inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-300">
+                      Campus Karma {karma.score} · {karma.label}
+                    </div>
 
-            {groupedListings.length === 0 ? (
+                    {badges.length > 0 ? (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {badges.slice(0, 2).map((badge) => (
+                          <span
+                            key={badge.id}
+                            className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/74"
+                          >
+                            {badge.label}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+
+                    <p className="mt-3 text-[11px] text-white/46">{getRelativePostLabel(item.created_at)}</p>
+                    {viewerCount > 0 ? (
+                      <p className="mt-1 text-[11px] font-semibold text-amber-300">🔥 {viewerCount} people are viewing this</p>
+                    ) : null}
+
+                    {urgency.flashSale || urgency.moveOutMode ? (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {urgency.flashSale ? (
+                          <span className="rounded-full border border-rose-400/20 bg-rose-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-rose-300">
+                            Flash Sale
+                          </span>
+                        ) : null}
+                        {urgency.moveOutMode ? (
+                          <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-300">
+                            Move-Out Mode
+                          </span>
+                        ) : null}
+                        {expiryCountdown ? (
+                          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/74">
+                            {expiryCountdown}
+                          </span>
+                        ) : null}
+                      </div>
+                    ) : null}
+
+                    <p className="mt-3 line-clamp-3 text-[13px] leading-6 text-white/48">
+                      {urgency.cleanDescription || "Campus listing"}
+                    </p>
+
+                    <div className="mt-3 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-white/58">
+                      {item.location || "Temple Main Campus"}
+                    </div>
+                  </button>
+
+                  <div className="mt-4 flex gap-2">
+                    {contactHref ? (
+                      <a
+                        href={contactHref}
+                        className="inline-flex flex-1 items-center justify-center rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[12px] font-semibold text-white/74 transition hover:border-white/20 hover:bg-white/[0.08]"
+                      >
+                        Contact
+                      </a>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => openListingDetail(item)}
+                        className="inline-flex flex-1 items-center justify-center rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[12px] font-semibold text-white/74 transition hover:border-white/20 hover:bg-white/[0.08]"
+                      >
+                        View
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleToggleSavedItem(item)}
+                      className={`inline-flex items-center justify-center rounded-[12px] border px-3 py-2.5 text-[12px] font-semibold transition ${
+                        savedItemIds[String(item.id)]
+                          ? "border-cyan-400/30 bg-cyan-400/10 text-cyan-300"
+                          : "border-white/10 bg-white/5 text-white/74 hover:border-white/20 hover:bg-white/[0.08]"
+                      }`}
+                    >
+                      <Bookmark className="h-4 w-4" />
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+
+            {visibleListings.length === 0 ? (
               <div className="rounded-[18px] border border-dashed border-white/12 bg-[rgba(255,255,255,0.02)] p-6 text-center text-[13px] text-white/42">
                 No listings found yet.
+              </div>
+            ) : null}
+
+            {visibleListings.length > renderedListings.length ? (
+              <div ref={loadMoreRef} className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 text-center text-[13px] text-white/48">
+                Loading more from your campus feed...
+              </div>
+            ) : visibleListings.length > 0 ? (
+              <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 text-center text-[13px] text-white/38">
+                You&apos;re caught up for now. New campus posts will flow in here automatically.
               </div>
             ) : null}
           </section>
