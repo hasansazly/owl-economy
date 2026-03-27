@@ -1,80 +1,223 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, CalendarDays, Clock3, MapPin, PartyPopper, Sparkles, Ticket, Users } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, CalendarDays, Clock3, MapPin, PartyPopper, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
-const eventTypes = ["Party", "Study Jam", "Club Event", "Popup", "Open Mic", "Signup"] as const;
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
-const promoTips = [
-  "Lead with the vibe first so students instantly know why it matters.",
-  "Keep the time window tight and easy to scan on mobile.",
-  "Use a clear location students already recognize on campus.",
-] as const;
+const eventTypes = ["Frat Party", "Club Meeting", "Study Jam", "Student Assoc. Event"] as const;
 
-const quickEventTemplates = [
+const eventTemplates = [
+  {
+    label: "Frat Party",
+    eventType: "Frat Party",
+    headline: "Late Night Frat Link",
+    vibe: "BYOB, campus fits, and pull-up energy before the line gets wild.",
+    location: "Off Broad near campus",
+    startTime: "10:30 PM",
+    endTime: "1:30 AM",
+    extras: ["BYOB", "Late Night", "Friends"],
+  },
+  {
+    label: "Club Meeting",
+    eventType: "Club Meeting",
+    headline: "Weekly Club Check-In",
+    vibe: "Free pizza, quick updates, and new faces welcome.",
+    location: "Student Center",
+    startTime: "6:00 PM",
+    endTime: "7:15 PM",
+    extras: ["Free Pizza", "Open Join", "Campus Org"],
+  },
   {
     label: "Study Jam",
-    headline: "Late Night Study Jam",
-    type: "Study Jam",
-    description: "Open tables, low-pressure study energy, and a quick campus meetup before exams hit.",
+    eventType: "Study Jam",
+    headline: "Finals Grind Study Jam",
+    vibe: "Finals Grind, quiet tables, and everybody locked in together.",
     location: "Charles Library",
     startTime: "8:00 PM",
-    endTime: "10:00 PM",
-    cta: "Pull up with your notes",
+    endTime: "11:00 PM",
+    extras: ["Finals Grind", "Quiet", "Notes"],
   },
   {
-    label: "Popup",
-    headline: "Campus Popup Drop",
-    type: "Popup",
-    description: "Quick student popup with limited stock and fast campus pickup.",
-    location: "Student Center",
-    startTime: "1:00 PM",
-    endTime: "3:00 PM",
-    cta: "Come early for first pick",
+    label: "Student Assoc. Event",
+    eventType: "Student Assoc. Event",
+    headline: "Student Assoc. Mixer",
+    vibe: "Free pizza, quick intros, and campus networking without the awkward drag.",
+    location: "Student Center South",
+    startTime: "5:30 PM",
+    endTime: "7:00 PM",
+    extras: ["Free Pizza", "Networking", "Campus Org"],
   },
 ] as const;
 
+type EventForm = {
+  headline: string;
+  eventType: (typeof eventTypes)[number];
+  vibe: string;
+  eventDate: string;
+  location: string;
+  startTime: string;
+  endTime: string;
+};
+
+type EventListingInsert = {
+  title: string;
+  price: number;
+  category: string;
+  description: string;
+  event_type: string;
+  vibe: string;
+  event_date: string;
+  location: string;
+  start_time: string;
+  end_time: string;
+};
+
+const initialForm: EventForm = {
+  headline: "",
+  eventType: "Frat Party",
+  vibe: "",
+  eventDate: "",
+  location: "",
+  startTime: "",
+  endTime: "",
+};
+
 export default function LaunchEventPage() {
-  const [headline, setHeadline] = useState("");
-  const [eventType, setEventType] = useState<(typeof eventTypes)[number]>("Party");
-  const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
-  const [eventDate, setEventDate] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [cta, setCta] = useState("");
-  const [extras, setExtras] = useState<string[]>(["Free Entry"]);
+  const router = useRouter();
+  const [form, setForm] = useState<EventForm>(initialForm);
+  const [extras, setExtras] = useState<string[]>(["Campus"]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [posting, setPosting] = useState(false);
+  const [postError, setPostError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  useEffect(() => {
+    const supabase = getSupabaseBrowserClient();
+
+    if (!supabase) return;
+
+    let mounted = true;
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
+      setIsLoggedIn(Boolean(data.session));
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
+      setIsLoggedIn(Boolean(session));
+    });
+
+    return () => {
+      mounted = false;
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  const updateField = <K extends keyof EventForm>(field: K, value: EventForm[K]) => {
+    setForm((current) => ({ ...current, [field]: value }));
+  };
 
   const toggleExtra = (value: string) => {
-    setExtras((current) =>
-      current.includes(value) ? current.filter((item) => item !== value) : [...current, value],
-    );
+    setExtras((current) => (current.includes(value) ? current.filter((item) => item !== value) : [...current, value]));
   };
 
-  const applyTemplate = (template: (typeof quickEventTemplates)[number]) => {
-    setHeadline(template.headline);
-    setEventType(template.type as (typeof eventTypes)[number]);
-    setDescription(template.description);
-    setLocation(template.location);
-    setStartTime(template.startTime);
-    setEndTime(template.endTime);
-    setCta(template.cta);
+  const applyTemplate = (template: (typeof eventTemplates)[number]) => {
+    setForm((current) => ({
+      ...current,
+      headline: template.headline,
+      eventType: template.eventType,
+      vibe: template.vibe,
+      location: template.location,
+      startTime: template.startTime,
+      endTime: template.endTime,
+    }));
+    setExtras(template.extras as string[]);
   };
 
-  const liveHeadline = headline || "Your event headline";
-  const liveDescription =
-    description ||
-    "Drop the vibe, why people should show up, and what makes this worth stopping by for tonight.";
-  const eventMeta = useMemo(
+  const liveHeadline = form.headline || "Your event headline";
+  const liveVibe = form.vibe || "Quick event preview for Temple students scrolling campus right now.";
+
+  const previewMeta = useMemo(
     () => ({
-      date: eventDate || "Date pending",
-      time: startTime && endTime ? `${startTime} to ${endTime}` : "Time pending",
-      location: location || "Campus location coming soon",
-      cta: cta || "RSVP / pull up",
+      date: form.eventDate || "Date pending",
+      time: form.startTime && form.endTime ? `${form.startTime} to ${form.endTime}` : "Time pending",
+      location: form.location || "Campus location pending",
     }),
-    [cta, endTime, eventDate, location, startTime],
+    [form.endTime, form.eventDate, form.location, form.startTime],
   );
+
+  const handlePostEvent = async () => {
+    const supabase = getSupabaseBrowserClient();
+
+    if (!supabase) {
+      setPostError("Supabase is not configured.");
+      return;
+    }
+
+    if (!isLoggedIn) {
+      setPostError("Log in first to post an event.");
+      return;
+    }
+
+    if (
+      !form.headline.trim() ||
+      !form.vibe.trim() ||
+      !form.eventDate.trim() ||
+      !form.location.trim() ||
+      !form.startTime.trim() ||
+      !form.endTime.trim()
+    ) {
+      setPostError("Fill out the event details first.");
+      return;
+    }
+
+    try {
+      setPosting(true);
+      setPostError("");
+      setSuccessMessage("");
+
+      const payload: EventListingInsert = {
+        title: form.headline.trim(),
+        price: 0,
+        category: "Event",
+        description: [
+          `Type: ${form.eventType}`,
+          `Vibe: ${form.vibe.trim()}`,
+          `Date: ${form.eventDate.trim()}`,
+          `Location: ${form.location.trim()}`,
+          `Time: ${form.startTime.trim()} to ${form.endTime.trim()}`,
+          extras.length ? `Tags: ${extras.join(", ")}` : "",
+        ]
+          .filter(Boolean)
+          .join(" | "),
+        event_type: form.eventType,
+        vibe: form.vibe.trim(),
+        event_date: form.eventDate.trim(),
+        location: form.location.trim(),
+        start_time: form.startTime.trim(),
+        end_time: form.endTime.trim(),
+      };
+
+      const { error } = await supabase.from("listings").insert(payload as never);
+
+      if (error) {
+        throw new Error("Could not post the event.");
+      }
+
+      setSuccessMessage("Event Live!");
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 900);
+    } catch (eventError) {
+      setPostError(eventError instanceof Error ? eventError.message : "Could not post the event.");
+    } finally {
+      setPosting(false);
+    }
+  };
 
   return (
     <main className="page-shell">
@@ -100,15 +243,11 @@ export default function LaunchEventPage() {
 
         <section className="page-hero">
           <p className="section-kicker">Launch Event</p>
-          <h1 className="page-title">
-            Launch Event
-          </h1>
-          <p className="page-copy">
-            Post parties, study jams, and popups fast.
-          </p>
+          <h1 className="page-title">Launch Event</h1>
+          <p className="page-copy">Build a fast Temple event post and push it live to the feed.</p>
         </section>
 
-        <div className="mt-7 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="mt-6 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
           <section className="page-card px-4 py-4">
             <div className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
               <PartyPopper className="h-4 w-4" />
@@ -117,14 +256,14 @@ export default function LaunchEventPage() {
 
             <div className="mt-5 space-y-5">
               <div>
-                <span className="text-[13px] font-semibold text-white">Quick Templates</span>
+                <span className="text-[13px] font-semibold text-white">Auto-Templates</span>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {quickEventTemplates.map((template) => (
+                  {eventTemplates.map((template) => (
                     <button
                       key={template.label}
                       type="button"
                       onClick={() => applyTemplate(template)}
-                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[13px] font-semibold text-white/72 transition hover:border-white/25 hover:bg-white/8"
+                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[13px] font-semibold text-white/72 transition hover:border-white/25 hover:bg-white/[0.08]"
                     >
                       {template.label}
                     </button>
@@ -134,28 +273,25 @@ export default function LaunchEventPage() {
 
               <label className="block">
                 <span className="text-[13px] font-semibold text-white">Headline</span>
-                <p className="mt-1 text-[12px] leading-5 text-white/38">
-                  Lead with why students should care.
-                </p>
                 <input
                   type="text"
-                  value={headline}
-                  onChange={(event) => setHeadline(event.target.value)}
-                  placeholder="Late Night Study Jam at Charles"
+                  value={form.headline}
+                  onChange={(event) => updateField("headline", event.target.value)}
+                  placeholder="Temple rooftop link tonight"
                   className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                 />
               </label>
 
               <div>
-                <span className="text-[13px] font-semibold text-white">Event Type</span>
+                <span className="text-[13px] font-semibold text-white">Category</span>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {eventTypes.map((type) => (
                     <button
                       key={type}
                       type="button"
-                      onClick={() => setEventType(type)}
+                      onClick={() => updateField("eventType", type)}
                       className={`rounded-full border px-3 py-1.5 text-[13px] transition ${
-                        eventType === type
+                        form.eventType === type
                           ? "border-[rgba(70,191,255,0.3)] bg-[rgba(70,191,255,0.08)] text-[var(--accent)]"
                           : "border-[var(--border)] bg-white/5 text-white/50 hover:border-white/25 hover:text-white/80"
                       }`}
@@ -168,41 +304,34 @@ export default function LaunchEventPage() {
 
               <label className="block">
                 <span className="text-[13px] font-semibold text-white">The Vibe</span>
-                <p className="mt-1 text-[12px] leading-5 text-white/38">
-                  Keep it short and clear.
-                </p>
                 <textarea
                   rows={3}
-                  value={description}
-                  onChange={(event) => setDescription(event.target.value)}
-                  placeholder="Open invite for Temple students with music, snacks, and low-pressure networking before midterms hit."
+                  value={form.vibe}
+                  onChange={(event) => updateField("vibe", event.target.value)}
+                  placeholder="BYOB, free pizza, or finals grind. Keep it direct."
                   className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] leading-5 outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                 />
               </label>
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="block">
-                  <span className="text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">
-                    Event Date
-                  </span>
+                  <span className="text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">Date</span>
                   <input
                     type="text"
-                    value={eventDate}
-                    onChange={(event) => setEventDate(event.target.value)}
-                    placeholder="Friday, March 22"
+                    value={form.eventDate}
+                    onChange={(event) => updateField("eventDate", event.target.value)}
+                    placeholder="Friday, April 18"
                     className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                   />
                 </label>
 
                 <label className="block">
-                  <span className="text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">
-                    Location
-                  </span>
+                  <span className="text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">Location</span>
                   <input
                     type="text"
-                    value={location}
-                    onChange={(event) => setLocation(event.target.value)}
-                    placeholder="Student Center South Lobby"
+                    value={form.location}
+                    onChange={(event) => updateField("location", event.target.value)}
+                    placeholder="Student Center / Off Broad"
                     className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                   />
                 </label>
@@ -210,50 +339,32 @@ export default function LaunchEventPage() {
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="block">
-                  <span className="text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">
-                    Start Time
-                  </span>
+                  <span className="text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">Start Time</span>
                   <input
                     type="text"
-                    value={startTime}
-                    onChange={(event) => setStartTime(event.target.value)}
-                    placeholder="7:00 PM"
+                    value={form.startTime}
+                    onChange={(event) => updateField("startTime", event.target.value)}
+                    placeholder="8:00 PM"
                     className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                   />
                 </label>
 
                 <label className="block">
-                  <span className="text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">
-                    End Time
-                  </span>
+                  <span className="text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">End Time</span>
                   <input
                     type="text"
-                    value={endTime}
-                    onChange={(event) => setEndTime(event.target.value)}
-                    placeholder="10:00 PM"
+                    value={form.endTime}
+                    onChange={(event) => updateField("endTime", event.target.value)}
+                    placeholder="11:00 PM"
                     className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
                   />
                 </label>
               </div>
 
-              <label className="block">
-                <span className="text-[13px] font-semibold text-white">Call to Action</span>
-                <p className="mt-1 text-[12px] leading-5 text-white/38">
-                  Tell students what to do next.
-                </p>
-                <input
-                  type="text"
-                  value={cta}
-                  onChange={(event) => setCta(event.target.value)}
-                  placeholder="RSVP now and bring your roommate"
-                  className="mt-2 w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none placeholder:text-white/25 focus:border-[rgba(70,191,255,0.35)]"
-                />
-              </label>
-
               <div>
-                <span className="text-[13px] font-semibold text-white">Quick Tags</span>
+                <span className="text-[13px] font-semibold text-white">Campus Tags</span>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {["Free Entry", "Food", "Live DJ", "RSVP", "Giveaway", "Club Members"].map((item) => {
+                  {["BYOB", "Free Pizza", "Finals Grind", "Pull Up", "RSVP", "Friends"].map((item) => {
                     const active = extras.includes(item);
 
                     return (
@@ -263,7 +374,7 @@ export default function LaunchEventPage() {
                         onClick={() => toggleExtra(item)}
                         className={`rounded-full border px-3 py-1.5 text-[11px] font-semibold transition ${
                           active
-                            ? "border-[rgba(255,62,165,0.3)] bg-[rgba(255,62,165,0.12)] text-[var(--accent)]"
+                            ? "border-[rgba(70,191,255,0.3)] bg-[rgba(70,191,255,0.12)] text-[var(--accent)]"
                             : "border-white/10 bg-white/5 text-white/50 hover:border-white/25 hover:text-white/78"
                         }`}
                       >
@@ -273,34 +384,53 @@ export default function LaunchEventPage() {
                   })}
                 </div>
               </div>
+
+              {postError ? (
+                <div className="rounded-[14px] border border-[rgba(240,80,80,0.22)] bg-[rgba(240,80,80,0.08)] px-3 py-3 text-[12px] text-[#F09595]">
+                  {postError}
+                </div>
+              ) : null}
+
+              {successMessage ? (
+                <div className="rounded-[14px] border border-[rgba(70,191,255,0.25)] bg-[rgba(70,191,255,0.08)] px-3 py-3 text-[12px] font-semibold text-[var(--accent)]">
+                  🎉 {successMessage}
+                </div>
+              ) : null}
+
+              <button
+                type="button"
+                onClick={handlePostEvent}
+                disabled={posting}
+                className="capsule-primary inline-flex w-full items-center justify-center px-5 py-3 text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {posting ? "Posting..." : "Post Event"}
+              </button>
             </div>
           </section>
 
           <aside className="space-y-4">
             <section className="page-card px-4 py-4">
               <p className="section-kicker !mt-0 !px-0">Live Preview</p>
-              <div className="mt-4 rounded-[18px] border border-[rgba(255,62,165,0.25)] bg-[linear-gradient(135deg,_rgba(51,65,92,0.65)_0%,_rgba(255,62,165,0.12)_100%)] p-4">
+              <div className="mt-4 rounded-[18px] border border-[rgba(70,191,255,0.22)] bg-[linear-gradient(135deg,_rgba(26,34,46,0.9)_0%,_rgba(18,214,255,0.08)_100%)] p-4">
                 <div className="inline-flex items-center gap-2 rounded-full bg-[rgba(255,255,255,0.08)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--accent)]">
                   <Sparkles className="h-3.5 w-3.5" />
-                  {eventType}
+                  {form.eventType}
                 </div>
-                <h2 className="mt-3 font-display text-[17px] font-bold tracking-[-0.03em] text-white">
-                  {liveHeadline}
-                </h2>
-                <p className="mt-2 text-[12px] leading-5 text-white/50">{liveDescription}</p>
+                <h2 className="mt-3 font-display text-[17px] font-bold tracking-[-0.03em] text-white">{liveHeadline}</h2>
+                <p className="mt-2 text-[12px] leading-5 text-white/56">{liveVibe}</p>
 
-                <div className="mt-5 space-y-2 text-[12px] text-white/58">
+                <div className="mt-5 space-y-2 text-[12px] text-white/60">
                   <div className="flex items-center gap-2">
                     <CalendarDays className="h-4 w-4 text-[var(--accent)]" />
-                    <span>{eventMeta.date}</span>
+                    <span>{previewMeta.date}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock3 className="h-4 w-4 text-[var(--accent)]" />
-                    <span>{eventMeta.time}</span>
+                    <span>{previewMeta.time}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-[var(--accent)]" />
-                    <span>{eventMeta.location}</span>
+                    <span>{previewMeta.location}</span>
                   </div>
                 </div>
 
@@ -315,50 +445,8 @@ export default function LaunchEventPage() {
                       </span>
                     ))
                   ) : (
-                    <span className="text-[11px] text-white/34">Add quick tags to highlight the draw.</span>
+                    <span className="text-[11px] text-white/34">Add tags to shape the draw.</span>
                   )}
-                </div>
-
-                <div className="mt-4 inline-flex rounded-[12px] bg-[var(--accent)] px-4 py-2.5 text-[12px] font-bold text-white">
-                  {eventMeta.cta}
-                </div>
-              </div>
-            </section>
-
-            <section className="page-card px-4 py-4">
-              <p className="section-kicker !mt-0 !px-0">Promotion Tips</p>
-              <div className="mt-4 space-y-3">
-                {promoTips.map((tip, index) => (
-                  <div
-                    key={tip}
-                    className="flex items-start gap-3 rounded-[14px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-3 py-3"
-                  >
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[rgba(70,191,255,0.12)] text-[12px] font-bold text-[var(--accent)]">
-                      {index + 1}
-                    </span>
-                    <p className="text-[11px] leading-5 text-white/55">{tip}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-4 rounded-[16px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
-                <div className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-white/50">
-                  <Users className="h-4 w-4 text-[var(--accent)]" />
-                  Best Use Cases
-                </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {["Study Jam", "Fundraiser Collab", "Open Mic", "Club Mixer", "Popup Drop"].map((item) => (
-                    <span
-                      key={item}
-                      className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-white/72"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-                <div className="mt-4 flex items-center gap-2 text-[12px] text-white/42">
-                  <Ticket className="h-4 w-4 text-[var(--accent)]" />
-                  Put the main draw in the headline.
                 </div>
               </div>
             </section>

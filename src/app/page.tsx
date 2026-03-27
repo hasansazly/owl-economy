@@ -25,12 +25,14 @@ type QuickAction = {
   icon: typeof Shirt;
   badge: string;
   href?: string;
+  locked?: boolean;
+  hypeBadge?: string;
 };
 
 const quickPills = [
   { label: "Feed", href: "/dashboard" },
   { label: "Resell", href: "/sell-goods" },
-  { label: "Rooms", href: "/rent-room" },
+  { label: "Rooms", href: "/rent-room", locked: true },
   { label: "Events", href: "/launch-event" },
   { label: "Lost", href: "/lost-and-found" },
   { label: "Book", href: "/campus-services" },
@@ -61,8 +63,10 @@ const quickActions: QuickAction[] = [
     title: "The Room Swap",
     description: "Semester sublets and room-wanted posts.",
     icon: BedDouble,
-    badge: "Rooms",
+    badge: "Coming Soon",
     href: "/rent-room",
+    locked: true,
+    hypeBadge: "Soon",
   },
   {
     title: "Launch Events",
@@ -82,8 +86,10 @@ const quickActions: QuickAction[] = [
     title: "Campus Creatives",
     description: "Custom designs, merch, and student-made work.",
     icon: Palette,
-    badge: "Create",
+    badge: "Coming Soon",
     href: "/campus-creatives",
+    locked: true,
+    hypeBadge: "Soon",
   },
   {
     title: "Lost and Found",
@@ -256,15 +262,25 @@ export default function Home() {
 
         <section className="border-t border-white/8 px-1 py-4">
           <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {quickPills.map((pill) => (
-              <Link
-                key={pill.label}
-                href={pill.href}
-                className="shrink-0 rounded-full border border-white/14 bg-white/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/76 transition hover:border-white/22 hover:bg-white/[0.08]"
-              >
-                {pill.label}
-              </Link>
-            ))}
+            {quickPills.map((pill) =>
+              pill.locked ? (
+                <div
+                  key={pill.label}
+                  aria-disabled="true"
+                  className="shrink-0 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/38"
+                >
+                  {pill.label}
+                </div>
+              ) : (
+                <Link
+                  key={pill.label}
+                  href={pill.href}
+                  className="shrink-0 rounded-full border border-white/14 bg-white/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/76 transition hover:border-white/22 hover:bg-white/[0.08]"
+                >
+                  {pill.label}
+                </Link>
+              ),
+            )}
           </div>
         </section>
 
@@ -312,13 +328,14 @@ export default function Home() {
         <section id="launcher" className="border-t border-white/8 px-1 py-5">
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/54">Everything Else</p>
           <div className="grid grid-cols-2 gap-3">
-            {quickActions.map(({ title, description, icon: Icon, badge, href }) => (
-              <Link
-                key={title}
-                href={href || "#"}
-                className="group rounded-[20px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 shadow-[0_16px_32px_rgba(0,0,0,0.18)] backdrop-blur-xl transition hover:border-white/18 hover:bg-white/[0.05]"
-              >
+            {quickActions.map(({ title, description, icon: Icon, badge, href, locked, hypeBadge }) => {
+              const content = (
                 <div className="flex h-full flex-col justify-between gap-4">
+                  {hypeBadge ? (
+                    <span className="absolute right-3 top-3 rounded-full border border-[var(--accent)]/30 bg-[var(--accent)]/12 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
+                      {hypeBadge}
+                    </span>
+                  ) : null}
                   <div>
                     <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04]">
                       <Icon className="h-5 w-5 text-white/78" />
@@ -332,11 +349,32 @@ export default function Home() {
                     <span className="rounded-full border border-white/12 bg-white/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70">
                       {badge}
                     </span>
-                    <ChevronRight className="h-4 w-4 shrink-0 text-white/32 transition group-hover:text-white/58" />
+                    <div className="flex items-center gap-2">
+                      {locked ? (
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/42">
+                          Locked
+                        </span>
+                      ) : null}
+                      <ChevronRight className="h-4 w-4 shrink-0 text-white/32 transition group-hover:text-white/58" />
+                    </div>
                   </div>
                 </div>
-              </Link>
-            ))}
+              );
+
+              const className = `group relative rounded-[20px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 shadow-[0_16px_32px_rgba(0,0,0,0.18)] backdrop-blur-xl transition ${
+                locked ? "opacity-96" : "hover:border-white/18 hover:bg-white/[0.05]"
+              }`;
+
+              return locked || !href ? (
+                <div key={title} aria-disabled="true" className={className}>
+                  {content}
+                </div>
+              ) : (
+                <Link key={title} href={href} className={className}>
+                  {content}
+                </Link>
+              );
+            })}
           </div>
         </section>
 

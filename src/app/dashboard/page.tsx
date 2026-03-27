@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
-const categories = ["All", "Textbooks", "Mini-Fridges", "Electronics", "Sublets"] as const;
+const categories = ["All", "Textbooks", "Mini-Fridges", "Electronics", "Sublets", "Event"] as const;
 
 type ListingRow = {
   id: string | number;
@@ -244,8 +244,14 @@ export default function DashboardPage() {
                   <div className="flex h-36 items-center justify-center rounded-[14px] bg-[linear-gradient(135deg,_rgba(35,42,54,0.88),_rgba(18,214,255,0.08))] px-4 text-center text-[13px] font-semibold text-white/70">
                     {item.category}
                   </div>
-                  <span className="absolute right-2.5 top-2.5 rounded-full bg-cyan-400 px-2.5 py-1 text-[11px] font-bold text-black">
-                    ${item.price}
+                  <span
+                    className={`absolute right-2.5 top-2.5 rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                      item.category === "Event"
+                        ? "border border-cyan-400/30 bg-cyan-400/12 text-cyan-300"
+                        : "bg-cyan-400 text-black"
+                    }`}
+                  >
+                    {item.category === "Event" ? "Event" : `$${item.price}`}
                   </span>
                 </div>
 

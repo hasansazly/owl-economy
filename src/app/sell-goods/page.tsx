@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 import { DormStashLogo } from "@/components/logo";
-import { goodsListings, type GoodsCategory, type GoodsCondition, type GoodsListing } from "@/lib/sell-goods-data";
+import { type GoodsCategory, type GoodsCondition, type GoodsListing } from "@/lib/sell-goods-data";
 import { buildSellerContactHref, isVerifiedTempleEmail } from "@/lib/security";
 
 type GoodsForm = {
@@ -84,7 +84,7 @@ export default function SellGoodsPage() {
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      setItems(goodsListings);
+      setItems([]);
       setStatus("ready");
     }, 700);
 
@@ -153,7 +153,7 @@ export default function SellGoodsPage() {
         setStatus("error");
         return;
       }
-      setItems((current) => (current.length ? current : goodsListings));
+      setItems((current) => current);
       setStatus("ready");
     }, 700);
   };
@@ -264,7 +264,7 @@ export default function SellGoodsPage() {
           </button>
         </header>
 
-        <section className="grid gap-5 py-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+        <section className="grid gap-4 py-4 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
           <div>
             <p className="text-xs uppercase tracking-[0.28em] text-white/40">Sell Goods</p>
             <h1 className="mt-2 font-display text-[1.9rem] font-bold tracking-[-0.04em] sm:text-[2.5rem]">
@@ -278,38 +278,38 @@ export default function SellGoodsPage() {
             </p>
           </div>
 
-          <div className="rounded-[20px] border border-[var(--border)] bg-[linear-gradient(135deg,_rgba(51,65,92,0.55),_rgba(26,29,36,0.92))] p-3.5">
-            <div className="grid gap-3 sm:grid-cols-3">
+          <div className="rounded-[18px] border border-[var(--border)] bg-[linear-gradient(135deg,_rgba(51,65,92,0.55),_rgba(26,29,36,0.92))] p-3">
+            <div className="grid gap-2 sm:grid-cols-3">
               {[
                 { label: "Access", value: "Students only" },
                 { label: "Item range", value: "New + used" },
                 { label: "Buying style", value: "Budget-friendly" },
               ].map((stat) => (
-                <div key={stat.label} className="rounded-[14px] border border-white/8 bg-white/5 p-3">
-                  <p className="text-sm font-semibold text-white">{stat.value}</p>
-                  <p className="mt-1 text-[11px] text-white/45">{stat.label}</p>
+                <div key={stat.label} className="rounded-[12px] border border-white/8 bg-white/5 p-2.5">
+                  <p className="text-[13px] font-semibold text-white">{stat.value}</p>
+                  <p className="mt-0.5 text-[10px] text-white/45">{stat.label}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="rounded-[20px] border border-[var(--border)] bg-[var(--panel)] p-3.5 sm:p-4">
-          <div className="grid gap-3 lg:grid-cols-[2fr_1fr_1fr_1fr]">
-            <label className="flex items-center gap-3 rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5">
+        <section className="rounded-[18px] border border-[var(--border)] bg-[var(--panel)] p-3">
+          <div className="grid gap-2.5 lg:grid-cols-[2fr_1fr_1fr_1fr]">
+            <label className="flex items-center gap-2.5 rounded-[11px] border border-[var(--border)] bg-white/5 px-3 py-2">
               <Search className="h-4 w-4 text-white/35" />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search items..."
-                className="w-full bg-transparent text-[13px] outline-none placeholder:text-white/30"
+                className="w-full bg-transparent text-[12px] outline-none placeholder:text-white/30"
               />
             </label>
 
             <select
               value={category}
               onChange={(event) => setCategory(event.target.value as "All" | GoodsCategory)}
-              className="rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] outline-none"
+              className="rounded-[11px] border border-[var(--border)] bg-white/5 px-3 py-2 text-[12px] outline-none"
             >
               {categories.map((item) => (
                 <option key={item} value={item}>
@@ -321,7 +321,7 @@ export default function SellGoodsPage() {
             <select
               value={condition}
               onChange={(event) => setCondition(event.target.value as "All" | GoodsCondition)}
-              className="rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] outline-none"
+              className="rounded-[11px] border border-[var(--border)] bg-white/5 px-3 py-2 text-[12px] outline-none"
             >
               <option value="All">All conditions</option>
               <option value="New">New</option>
@@ -331,7 +331,7 @@ export default function SellGoodsPage() {
             <select
               value={sortBy}
               onChange={(event) => setSortBy(event.target.value as "newest" | "price-low" | "price-high")}
-              className="rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] outline-none"
+              className="rounded-[11px] border border-[var(--border)] bg-white/5 px-3 py-2 text-[12px] outline-none"
             >
               <option value="newest">Newest first</option>
               <option value="price-low">Price: low to high</option>
@@ -339,11 +339,11 @@ export default function SellGoodsPage() {
             </select>
           </div>
 
-          <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_1fr_auto]">
+          <div className="mt-3 grid gap-2.5 lg:grid-cols-[1fr_1fr_auto]">
             <select
               value={homeCampus}
               onChange={(event) => setHomeCampus(event.target.value as (typeof campuses)[number])}
-              className="rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] outline-none"
+              className="rounded-[11px] border border-[var(--border)] bg-white/5 px-3 py-2 text-[12px] outline-none"
             >
               {campuses.map((campus) => (
                 <option key={campus} value={campus}>
@@ -357,7 +357,7 @@ export default function SellGoodsPage() {
               onChange={(event) =>
                 setBrowseCampus(event.target.value as "Home Campus" | (typeof campuses)[number])
               }
-              className="rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] outline-none"
+              className="rounded-[11px] border border-[var(--border)] bg-white/5 px-3 py-2 text-[12px] outline-none"
             >
               <option value="Home Campus">Browse home campus first</option>
               {campuses.map((campus) => (
@@ -367,7 +367,7 @@ export default function SellGoodsPage() {
               ))}
             </select>
 
-            <label className="inline-flex items-center gap-3 rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5 text-[13px] text-white/70">
+            <label className="inline-flex items-center gap-2.5 rounded-[11px] border border-[var(--border)] bg-white/5 px-3 py-2 text-[12px] text-white/70">
               <input
                 type="checkbox"
                 checked={includeOtherCampuses}
@@ -378,25 +378,25 @@ export default function SellGoodsPage() {
             </label>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(70,191,255,0.24)] bg-[rgba(70,191,255,0.08)] px-3 py-1.5 text-[11px] text-[var(--accent)]">
+          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(70,191,255,0.24)] bg-[rgba(70,191,255,0.08)] px-2.5 py-1 text-[10px] text-[var(--accent)]">
               <ShieldCheck className="h-3.5 w-3.5" />
               Students only
             </div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] text-white/60">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] text-white/60">
               {browseCampus === "Home Campus" ? homeCampus : browseCampus}
             </div>
             <button
               type="button"
               onClick={() => refreshItems(false)}
-              className="rounded-full border border-[var(--border)] px-3 py-1.5 text-[11px] text-white/60 transition hover:bg-white/5"
+              className="rounded-full border border-[var(--border)] px-2.5 py-1 text-[10px] text-white/60 transition hover:bg-white/5"
             >
               Refresh
             </button>
             <button
               type="button"
               onClick={() => refreshItems(true)}
-              className="rounded-full border border-[var(--border)] px-3 py-1.5 text-[11px] text-white/45 transition hover:bg-white/5"
+              className="rounded-full border border-[var(--border)] px-2.5 py-1 text-[10px] text-white/45 transition hover:bg-white/5"
             >
               Test error state
             </button>
