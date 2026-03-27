@@ -13,6 +13,11 @@ type VerifyEmailClientProps = {
   email: string;
 };
 
+type OtpRow = {
+  code: string;
+  verified?: boolean | null;
+};
+
 const INCORRECT_CODE_MESSAGE = "Incorrect code. Please check your Temple email again.";
 
 export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
@@ -48,18 +53,27 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
         throw new Error("Supabase is not configured.");
       }
 
-      const { error: verifyError } = await supabase.auth.verifyOtp({
-        email,
-        token: code.trim(),
-        type: "signup",
-      });
+      const { data, error: otpError } = await supabase
+        .from("otps")
+        .select("code, verified")
+        .eq("email", email)
+        .eq("code", code.trim())
+        .maybeSingle();
 
-      if (verifyError) {
+      const otpRecord = data as OtpRow | null;
+
+      if (otpError || !otpRecord) {
         throw new Error(INCORRECT_CODE_MESSAGE);
       }
 
+      await supabase
+        .from("otps")
+        .update({ verified: true } as never)
+        .eq("email", email)
+        .eq("code", code.trim());
+
       setVerified(true);
-      router.push("/");
+      router.push("/dashboard");
     } catch (verifyError) {
       setVerified(false);
       const nextError =
