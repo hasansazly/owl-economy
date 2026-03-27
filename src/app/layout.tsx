@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import type { CSSProperties } from "react";
 
 import { HomeFooter } from "@/components/home-footer";
 import "./globals.css";
-
-const inter = Inter({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
 
 export const metadata: Metadata = {
   title: "mydormstash.com | Campus Marketplace",
@@ -23,7 +17,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} antialiased`}>
+      <body
+        className="antialiased"
+        style={
+          {
+            "--font-sans":
+              '"Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          } as CSSProperties
+        }
+      >
         {children}
         <HomeFooter />
       </body>

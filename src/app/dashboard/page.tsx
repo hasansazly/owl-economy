@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Mail, Plus, Search, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Home, Mail, Plus, Search, Settings, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { isVerifiedStudentLoggedIn } from "@/lib/app-auth";
@@ -118,6 +119,7 @@ function sortListingsNewest(items: ListingRow[]) {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<FeedFilter>("All");
   const [listings, setListings] = useState<ListingRow[]>([]);
@@ -174,6 +176,12 @@ export default function DashboardPage() {
       authListener.subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (!loading && !isLoggedIn) {
+      router.push("/login");
+    }
+  }, [isLoggedIn, loading, router]);
 
   const visibleListings = useMemo(() => {
     const next = listings.filter((item) => {
@@ -279,6 +287,23 @@ export default function DashboardPage() {
             </p>
           </div>
 
+          <div className="mt-4 flex items-center gap-2">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[12px] font-semibold text-white/74 transition hover:border-white/20 hover:bg-white/[0.08]"
+            >
+              <Home className="h-3.5 w-3.5" />
+              Home
+            </Link>
+            <Link
+              href="/account"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[12px] font-semibold text-white/74 transition hover:border-white/20 hover:bg-white/[0.08]"
+            >
+              <Settings className="h-3.5 w-3.5" />
+              Account
+            </Link>
+          </div>
+
           <label className="mt-4 flex items-center gap-3 rounded-[14px] border border-white/10 bg-white/5 px-4 py-3">
             <Search className="h-4 w-4 text-white/35" />
             <input
@@ -331,13 +356,13 @@ export default function DashboardPage() {
           </section>
         ) : null}
 
-        {!loading && error ? (
+        {!loading && isLoggedIn && error ? (
           <section className="mt-5 rounded-[18px] border border-[rgba(240,80,80,0.22)] bg-[rgba(240,80,80,0.08)] p-4 text-[13px] text-[#F09595]">
             {error}
           </section>
         ) : null}
 
-        {!loading && !error ? (
+        {!loading && isLoggedIn && !error ? (
           <section className="mt-5 space-y-6">
             {groupedListings.map(({ category, items }) => (
               <div key={category}>

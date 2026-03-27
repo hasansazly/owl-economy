@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle2, Mail, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import { setVerifiedStudentEmail } from "@/lib/app-auth";
+import { saveStudentProfile, setVerifiedStudentEmail } from "@/lib/app-auth";
+import { isVerifiedTempleEmail } from "@/lib/security";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const RESEND_WAIT_SECONDS = 60;
@@ -23,6 +24,7 @@ const INCORRECT_CODE_MESSAGE = "Incorrect code. Please check your Temple email a
 
 export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
   const router = useRouter();
+  const normalizedEmail = email.trim().toLowerCase();
   const [code, setCode] = useState("");
   const [resendCountdown, setResendCountdown] = useState(0);
   const [verified, setVerified] = useState(false);
@@ -42,11 +44,15 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
   const isCodeReady = useMemo(() => /^\d{6}$/.test(code.trim()), [code]);
 
   const handleVerify = async () => {
-    if (!isCodeReady || !email) return;
+    if (!isCodeReady || !normalizedEmail) return;
 
     try {
       setLoading(true);
       setError("");
+
+      if (!isVerifiedTempleEmail(normalizedEmail)) {
+        throw new Error("Only Temple students using @temple.edu can access MyDormStash.");
+      }
 
       const supabase = getSupabaseBrowserClient();
 
@@ -57,7 +63,7 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
       const { data, error: otpError } = await supabase
         .from("otps")
         .select("code, verified")
-        .eq("email", email)
+        .eq("email", normalizedEmail)
         .eq("code", code.trim())
         .maybeSingle();
 
@@ -70,11 +76,21 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
       await supabase
         .from("otps")
         .update({ verified: true } as never)
-        .eq("email", email)
+        .eq("email", normalizedEmail)
         .eq("code", code.trim());
 
       setVerified(true);
-      setVerifiedStudentEmail(email);
+      setVerifiedStudentEmail(normalizedEmail);
+      saveStudentProfile({
+        name: "",
+        email: normalizedEmail,
+        phone: "",
+        major: "",
+        classYear: "2028",
+        privacyMode: true,
+        eventAlerts: true,
+        lostFoundAlerts: true,
+      });
       router.push("/dashboard");
     } catch (verifyError) {
       setVerified(false);
@@ -91,7 +107,7 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
   };
 
   const handleResend = async () => {
-    if (resendCountdown > 0 || !email) return;
+    if (resendCountdown > 0 || !normalizedEmail) return;
 
     try {
       setError("");
@@ -101,7 +117,7 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: normalizedEmail }),
       });
 
       const data = (await response.json()) as {
@@ -144,7 +160,7 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
           <p className="mt-3 text-[13px] leading-6 text-white/48">
             We sent a 6-digit code to your student email. Enter it below to join the Temple marketplace.
           </p>
-          {email ? <p className="mt-2 text-[12px] text-[var(--accent)]">{email}</p> : null}
+          {normalizedEmail ? <p className="mt-2 text-[12px] text-[var(--accent)]">{normalizedEmail}</p> : null}
 
           <label className="mt-6 block">
             <span className="mb-2 block text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">
@@ -172,7 +188,7 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
           <button
             type="button"
             onClick={handleVerify}
-            disabled={!isCodeReady || !email || loading}
+            disabled={!isCodeReady || !normalizedEmail || loading}
             className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-[var(--accent)] px-5 py-3 text-[14px] font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-35"
           >
             {loading ? "Verifying..." : "Verify Account"}

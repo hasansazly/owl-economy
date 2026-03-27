@@ -29,15 +29,15 @@ export default function SignupPage() {
 
   const emailState = useMemo(() => {
     const value = email.trim();
-    if (!value) return { valid: false, status: "neutral", hint: "Must end in .edu" };
+    if (!value) return { valid: false, status: "neutral", hint: "Must use your @temple.edu email" };
     if (!value.includes("@")) {
       return { valid: false, status: "error", hint: "Enter a valid email address" };
     }
     const domain = value.split("@").pop()?.toLowerCase() ?? "";
-    if (!domain.endsWith(".edu")) {
-      return { valid: false, status: "error", hint: "Only .edu addresses are accepted" };
+    if (domain !== "temple.edu") {
+      return { valid: false, status: "error", hint: "Only @temple.edu addresses are accepted" };
     }
-    return { valid: true, status: "valid", hint: "University email confirmed" };
+    return { valid: true, status: "valid", hint: "Temple student email confirmed" };
   }, [email]);
 
   const strength = useMemo(() => getStrength(password), [password]);
@@ -179,7 +179,7 @@ export default function SignupPage() {
                     type="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    placeholder="you@university.edu"
+                    placeholder="you@temple.edu"
                     autoComplete="email"
                     className="w-full bg-transparent text-sm outline-none placeholder:text-white/25"
                   />

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { generateSixDigitVerificationCode, sendStudentVerificationEmail } from "@/lib/brevo-student-verification";
+import { isVerifiedTempleEmail } from "@/lib/security";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 
 export async function POST(request: Request) {
@@ -11,7 +12,7 @@ export async function POST(request: Request) {
       password?: string;
     };
 
-    const email = body.email?.trim() ?? "";
+    const email = body.email?.trim().toLowerCase() ?? "";
 
     if (!body.name?.trim()) {
       return NextResponse.json({ error: "Name is required." }, { status: 400 });
@@ -19,6 +20,10 @@ export async function POST(request: Request) {
 
     if (!email) {
       return NextResponse.json({ error: "Email is required." }, { status: 400 });
+    }
+
+    if (!isVerifiedTempleEmail(email)) {
+      return NextResponse.json({ error: "Only @temple.edu emails can sign up." }, { status: 400 });
     }
 
     if (!body.password || body.password.length < 8) {

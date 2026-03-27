@@ -341,12 +341,20 @@ export default function Home() {
             <span className="text-[#37c8ff]">my</span>dormstash<span className="text-white">.com</span>
           </Link>
 
-          <Link
-            href="/login"
-            className="rounded-full border border-[var(--accent)]/30 bg-[rgba(18,214,255,0.12)] px-4 py-2 text-[13px] font-semibold text-white shadow-[0_10px_24px_rgba(18,214,255,0.12)] transition hover:border-[var(--accent)]/45 hover:bg-[rgba(18,214,255,0.18)]"
-          >
-            Log in
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/signup"
+              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[13px] font-semibold text-white/82 transition hover:border-white/20 hover:bg-white/[0.08]"
+            >
+              Sign up
+            </Link>
+            <Link
+              href="/login"
+              className="rounded-full border border-[var(--accent)]/30 bg-[rgba(18,214,255,0.12)] px-4 py-2 text-[13px] font-semibold text-white shadow-[0_10px_24px_rgba(18,214,255,0.12)] transition hover:border-[var(--accent)]/45 hover:bg-[rgba(18,214,255,0.18)]"
+            >
+              Log in
+            </Link>
+          </div>
         </header>
 
         <section className="px-1 pb-6 pt-5">
