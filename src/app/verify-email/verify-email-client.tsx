@@ -7,17 +7,11 @@ import { useEffect, useMemo, useState } from "react";
 
 import { getStudentProfile, saveStudentProfile, setVerifiedStudentEmail } from "@/lib/app-auth";
 import { isVerifiedTempleEmail } from "@/lib/security";
-import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const RESEND_WAIT_SECONDS = 60;
 
 type VerifyEmailClientProps = {
   email: string;
-};
-
-type OtpRow = {
-  code: string;
-  verified?: boolean | null;
 };
 
 const INCORRECT_CODE_MESSAGE = "Incorrect code. Please check your Temple email again.";
@@ -55,30 +49,25 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
         throw new Error("Only Temple students using @temple.edu can access MyDormStash.");
       }
 
-      const supabase = getSupabaseBrowserClient();
+      const response = await fetch("/api/signup/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: normalizedEmail,
+          code: normalizedCode,
+        }),
+      });
 
-      if (!supabase) {
-        throw new Error("Supabase is not configured.");
+      const data = (await response.json()) as {
+        error?: string;
+        redirectTo?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(data.error || INCORRECT_CODE_MESSAGE);
       }
-
-      const { data, error: otpError } = await supabase
-        .from("otps")
-        .select("code, verified")
-        .eq("email", normalizedEmail)
-        .eq("code", normalizedCode)
-        .maybeSingle();
-
-      const otpRecord = data as OtpRow | null;
-
-      if (otpError || !otpRecord) {
-        throw new Error(INCORRECT_CODE_MESSAGE);
-      }
-
-      await supabase
-        .from("otps")
-        .update({ verified: true } as never)
-        .eq("email", normalizedEmail)
-        .eq("code", normalizedCode);
 
       setVerified(true);
       setVerifiedStudentEmail(normalizedEmail);
@@ -87,7 +76,7 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
         ...currentProfile,
         email: normalizedEmail,
       });
-      router.push("/dashboard");
+      router.push(data.redirectTo || "/dashboard");
     } catch (verifyError) {
       setVerified(false);
       const nextError =
