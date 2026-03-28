@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { generateSixDigitVerificationCode, sendStudentVerificationEmail } from "@/lib/brevo-student-verification";
+import { saveOtpCode } from "@/lib/otp-store";
 import { isVerifiedTempleEmail } from "@/lib/security";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 
@@ -28,14 +29,11 @@ export async function POST(request: Request) {
 
     const code = generateSixDigitVerificationCode();
 
-    const { error: otpError } = await supabase.from("otps").upsert(
-      {
-        email,
-        code,
-        verified: false,
-      } as never,
-      { onConflict: "email" },
-    );
+    const { error: otpError } = await saveOtpCode(supabase, {
+      email,
+      code,
+      verified: false,
+    });
 
     if (otpError) {
       return NextResponse.json({ error: "Could not refresh verification code." }, { status: 500 });

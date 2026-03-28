@@ -49,6 +49,7 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
     try {
       setLoading(true);
       setError("");
+      const normalizedCode = String(code).trim();
 
       if (!isVerifiedTempleEmail(normalizedEmail)) {
         throw new Error("Only Temple students using @temple.edu can access MyDormStash.");
@@ -64,7 +65,7 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
         .from("otps")
         .select("code, verified")
         .eq("email", normalizedEmail)
-        .eq("code", code.trim())
+        .eq("code", normalizedCode)
         .maybeSingle();
 
       const otpRecord = data as OtpRow | null;
@@ -77,7 +78,7 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
         .from("otps")
         .update({ verified: true } as never)
         .eq("email", normalizedEmail)
-        .eq("code", code.trim());
+        .eq("code", normalizedCode);
 
       setVerified(true);
       setVerifiedStudentEmail(normalizedEmail);
