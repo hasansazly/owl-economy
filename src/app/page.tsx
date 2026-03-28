@@ -47,14 +47,7 @@ const quickPills = [
   { label: "Events", href: "/launch-event" },
   { label: "Lost", href: "/lost-and-found" },
   { label: "Book", href: "/campus-services" },
-<<<<<<< ours
-<<<<<<< ours
-=======
   { label: "Wall", href: "/campus-wall" },
->>>>>>> theirs
-=======
-  { label: "Wall", href: "/campus-wall" },
->>>>>>> theirs
 ];
 
 const quickActions: QuickAction[] = [
@@ -438,22 +431,6 @@ export default function Home() {
           {moveOutCountdown ? (
             <div className="mb-3 rounded-[16px] border border-cyan-400/20 bg-cyan-400/8 px-4 py-3 text-[12px] text-white/78">
               <span className="font-semibold text-cyan-300">Move-Out Mode:</span> {moveOutCountdown}
-<<<<<<< ours
-<<<<<<< ours
-=======
->>>>>>> theirs
-            </div>
-          ) : null}
-          {campusLiveLoading ? (
-            <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 text-[13px] text-white/42">
-              Loading Campus Live...
-            </div>
-          ) : campusLiveError ? (
-            <div className="rounded-[18px] border border-[rgba(240,80,80,0.22)] bg-[rgba(240,80,80,0.08)] px-4 py-4 text-[13px] text-[#F09595]">
-              {campusLiveError}
-<<<<<<< ours
-            </div>
-=======
             </div>
           ) : null}
           {campusLiveLoading ? (
@@ -464,10 +441,6 @@ export default function Home() {
             <div className="rounded-[18px] border border-[rgba(240,80,80,0.22)] bg-[rgba(240,80,80,0.08)] px-4 py-4 text-[13px] text-[#F09595]">
               {campusLiveError}
             </div>
->>>>>>> theirs
-=======
-            </div>
->>>>>>> theirs
           ) : campusLiveItems.length === 0 ? (
             <div className="rounded-[18px] border border-dashed border-white/12 bg-[rgba(255,255,255,0.02)] px-4 py-6 text-center text-[13px] text-white/42">
               No live lost and found, fundraiser, or event posts yet.
@@ -502,24 +475,6 @@ export default function Home() {
                         {parseUrgencyMeta(item.description).flashSale ? (
                           <span className="rounded-full border border-rose-400/20 bg-rose-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-rose-300">
                             Flash Sale
-<<<<<<< ours
-<<<<<<< ours
-=======
->>>>>>> theirs
-                          </span>
-                        ) : null}
-                        {parseUrgencyMeta(item.description).moveOutMode ? (
-                          <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-300">
-                            Move-Out
-<<<<<<< ours
-                          </span>
-                        ) : null}
-                        {getExpiryCountdown(parseUrgencyMeta(item.description).expiresAt) ? (
-                          <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/74">
-                            {getExpiryCountdown(parseUrgencyMeta(item.description).expiresAt)}
-                          </span>
-                        ) : null}
-=======
                           </span>
                         ) : null}
                         {parseUrgencyMeta(item.description).moveOutMode ? (
@@ -532,16 +487,6 @@ export default function Home() {
                             {getExpiryCountdown(parseUrgencyMeta(item.description).expiresAt)}
                           </span>
                         ) : null}
->>>>>>> theirs
-=======
-                          </span>
-                        ) : null}
-                        {getExpiryCountdown(parseUrgencyMeta(item.description).expiresAt) ? (
-                          <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/74">
-                            {getExpiryCountdown(parseUrgencyMeta(item.description).expiresAt)}
-                          </span>
-                        ) : null}
->>>>>>> theirs
                       </div>
                     ) : null}
                     <div className="mt-1 flex items-center gap-1.5 text-[12px] text-white/42">
