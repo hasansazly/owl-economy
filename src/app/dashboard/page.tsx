@@ -34,8 +34,8 @@ import {
 } from "@/lib/campus-notifications";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
-const feedFilters = ["All", "Events", "Marketplace", "Lost & Found", "Services", "Campus Wall"] as const;
-const postCategories = ["Textbooks", "Mini-Fridges", "Electronics", "Sublets", "Event", "Campus Wall"] as const;
+const feedFilters = ["All", "Events", "Marketplace", "Lost & Found", "Services"] as const;
+const postCategories = ["Textbooks", "Mini-Fridges", "Electronics", "Sublets", "Event"] as const;
 const FEED_PAGE_SIZE = 8;
 
 type FeedFilter = (typeof feedFilters)[number];
@@ -107,9 +107,6 @@ function getFeedGroup(category: string) {
   ) {
     return "Services";
   }
-  if (value.includes("wall") || value.includes("meme") || value.includes("tip")) {
-    return "Campus Wall";
-  }
   return "Marketplace";
 }
 
@@ -126,10 +123,6 @@ function getBadgeStyles(category: string) {
 
   if (group === "Lost & Found") {
     return "border border-amber-300/25 bg-amber-300/12 text-amber-200";
-  }
-
-  if (group === "Campus Wall") {
-    return "border border-fuchsia-400/25 bg-fuchsia-400/12 text-fuchsia-300";
   }
 
   return "border border-emerald-400/25 bg-emerald-400/12 text-emerald-300";

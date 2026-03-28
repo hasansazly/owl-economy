@@ -2,30 +2,25 @@
 
 import Link from "next/link";
 import {
-  Bell,
   BedDouble,
   ChevronRight,
-  CirclePlus,
   DoorOpen,
   GraduationCap,
   HandCoins,
-  House,
   LampDesk,
   Loader2,
   MapPin,
-  MessageCircle,
   Palette,
   PartyPopper,
-  PenSquare,
   Scissors,
   Search,
   Shirt,
   Sparkles,
-  UserRound,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import { buildWeeklyLeaderboard, computeCampusKarma, getCampusKarmaLabel } from "@/lib/campus-identity";
+import { computeCampusKarma, getCampusKarmaLabel } from "@/lib/campus-identity";
+import { buildWeeklyLeaderboard, getCampusBadges } from "@/lib/campus-identity";
 import {
   getExpiryCountdown,
   getMoveOutCountdown,
@@ -44,6 +39,15 @@ type QuickAction = {
   locked?: boolean;
   hypeBadge?: string;
 };
+
+const quickPills = [
+  { label: "Feed", href: "/dashboard" },
+  { label: "Resell", href: "/sell-goods" },
+  { label: "Rooms", href: "/rent-room", locked: true },
+  { label: "Events", href: "/launch-event" },
+  { label: "Lost", href: "/lost-and-found" },
+  { label: "Book", href: "/campus-services" },
+];
 
 const quickActions: QuickAction[] = [
   {
@@ -106,13 +110,6 @@ const quickActions: QuickAction[] = [
     badge: "Book",
     href: "/campus-services",
   },
-  {
-    title: "Campus Wall",
-    description: "Moments, memes, dorm tips, and campus updates.",
-    icon: PenSquare,
-    badge: "Scroll",
-    href: "/campus-wall",
-  },
 ];
 
 type RecentListing = {
@@ -133,6 +130,12 @@ type RecentListing = {
 type CampusLiveItem = RecentListing;
 
 const campusLiveOrder = ["Lost & Found", "Fundraise", "Event"] as const;
+
+function getCampusLiveLabel(category: string) {
+  if (category === "Lost & Found") return "Lost";
+  if (category === "Fundraise") return "Fundraise";
+  return "Events";
+}
 
 function getCampusLiveTime(createdAt?: string | null) {
   if (!createdAt) return "Live";
@@ -178,47 +181,17 @@ const supportCards = [
   },
 ];
 
-const feedTabs = ["All", "Resell", "Events", "Lost", "Services", "Wall"] as const;
-
-type FeedTab = (typeof feedTabs)[number];
-
-function getFeedTab(category?: string | null): FeedTab {
-  const value = (category || "").toLowerCase();
-
-  if (value.includes("lost")) return "Lost";
-  if (value.includes("event") || value.includes("fundraise")) return "Events";
-  if (value.includes("service")) return "Services";
-  if (value.includes("wall")) return "Wall";
-  return "Resell";
-}
-
-function getFeedBadgeClass(category?: string | null) {
-  const tab = getFeedTab(category);
-
-  if (tab === "Events") {
-    return "border-rose-400/20 bg-rose-400/10 text-rose-300";
-  }
-
-  if (tab === "Lost") {
-    return "border-amber-400/20 bg-amber-400/10 text-amber-300";
-  }
-
-  if (tab === "Services") {
-    return "border-sky-400/20 bg-sky-400/10 text-sky-300";
-  }
-
-  if (tab === "Wall") {
-    return "border-fuchsia-400/20 bg-fuchsia-400/10 text-fuchsia-300";
-  }
-
-  return "border-emerald-400/20 bg-emerald-400/10 text-emerald-300";
-}
+const jumpSections = [
+  { label: "F", href: "#flash" },
+  { label: "L", href: "#launcher" },
+  { label: "R", href: "#recent" },
+  { label: "A", href: "#ai" },
+];
 
 export default function Home() {
   const [assistantQuestion, setAssistantQuestion] = useState("");
   const [assistantLoading, setAssistantLoading] = useState(false);
   const [assistantError, setAssistantError] = useState("");
-  const [selectedTab, setSelectedTab] = useState<FeedTab>("All");
   const [assistantReply, setAssistantReply] = useState<{
     answer: string;
     suggestedRoute: string;
@@ -358,29 +331,11 @@ export default function Home() {
     () => recentListings.find((listing) => listing.title === activePreview) ?? recentListings[0] ?? null,
     [activePreview, recentListings],
   );
-  const allVisibleIdentityListings = useMemo(() => {
-    const merged = [...recentListings, ...campusLiveItems];
-    const deduped = new Map<string, RecentListing | CampusLiveItem>();
-
-    merged.forEach((item) => {
-      deduped.set(String(item.id), item);
-    });
-
-    return [...deduped.values()].sort((a, b) => {
-      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-      return dateB - dateA;
-    });
-  }, [campusLiveItems, recentListings]);
+  const allVisibleIdentityListings = useMemo(
+    () => [...recentListings, ...campusLiveItems],
+    [campusLiveItems, recentListings],
+  );
   const leaderboardPreview = useMemo(() => buildWeeklyLeaderboard(allVisibleIdentityListings), [allVisibleIdentityListings]);
-  const filteredFeed = useMemo(() => {
-    if (selectedTab === "All") return allVisibleIdentityListings;
-    return allVisibleIdentityListings.filter((item) => getFeedTab(item.category) === selectedTab);
-  }, [allVisibleIdentityListings, selectedTab]);
-  const hotItems = useMemo(() => filteredFeed.slice(0, 2), [filteredFeed]);
-  const browseItems = useMemo(() => recentListings.slice(0, 4), [recentListings]);
-  const activityItems = useMemo(() => allVisibleIdentityListings.slice(0, 4), [allVisibleIdentityListings]);
-  const notifCount = Math.min(9, Math.max(1, campusLiveItems.length + recentListings.length));
 
   const getKarma = (item: RecentListing | CampusLiveItem) => {
     const score = computeCampusKarma(allVisibleIdentityListings, item.contact_email || item.email || "");
@@ -388,396 +343,344 @@ export default function Home() {
   };
 
   return (
-    <main id="top" className="relative overflow-hidden bg-[#000000] pb-32 text-white">
-      <div className="startup-orb left-[-180px] top-[80px] h-[240px] w-[240px] bg-[rgba(18,214,255,0.08)]" />
-      <div className="startup-orb right-[-140px] top-[180px] h-[280px] w-[280px] bg-[rgba(255,255,255,0.03)]" />
-      <div className="relative z-10 mx-auto max-w-[680px]">
-        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-white/8 bg-[rgba(0,0,0,0.92)] px-4 py-3 backdrop-blur-xl">
-          <Link href="#top" className="font-display text-[15px] font-semibold text-white">
-            my<span className="text-[var(--accent)]">dorm</span>stash
+    <main id="top" className="relative overflow-hidden bg-[#000000] pb-28 text-white">
+      <div className="startup-orb left-[-160px] top-[60px] h-[220px] w-[220px] bg-[rgba(140,29,64,0.22)]" />
+      <div className="startup-orb right-[-120px] top-[120px] h-[260px] w-[260px] bg-[rgba(255,255,255,0.04)]" />
+      <div className="startup-grid absolute inset-0 opacity-40" />
+
+      <nav className="fixed right-3 top-1/2 z-30 flex -translate-y-1/2 flex-col items-center gap-2 rounded-full border border-white/10 bg-[rgba(8,8,8,0.84)] px-2 py-3 shadow-[0_18px_40px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+        {jumpSections.map((item) => (
+          <a
+            key={item.label}
+            href={item.href}
+            className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/46 transition hover:text-[var(--accent)]"
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
+
+      <section className="relative z-10 mx-auto max-w-5xl px-4 pb-12 pt-1 sm:px-6">
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-white/8 bg-[rgba(5,5,5,0.9)] px-1 py-4 backdrop-blur-xl">
+          <Link href="#top" className="font-display text-[1.2rem] font-extrabold tracking-[0.01em] sm:text-[1.35rem]">
+            <span className="text-[#37c8ff]">my</span>dormstash<span className="text-white">.com</span>
           </Link>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              className="relative flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/72"
+            <Link
+              href="/signup"
+              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[13px] font-semibold text-white/82 transition hover:border-white/20 hover:bg-white/[0.08]"
             >
-              <Bell className="h-4 w-4" />
-              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--accent)] text-[9px] font-semibold text-black">
-                {notifCount}
-              </span>
-            </button>
+              Sign up
+            </Link>
             <Link
               href="/login"
-              className="rounded-lg bg-[var(--accent)] px-3.5 py-2 text-[13px] font-semibold text-black transition hover:brightness-110"
+              className="rounded-full border border-[var(--accent)]/30 bg-[rgba(18,214,255,0.12)] px-4 py-2 text-[13px] font-semibold text-white shadow-[0_10px_24px_rgba(18,214,255,0.12)] transition hover:border-[var(--accent)]/45 hover:bg-[rgba(18,214,255,0.18)]"
             >
               Log in
             </Link>
           </div>
         </header>
 
-        <section className="overflow-x-auto border-b border-white/8 bg-[rgba(255,255,255,0.02)] px-4 py-2 text-[12px] text-white/62 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex min-w-max items-center gap-2 whitespace-nowrap">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>
-              <span className="font-semibold text-emerald-300">{campusLiveItems.length || 0}</span> live on campus
-            </span>
-            <span className="text-white/24">·</span>
-            <span>{recentListings.length} recent posts</span>
-            {moveOutCountdown ? (
-              <>
-                <span className="text-white/24">·</span>
-                <span className="rounded-md bg-white/6 px-2 py-0.5 text-[11px] font-medium text-white/78">
-                  Move-Out Mode {moveOutCountdown}
-                </span>
-              </>
-            ) : null}
+        <section className="px-1 pb-6 pt-5">
+          <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/72 shadow-[0_10px_24px_rgba(0,0,0,0.22)]">
+            Temple Campus Live
           </div>
+          <h1 className="mt-4 max-w-3xl font-display text-[2.1rem] font-extrabold leading-[0.98] tracking-[0.01em] text-white sm:text-[2.8rem]">
+            Everything campus.
+            <span className="mt-1 block text-[var(--accent)]">All in one place.</span>
+          </h1>
+          <p className="mt-3 max-w-2xl text-[13px] leading-6 text-white/62 sm:text-[14px]">
+            The student network for what you need. Buy, sell, and connect with your community instantly.
+          </p>
         </section>
 
-        <section className="border-b border-white/8 px-4">
-          <div className="flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {feedTabs.map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                onClick={() => setSelectedTab(tab)}
-                className={`shrink-0 border-b-2 px-3 py-3 text-[13px] font-medium transition ${
-                  selectedTab === tab
-                    ? "border-[var(--accent)] text-[var(--accent)]"
-                    : "border-transparent text-white/48 hover:text-white/72"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section className="px-4 pt-3">
-          <div className="rounded-[14px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
-            <p className="text-[13px] font-semibold text-white">Everything campus. All in one place.</p>
-            <p className="mt-1 text-[12px] text-white/52">
-              The student network for what you need. Buy, sell, and connect with your community instantly.
-            </p>
-          </div>
-        </section>
-
-        <section className="px-4 pt-3">
-          <div className="rounded-[14px] border border-[rgba(127,119,221,0.35)] bg-[rgba(127,119,221,0.12)] p-4">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[13px] font-semibold text-white">Got something to post?</p>
-                <p className="mt-1 text-[12px] text-white/58">Listings, events, services, and campus moments all move from here.</p>
-              </div>
-              <Link
-                href="/create-listing"
-                className="shrink-0 rounded-lg bg-[var(--accent)] px-4 py-2 text-[13px] font-semibold text-black"
-              >
-                + Post
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        <section className="px-4 pt-3">
-          <div className="rounded-[14px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
-            <div className="flex items-start gap-3">
-              <div className="text-lg">⭐</div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-semibold text-white">
-                  {leaderboardPreview[0]
-                    ? `Top seller this week: ${leaderboardPreview[0].name}`
-                    : 'Campus karma starts as soon as students post'}
-                </p>
-                <p className="mt-1 text-[12px] text-white/52">
-                  {leaderboardPreview[0]
-                    ? `${leaderboardPreview[0].karma} points this week · ${leaderboardPreview[0].major || "Temple student"}`
-                    : "Post, help, and return lost items to build your campus identity."}
-                </p>
-                <div className="mt-3 h-1.5 w-full rounded-full bg-white/8">
-                  <div className="h-1.5 rounded-full bg-[var(--accent)]" style={{ width: `${leaderboardPreview[0] ? 72 : 38}%` }} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="flash" className="px-4 pb-1 pt-4">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-[14px] font-semibold text-white">Hot right now</p>
-            <Link href="/dashboard" className="text-[13px] text-[var(--accent)]">
-              See all
-            </Link>
-          </div>
-          {recentLoading || campusLiveLoading ? (
-            <div className="rounded-[14px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 text-[13px] text-white/42">
-              Loading feed...
-            </div>
-          ) : recentError || campusLiveError ? (
-            <div className="rounded-[14px] border border-[rgba(240,80,80,0.22)] bg-[rgba(240,80,80,0.08)] p-4 text-[13px] text-[#F09595]">
-              {recentError || campusLiveError}
-            </div>
-          ) : hotItems.length === 0 ? (
-            <div className="rounded-[14px] border border-dashed border-white/12 bg-[rgba(255,255,255,0.02)] p-4 text-[13px] text-white/42">
-              No listings yet. New campus posts will appear here automatically.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {hotItems.map((item) => {
-                const urgency = parseUrgencyMeta(item.description);
-                const priceLabel =
-                  item.price !== null && item.price !== undefined && Number(item.price) > 0
-                    ? `$${item.price}`
-                    : getFeedTab(item.category);
-
-                return (
-                  <article
-                    key={String(item.id)}
-                    className="overflow-hidden rounded-[14px] border border-white/10 bg-[rgba(255,255,255,0.02)]"
-                  >
-                    <div className="relative flex h-36 items-center justify-center bg-[linear-gradient(135deg,_rgba(18,214,255,0.12),_rgba(255,255,255,0.03))] text-4xl">
-                      {getFeedTab(item.category) === "Events"
-                        ? "🎉"
-                        : getFeedTab(item.category) === "Lost"
-                          ? "🔍"
-                          : getFeedTab(item.category) === "Services"
-                            ? "✂️"
-                            : getFeedTab(item.category) === "Wall"
-                              ? "📸"
-                              : "📦"}
-                      {getRecentViewerCount(item.id) > 0 ? (
-                        <span className="absolute left-3 top-3 rounded-md bg-rose-500 px-2 py-1 text-[10px] font-semibold text-white">
-                          🔥 {getRecentViewerCount(item.id)} viewing
-                        </span>
-                      ) : (
-                        <span className="absolute left-3 top-3 rounded-md bg-emerald-500 px-2 py-1 text-[10px] font-semibold text-white">
-                          Just posted
-                        </span>
-                      )}
-                      {getExpiryCountdown(urgency.expiresAt) ? (
-                        <span className="absolute right-3 top-3 rounded-md bg-black/55 px-2 py-1 text-[10px] font-semibold text-white">
-                          {getExpiryCountdown(urgency.expiresAt)}
-                        </span>
-                      ) : null}
-                    </div>
-                    <div className="p-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <h2 className="text-[14px] font-semibold text-white">{item.title || "Campus post"}</h2>
-                          <p className="mt-1 text-[12px] text-white/48">
-                            {item.location || "Temple Main Campus"} · {getRelativePostLabel(item.created_at)}
-                          </p>
-                        </div>
-                        <span className="shrink-0 text-[15px] font-semibold text-[var(--accent)]">{priceLabel}</span>
-                      </div>
-                      <p className="mt-2 text-[11px] text-white/62">
-                        {item.poster_name || "Temple Student"}
-                        {item.major ? ` · ${item.major}` : ""}
-                        {item.class_year ? ` · ${item.class_year}` : ""}
-                      </p>
-                      <div className="mt-3 flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-200 text-[9px] font-semibold text-black">
-                            {(item.poster_name || "TS")
-                              .split(" ")
-                              .map((part) => part[0])
-                              .join("")
-                              .slice(0, 2)}
-                          </span>
-                          <span className="text-[11px] text-white/52">⭐ {getKarma(item).score} karma</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[12px] text-white/70"
-                          >
-                            Save
-                          </button>
-                          <Link
-                            href="/dashboard"
-                            className="rounded-md bg-[var(--accent)] px-3 py-1.5 text-[12px] font-semibold text-black"
-                          >
-                            Open
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        <section className="px-4 pt-4">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-[14px] font-semibold text-white">Campus activity</p>
-            <Link href="/dashboard" className="text-[13px] text-[var(--accent)]">
-              See all
-            </Link>
-          </div>
-          <div className="overflow-hidden rounded-[14px] border border-white/10 bg-[rgba(255,255,255,0.02)]">
-            {activityItems.length === 0 ? (
-              <div className="p-4 text-[13px] text-white/42">Campus activity will appear here once students start posting.</div>
-            ) : (
-              activityItems.map((item) => (
+        <section className="border-t border-white/8 px-1 py-4">
+          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {quickPills.map((pill) =>
+              pill.locked ? (
                 <div
-                  key={`activity-${item.id}`}
-                  className="flex items-center gap-3 border-b border-white/8 px-4 py-3 last:border-b-0"
+                  key={pill.label}
+                  aria-disabled="true"
+                  className="shrink-0 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/38"
                 >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-[10px] font-semibold text-white">
-                    {(item.poster_name || "TS")
-                      .split(" ")
-                      .map((part) => part[0])
-                      .join("")
-                      .slice(0, 2)}
-                  </div>
-                  <div className="min-w-0 flex-1 text-[13px] text-white">
-                    <span className="font-semibold">{item.poster_name || "Temple Student"}</span>{" "}
-                    <span className="text-white/72">
-                      posted {item.title || item.category || "something new"} in {getFeedTab(item.category)}
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-white/42">{getCampusLiveTime(item.created_at)}</span>
+                  {pill.label}
                 </div>
-              ))
+              ) : (
+                <Link
+                  key={pill.label}
+                  href={pill.href}
+                  className="shrink-0 rounded-full border border-white/14 bg-white/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/76 transition hover:border-white/22 hover:bg-white/[0.08]"
+                >
+                  {pill.label}
+                </Link>
+              ),
             )}
           </div>
         </section>
 
-        <section className="px-4 pt-4">
-          <div className="rounded-[14px] border border-orange-300/20 bg-orange-200/10 p-4">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[13px] font-semibold text-white">Move-Out Mode is live</p>
-                <p className="mt-1 text-[12px] text-white/58">Rugs, lamps, mini fridges, and bins move fastest here.</p>
-              </div>
-              <Link
-                href="/sell-goods"
-                className="shrink-0 rounded-lg bg-orange-500 px-3 py-2 text-[12px] font-semibold text-white"
-              >
-                List now
-              </Link>
-            </div>
+        <section id="flash" className="campus-live-section px-1 py-4">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="campus-live-heading">
+              <span className="campus-live-dot" aria-hidden="true" />
+              Campus Live
+            </p>
+            <span className="campus-live-badge">{campusLiveItems.length} active</span>
           </div>
-        </section>
-
-        <section id="recent" className="px-4 pt-4">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-[14px] font-semibold text-white">Browse nearby</p>
-            <Link href="/dashboard" className="text-[13px] text-[var(--accent)]">
-              See all
-            </Link>
-          </div>
-          {recentLoading ? (
-            <div className="rounded-[14px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 text-[13px] text-white/42">
-              Loading nearby listings...
+          {moveOutCountdown ? (
+            <div className="mb-3 rounded-[16px] border border-cyan-400/20 bg-cyan-400/8 px-4 py-3 text-[12px] text-white/78">
+              <span className="font-semibold text-cyan-300">Move-Out Mode:</span> {moveOutCountdown}
             </div>
-          ) : recentError ? (
-            <div className="rounded-[14px] border border-[rgba(240,80,80,0.22)] bg-[rgba(240,80,80,0.08)] p-4 text-[13px] text-[#F09595]">
-              {recentError}
+          ) : null}
+          {campusLiveLoading ? (
+            <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4 text-[13px] text-white/42">
+              Loading Campus Live...
             </div>
-          ) : browseItems.length === 0 ? (
-            <div className="rounded-[14px] border border-dashed border-white/12 bg-[rgba(255,255,255,0.02)] p-4 text-[13px] text-white/42">
-              No recent listings yet. The grid will fill automatically when students post.
+          ) : campusLiveError ? (
+            <div className="rounded-[18px] border border-[rgba(240,80,80,0.22)] bg-[rgba(240,80,80,0.08)] px-4 py-4 text-[13px] text-[#F09595]">
+              {campusLiveError}
+            </div>
+          ) : campusLiveItems.length === 0 ? (
+            <div className="rounded-[18px] border border-dashed border-white/12 bg-[rgba(255,255,255,0.02)] px-4 py-6 text-center text-[13px] text-white/42">
+              No live lost and found, fundraiser, or event posts yet.
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
-              {browseItems.map((listing) => (
-                <button
-                  key={String(listing.id)}
-                  type="button"
-                  onMouseEnter={() => setActivePreview(listing.title ?? null)}
-                  onFocus={() => setActivePreview(listing.title ?? null)}
-                  onClick={() => setActivePreview(listing.title ?? null)}
-                  className="overflow-hidden rounded-[12px] border border-white/10 bg-[rgba(255,255,255,0.02)] text-left transition hover:border-white/18"
+            <div className="space-y-2">
+              {campusLiveItems.map((item) => (
+                <article
+                  key={String(item.id)}
+                  className="flex items-center justify-between rounded-[18px] border border-transparent px-3 py-3 transition hover:border-white/8 hover:bg-white/[0.03]"
                 >
-                  <div className="relative flex h-24 items-center justify-center bg-[rgba(255,255,255,0.04)] text-3xl">
-                    {getFeedTab(listing.category) === "Events"
-                      ? "🎉"
-                      : getFeedTab(listing.category) === "Lost"
-                        ? "🔍"
-                        : getFeedTab(listing.category) === "Services"
-                          ? "✂️"
-                          : getFeedTab(listing.category) === "Wall"
-                            ? "📸"
-                            : "📦"}
-                    <span className={`absolute right-2 top-2 rounded px-1.5 py-0.5 text-[9px] font-semibold ${getFeedBadgeClass(listing.category)}`}>
-                      {getFeedTab(listing.category)}
+                  <div className="min-w-0 pr-3">
+                    <h2 className="truncate text-[15px] font-semibold tracking-[0.01em] text-white">
+                      {item.title || item.category || "Campus post"}
+                    </h2>
+                    <p className="mt-1 truncate text-[11px] text-white/52">
+                      {item.poster_name || "Temple Student"}
+                      {item.major ? ` · ${item.major}` : ""}
+                      {item.class_year ? ` · ${item.class_year}` : ""}
+                    </p>
+                    <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-cyan-300/90">
+                      Campus Karma {getKarma(item).score} · {getKarma(item).label}
+                    </p>
+                    <p className="mt-1 text-[11px] text-white/46">{getRelativePostLabel(item.created_at)}</p>
+                    {getRecentViewerCount(item.id) > 0 ? (
+                      <p className="mt-1 text-[11px] font-semibold text-amber-300">
+                        🔥 {getRecentViewerCount(item.id)} people are viewing this
+                      </p>
+                    ) : null}
+                    {parseUrgencyMeta(item.description).flashSale || parseUrgencyMeta(item.description).moveOutMode ? (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {parseUrgencyMeta(item.description).flashSale ? (
+                          <span className="rounded-full border border-rose-400/20 bg-rose-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-rose-300">
+                            Flash Sale
+                          </span>
+                        ) : null}
+                        {parseUrgencyMeta(item.description).moveOutMode ? (
+                          <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-300">
+                            Move-Out
+                          </span>
+                        ) : null}
+                        {getExpiryCountdown(parseUrgencyMeta(item.description).expiresAt) ? (
+                          <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/74">
+                            {getExpiryCountdown(parseUrgencyMeta(item.description).expiresAt)}
+                          </span>
+                        ) : null}
+                      </div>
+                    ) : null}
+                    <div className="mt-1 flex items-center gap-1.5 text-[12px] text-white/42">
+                      <MapPin className="h-3.5 w-3.5 shrink-0 text-white/34" />
+                      <span className="truncate">{item.location || "Temple Main Campus"}</span>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <button
+                      type="button"
+                      className="rounded-full border border-white/12 bg-white/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70"
+                    >
+                      {getCampusLiveLabel(item.category || "Event")}
+                    </button>
+                    <span className="rounded-full border border-white/10 bg-[rgba(18,214,255,0.08)] px-2.5 py-1 text-[11px] font-semibold text-[var(--accent)]">
+                      {getCampusLiveTime(item.created_at)}
                     </span>
                   </div>
-                  <div className="p-3">
-                    <p className="truncate text-[12px] font-semibold text-white">{listing.title || "Campus listing"}</p>
-                    <p className="mt-1 text-[13px] font-semibold text-[var(--accent)]">
-                      {listing.price !== null && listing.price !== undefined && Number(listing.price) > 0
-                        ? `$${listing.price}`
-                        : getFeedTab(listing.category)}
-                    </p>
-                    <p className="mt-1 truncate text-[11px] text-white/44">{listing.location || "Temple Main Campus"}</p>
-                  </div>
-                </button>
+                </article>
               ))}
             </div>
           )}
         </section>
 
-        <section id="launcher" className="px-4 pt-4">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-[14px] font-semibold text-white">Explore tools</p>
-            <span className="text-[12px] text-white/38">Everything else</span>
-          </div>
+        <section id="launcher" className="border-t border-white/8 px-1 py-5">
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/54">Everything Else</p>
           <div className="grid grid-cols-2 gap-3">
             {quickActions.map(({ title, description, icon: Icon, badge, href, locked, hypeBadge }) => {
-              const card = (
-                <div className="rounded-[14px] border border-white/10 bg-[rgba(255,255,255,0.02)] p-3 transition hover:border-white/18">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04]">
-                      <Icon className="h-4 w-4 text-white/76" />
+              const content = (
+                <div className="flex h-full flex-col justify-between gap-4">
+                  {hypeBadge ? (
+                    <span className="absolute right-3 top-3 rounded-full border border-[var(--accent)]/30 bg-[var(--accent)]/12 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
+                      {hypeBadge}
+                    </span>
+                  ) : null}
+                  <div>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04]">
+                      <Icon className="h-5 w-5 text-white/78" />
                     </div>
-                    <div className="flex items-center gap-2">
-                      {hypeBadge ? (
-                        <span className="rounded-full border border-[var(--accent)]/20 bg-[var(--accent)]/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-[var(--accent)]">
-                          {hypeBadge}
-                        </span>
-                      ) : null}
-                      <ChevronRight className="h-4 w-4 text-white/28" />
+                    <div className="mt-4 min-w-0">
+                      <h2 className="truncate text-[15px] font-semibold tracking-[0.01em] text-white">{title}</h2>
+                      <p className="mt-1 text-[12px] leading-5 text-white/46">{description}</p>
                     </div>
                   </div>
-                  <p className="mt-3 text-[14px] font-semibold text-white">{title}</p>
-                  <p className="mt-1 text-[12px] leading-5 text-white/44">{description}</p>
-                  <div className="mt-3 flex items-center justify-between">
-                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/66">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="rounded-full border border-white/12 bg-white/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70">
                       {badge}
                     </span>
-                    {locked ? <span className="text-[10px] uppercase tracking-[0.14em] text-white/34">Locked</span> : null}
+                    <div className="flex items-center gap-2">
+                      {locked ? (
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/42">
+                          Locked
+                        </span>
+                      ) : null}
+                      <ChevronRight className="h-4 w-4 shrink-0 text-white/32 transition group-hover:text-white/58" />
+                    </div>
                   </div>
                 </div>
               );
 
+              const className = `group relative rounded-[20px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 shadow-[0_16px_32px_rgba(0,0,0,0.18)] backdrop-blur-xl transition ${
+                locked ? "opacity-96" : "hover:border-white/18 hover:bg-white/[0.05]"
+              }`;
+
               return locked || !href ? (
-                <div key={title} aria-disabled="true">
-                  {card}
+                <div key={title} aria-disabled="true" className={className}>
+                  {content}
                 </div>
               ) : (
-                <Link key={title} href={href}>
-                  {card}
+                <Link key={title} href={href} className={className}>
+                  {content}
                 </Link>
               );
             })}
           </div>
         </section>
 
-        <section className="px-4 pt-4">
+        <section id="recent" className="border-t border-white/8 px-1 py-5">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/54">Recent Listings</p>
+            <Link href="/dashboard" className="text-[12px] text-white/38 transition hover:text-white/62">
+              See all
+            </Link>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-[1fr_260px]">
+            {recentLoading ? (
+              <div className="lg:col-span-2 rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 text-[13px] text-white/42">
+                Loading recent listings...
+              </div>
+            ) : recentError ? (
+              <div className="lg:col-span-2 rounded-[18px] border border-[rgba(240,80,80,0.22)] bg-[rgba(240,80,80,0.08)] p-4 text-[13px] text-[#F09595]">
+                {recentError}
+              </div>
+            ) : recentListings.length === 0 ? (
+              <div className="lg:col-span-2 rounded-[18px] border border-dashed border-white/12 bg-[rgba(255,255,255,0.02)] p-6 text-center text-[13px] text-white/42">
+                No recent listings yet. When students post, they’ll appear here automatically.
+              </div>
+            ) : (
+              <>
+                <div className="space-y-1">
+                  {recentListings.map((listing) => (
+                    <button
+                      key={String(listing.id)}
+                      type="button"
+                      onMouseEnter={() => setActivePreview(listing.title ?? null)}
+                      onFocus={() => setActivePreview(listing.title ?? null)}
+                      onClick={() => setActivePreview(listing.title ?? null)}
+                      className="flex w-full items-center justify-between rounded-[16px] border border-transparent px-2 py-3 text-left transition hover:border-white/8 hover:bg-white/[0.03]"
+                    >
+                      <span className="min-w-0">
+                        <span className="block truncate text-[14px] font-medium tracking-[0.01em] text-white">
+                          {listing.price !== null && listing.price !== undefined ? `$${listing.price}` : listing.category || "Post"} -{" "}
+                          {listing.title || "Campus listing"} - {listing.location || "Temple Main Campus"}
+                        </span>
+                        <span className="mt-1 block truncate text-[11px] text-white/46">
+                          {getRelativePostLabel(listing.created_at)}
+                        </span>
+                      </span>
+                      <span className="ml-3 shrink-0 rounded-full border border-white/12 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/66">
+                        Peek
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                <aside className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 backdrop-blur-xl">
+                  <div className="flex h-32 items-center justify-center rounded-[14px] border border-white/8 bg-[linear-gradient(135deg,_rgba(18,214,255,0.12),_rgba(255,255,255,0.03))] px-4 text-center text-sm font-semibold text-white/72">
+                    {previewItem?.category || "Listing"}
+                  </div>
+                  <p className="mt-4 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
+                    Preview
+                  </p>
+                  <p className="mt-2 text-sm text-white">
+                    {previewItem?.price !== null && previewItem?.price !== undefined ? `$${previewItem?.price} - ` : ""}
+                    {previewItem?.title || "Campus listing"}
+                  </p>
+                  <p className="mt-1 text-[11px] text-white/52">
+                    {previewItem?.poster_name || "Temple Student"}
+                    {previewItem?.major ? ` · ${previewItem.major}` : ""}
+                    {previewItem?.class_year ? ` · ${previewItem.class_year}` : ""}
+                  </p>
+                  {previewItem ? (
+                    <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-cyan-300/90">
+                      Campus Karma {getKarma(previewItem).score} · {getKarma(previewItem).label}
+                    </p>
+                  ) : null}
+                  {previewItem ? (
+                    <p className="mt-1 text-[11px] text-white/46">{getRelativePostLabel(previewItem.created_at)}</p>
+                  ) : null}
+                  {previewItem && getRecentViewerCount(previewItem.id) > 0 ? (
+                    <p className="mt-1 text-[11px] font-semibold text-amber-300">
+                      🔥 {getRecentViewerCount(previewItem.id)} people are viewing this
+                    </p>
+                  ) : null}
+                  {previewItem && (parseUrgencyMeta(previewItem.description).flashSale || parseUrgencyMeta(previewItem.description).moveOutMode) ? (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {parseUrgencyMeta(previewItem.description).flashSale ? (
+                        <span className="rounded-full border border-rose-400/20 bg-rose-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-rose-300">
+                          Flash Sale
+                        </span>
+                      ) : null}
+                      {parseUrgencyMeta(previewItem.description).moveOutMode ? (
+                        <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-300">
+                          Move-Out
+                        </span>
+                      ) : null}
+                      {getExpiryCountdown(parseUrgencyMeta(previewItem.description).expiresAt) ? (
+                        <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/74">
+                          {getExpiryCountdown(parseUrgencyMeta(previewItem.description).expiresAt)}
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  <p className="mt-1 text-[12px] text-white/42">{previewItem?.location || "Temple Main Campus"}</p>
+                  <p className="mt-3 text-[12px] leading-6 text-white/52">
+                    {parseUrgencyMeta(previewItem?.description).cleanDescription || "Open the feed to view the full post details."}
+                  </p>
+                </aside>
+              </>
+            )}
+          </div>
+        </section>
+
+        <section className="border-t border-white/8 px-1 py-5">
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/54">Campus Signals</p>
           <div className="space-y-1">
             {supportCards.map(({ title, text, icon: Icon, href }) => {
-              const row = (
-                <div className="flex items-center justify-between gap-3 border-b border-white/8 py-3 last:border-b-0">
-                  <div className="flex min-w-0 items-center gap-3">
+              const content = (
+                <div className="flex items-center justify-between rounded-[18px] border border-transparent px-2 py-3 transition hover:border-white/8 hover:bg-white/[0.03]">
+                  <div className="flex min-w-0 items-center gap-3 pr-4">
                     <Icon className="h-4 w-4 shrink-0 text-white/72" />
                     <div className="min-w-0">
-                      <p className="truncate text-[14px] font-semibold text-white">{title}</p>
-                      <p className="truncate text-[12px] text-white/42">{text}</p>
+                      <h2 className="truncate text-[15px] font-semibold tracking-[0.03em] text-white">{title}</h2>
+                      <p className="truncate text-[12px] text-white/38">{text}</p>
                     </div>
                   </div>
                   <ChevronRight className="h-4 w-4 shrink-0 text-white/28" />
@@ -786,91 +689,69 @@ export default function Home() {
 
               return href ? (
                 <Link key={title} href={href}>
-                  {row}
+                  {content}
                 </Link>
               ) : (
-                <div key={title}>{row}</div>
+                <div key={title}>{content}</div>
               );
             })}
           </div>
-        </section>
-
-        <section id="ai" className="px-4 py-4">
-          <div className="rounded-[14px] border border-white/10 bg-[rgba(255,255,255,0.02)] p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/46">AI Reply</p>
-            {assistantReply ? (
+          <div className="mt-4 rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/46">Top Sellers This Week</p>
+            {leaderboardPreview.length > 0 ? (
               <div className="mt-3 space-y-2">
-                <p className="text-[13px] leading-6 text-white/72">{assistantReply.answer}</p>
-                <p className="text-[12px] text-[var(--accent)]">{assistantReply.suggestedRoute}</p>
-                <p className="text-[12px] text-white/46">{assistantReply.suggestedAction}</p>
+                {leaderboardPreview.slice(0, 3).map((entry, index) => (
+                  <div key={entry.email} className="flex items-center justify-between gap-3 rounded-[14px] border border-white/10 bg-white/[0.03] px-3 py-3">
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-semibold text-white">
+                        #{index + 1} {entry.name}
+                      </p>
+                      <p className="mt-1 truncate text-[12px] text-white/48">
+                        {entry.major || "Temple student"}
+                        {entry.classYear ? ` · ${entry.classYear}` : ""}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[13px] font-semibold text-cyan-300">{entry.karma} pts</p>
+                      {getCampusBadges(allVisibleIdentityListings, entry.email).length > 0 ? (
+                        <p className="text-[11px] text-white/44">{getCampusBadges(allVisibleIdentityListings, entry.email)[0]?.label}</p>
+                      ) : null}
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
-              <p className="mt-3 text-[13px] leading-6 text-white/46">
-                Use the command line below to ask where to post, browse, or start.
-              </p>
+              <p className="mt-3 text-[12px] text-white/42">The weekly leaderboard appears automatically when students start posting this week.</p>
             )}
-            {assistantError ? <p className="mt-3 text-[12px] text-[#F09595]">{assistantError}</p> : null}
           </div>
         </section>
 
-        {previewItem ? (
-          <section className="px-4 pb-2">
-            <div className="rounded-[14px] border border-white/10 bg-[rgba(255,255,255,0.02)] p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--accent)]">Peek</p>
-              <p className="mt-2 text-[14px] font-semibold text-white">
-                {previewItem.price !== null && previewItem.price !== undefined && Number(previewItem.price) > 0 ? `$${previewItem.price} · ` : ""}
-                {previewItem.title || "Campus listing"}
+        <section id="ai" className="border-t border-white/8 px-1 py-5">
+          <div className="rounded-[20px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 shadow-[0_18px_36px_rgba(0,0,0,0.24)] backdrop-blur-xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/54">AI Reply</p>
+            {assistantReply ? (
+              <div className="mt-4 space-y-3">
+                <p className="text-sm leading-6 text-white/72">{assistantReply.answer}</p>
+                <div className="rounded-[14px] border border-white/8 bg-white/[0.02] p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
+                    Suggested Route
+                  </p>
+                  <p className="mt-2 text-sm font-semibold text-white">{assistantReply.suggestedRoute}</p>
+                  <p className="mt-2 text-[13px] leading-6 text-white/48">{assistantReply.suggestedAction}</p>
+                </div>
+              </div>
+            ) : (
+              <p className="mt-4 text-sm leading-6 text-white/42">
+                Use the fixed command line to ask about selling, rooms, fundraisers, services, lost items, or events.
               </p>
-              <p className="mt-1 text-[12px] text-white/48">
-                {previewItem.poster_name || "Temple Student"}
-                {previewItem.major ? ` · ${previewItem.major}` : ""}
-                {previewItem.class_year ? ` · ${previewItem.class_year}` : ""}
-              </p>
-              <p className="mt-2 text-[12px] leading-6 text-white/56">
-                {parseUrgencyMeta(previewItem.description).cleanDescription || "Open the dashboard to view the full details."}
-              </p>
-            </div>
-          </section>
-        ) : null}
-
-        <div className="sticky bottom-[86px] z-20 flex justify-end px-4 pb-2">
-          <Link
-            href="/sell-goods"
-            className="inline-flex items-center gap-2 rounded-full bg-[var(--accent)] px-5 py-3 text-[14px] font-semibold text-black shadow-[0_8px_24px_rgba(18,214,255,0.26)]"
-          >
-            <CirclePlus className="h-4 w-4" />
-            Sell something
-          </Link>
-        </div>
-
-        <nav className="sticky bottom-0 z-30 border-t border-white/8 bg-[rgba(0,0,0,0.94)] px-2 py-2 backdrop-blur-xl">
-          <div className="grid grid-cols-5">
-            <Link href="/" className="flex flex-col items-center gap-1 py-1 text-[var(--accent)]">
-              <House className="h-4 w-4" />
-              <span className="text-[10px]">Feed</span>
-            </Link>
-            <Link href="/dashboard" className="flex flex-col items-center gap-1 py-1 text-white/48">
-              <Search className="h-4 w-4" />
-              <span className="text-[10px]">Search</span>
-            </Link>
-            <Link href="/create-listing" className="flex flex-col items-center gap-1 py-1 text-white/48">
-              <CirclePlus className="h-4 w-4" />
-              <span className="text-[10px]">Post</span>
-            </Link>
-            <Link href="/campus-services" className="flex flex-col items-center gap-1 py-1 text-white/48">
-              <MessageCircle className="h-4 w-4" />
-              <span className="text-[10px]">Book</span>
-            </Link>
-            <Link href="/account" className="flex flex-col items-center gap-1 py-1 text-white/48">
-              <UserRound className="h-4 w-4" />
-              <span className="text-[10px]">Profile</span>
-            </Link>
+            )}
+            {assistantError ? <p className="mt-4 text-sm text-white/58">{assistantError}</p> : null}
           </div>
-        </nav>
-      </div>
+        </section>
+      </section>
 
-      <div className="fixed inset-x-0 bottom-[58px] z-40 px-4">
-        <div className="mx-auto flex max-w-[680px] items-center gap-3 rounded-full border border-white/12 bg-[rgba(10,10,10,0.96)] px-4 py-3 shadow-[0_18px_36px_rgba(0,0,0,0.36)] backdrop-blur-2xl">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/8 bg-[rgba(5,5,5,0.92)] px-4 py-3 backdrop-blur-2xl">
+        <div className="mx-auto flex max-w-5xl items-center gap-3 rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-4 py-3 shadow-[0_18px_36px_rgba(0,0,0,0.32)]">
           <Search className="h-4 w-4 shrink-0 text-white/42" />
           <input
             type="search"
@@ -886,6 +767,7 @@ export default function Home() {
             className="inline-flex shrink-0 items-center gap-2 rounded-full bg-white px-4 py-2 text-[13px] font-semibold text-black transition disabled:cursor-not-allowed disabled:opacity-40"
           >
             {assistantLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            <span className="hidden sm:inline">Run</span>
           </button>
         </div>
       </div>
