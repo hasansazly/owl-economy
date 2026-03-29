@@ -249,7 +249,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!loading && !isLoggedIn) {
-      router.push("/login");
+      router.push("/signin");
     }
   }, [isLoggedIn, loading, router]);
 

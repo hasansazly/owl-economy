@@ -1,304 +1,483 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ArrowLeft, Eye, EyeOff, GraduationCap, LockKeyhole, Mail, User } from "lucide-react";
-import { useMemo, useState } from "react";
+import { ArrowLeft, CheckCircle2, Eye, EyeOff, Mail } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import { saveStudentProfile } from "@/lib/app-auth";
+import { getStudentProfile, saveStudentProfile, setVerifiedStudentEmail } from "@/lib/app-auth";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
-function getStrength(password: string) {
-  let score = 0;
-  if (password.length >= 8) score += 1;
-  if (/[A-Z]/.test(password)) score += 1;
-  if (/[0-9]/.test(password)) score += 1;
-  if (/[^A-Za-z0-9]/.test(password)) score += 1;
-  return score;
+type Step = 1 | 2 | 3;
+type FieldErrors = Partial<Record<"name" | "email" | "password" | "confirm" | "general", string>>;
+
+const OTP_LENGTH = 6;
+
+function AuthLogo() {
+  return (
+    <div className="pt-[calc(env(safe-area-inset-top)+16px)] text-center">
+      <p className="font-display text-[22px] font-semibold tracking-[-0.03em] text-[#F0EEFF]">
+        my<span className="text-[#9B8FFF]">dorm</span>stash
+      </p>
+      <p className="mt-2 text-[12px] text-[rgba(240,238,255,0.45)]">Temple&apos;s campus marketplace</p>
+    </div>
+  );
 }
 
-const strengthColors = ["#E24B4A", "#6A7B99", "#A88DFF", "#FF3EA5"];
-const strengthLabels = ["", "Weak", "Fair", "Strong", "Very strong"];
+function StepBackButton({
+  onClick,
+  hidden = false,
+}: {
+  onClick: () => void;
+  hidden?: boolean;
+}) {
+  if (hidden) {
+    return <div className="h-[44px]" />;
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex h-[44px] w-[44px] items-center justify-center rounded-[20px] text-[rgba(240,238,255,0.5)]"
+      aria-label="Go back"
+    >
+      <ArrowLeft className="h-5 w-5" />
+    </button>
+  );
+}
 
 export default function SignupPage() {
-  const router = useRouter();
-  const [name, setName] = useState("");
+  const supabase = getSupabaseBrowserClient();
+  const otpRefs = useRef<Array<HTMLInputElement | null>>([]);
+
+  const [step, setStep] = useState<Step>(1);
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
+  const [otpDigits, setOtpDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));
+  const [otpError, setOtpError] = useState("");
+  const [resendMessage, setResendMessage] = useState("");
+  const [verifying, setVerifying] = useState(false);
 
-  const emailState = useMemo(() => {
-    const value = email.trim();
-    if (!value) return { valid: false, status: "neutral", hint: "Must use your @temple.edu email" };
-    if (!value.includes("@")) {
-      return { valid: false, status: "error", hint: "Enter a valid email address" };
+  const normalizedEmail = email.trim().toLowerCase();
+  const otpCode = otpDigits.join("");
+
+  useEffect(() => {
+    if (step !== 3) return;
+
+    const redirectTimer = window.setTimeout(() => {
+      window.location.href = "/";
+    }, 1500);
+
+    return () => window.clearTimeout(redirectTimer);
+  }, [step]);
+
+  useEffect(() => {
+    if (!resendMessage) return;
+
+    const timer = window.setTimeout(() => setResendMessage(""), 3000);
+    return () => window.clearTimeout(timer);
+  }, [resendMessage]);
+
+  const canSubmitStepOne = useMemo(() => {
+    return fullName.trim() && normalizedEmail && password && confirmPassword;
+  }, [confirmPassword, fullName, normalizedEmail, password]);
+
+  const validateStepOne = () => {
+    const nextErrors: FieldErrors = {};
+
+    if (!fullName.trim()) {
+      nextErrors.name = "Enter your full name.";
     }
-    const domain = value.split("@").pop()?.toLowerCase() ?? "";
-    if (domain !== "temple.edu") {
-      return { valid: false, status: "error", hint: "Only @temple.edu addresses are accepted" };
+
+    if (!normalizedEmail) {
+      nextErrors.email = "Enter your Temple email.";
+    } else if (!normalizedEmail.endsWith("@temple.edu")) {
+      nextErrors.email = "Use your @temple.edu email.";
     }
-    return { valid: true, status: "valid", hint: "Temple student email confirmed" };
-  }, [email]);
 
-  const strength = useMemo(() => getStrength(password), [password]);
-
-  const passwordState = useMemo(() => {
-    if (!password) return { valid: false, status: "neutral", hint: "" };
-    if (password.length < 8) {
-      return { valid: false, status: "error", hint: "At least 8 characters required" };
+    if (!password) {
+      nextErrors.password = "Enter a password.";
+    } else if (password.length < 8) {
+      nextErrors.password = "Password must be at least 8 characters.";
     }
-    return { valid: true, status: "valid", hint: strengthLabels[strength] };
-  }, [password, strength]);
 
-  const confirmState = useMemo(() => {
-    if (!confirm) return { valid: false, status: "neutral", hint: "" };
-    if (confirm === password) {
-      return { valid: true, status: "valid", hint: "Passwords match" };
+    if (!confirmPassword) {
+      nextErrors.confirm = "Confirm your password.";
+    } else if (confirmPassword !== password) {
+      nextErrors.confirm = "Passwords do not match.";
     }
-    return { valid: false, status: "error", hint: "Passwords do not match" };
-  }, [confirm, password]);
 
-  const isFormValid =
-    name.trim().length > 0 && emailState.valid && passwordState.valid && confirmState.valid;
-
-  const fieldClass = (status: string) => {
-    if (status === "error") return "border-[rgba(107,92,231,0.4)]";
-    if (status === "valid") return "border-[rgba(255,62,165,0.45)]";
-    return "border-[var(--border)]";
+    setFieldErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
-  const hintClass = (status: string) => {
-    if (status === "error") return "text-[rgba(240,238,255,0.35)]";
-    if (status === "valid") return "text-[var(--accent)]";
-    return "text-white/30";
-  };
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleCreateAccount = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSubmitError("");
 
-    if (!isFormValid) {
+    if (!validateStepOne()) return;
+    if (!supabase) {
+      setFieldErrors({ general: "Supabase is not configured." });
       return;
     }
 
     try {
       setSubmitting(true);
+      setFieldErrors({});
 
-      const response = await fetch("/api/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const { error } = await supabase.auth.signUp({
+        email: normalizedEmail,
+        password,
+        options: {
+          data: {
+            full_name: fullName.trim(),
+          },
+          emailRedirectTo: undefined,
         },
-        body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          password,
-        }),
       });
 
-      const data = (await response.json()) as {
-        error?: string;
-      };
-
-      if (!response.ok) {
-        throw new Error(data.error || "Signup failed.");
+      if (error) {
+        throw error;
       }
 
       saveStudentProfile({
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        phone: "",
-        major: "",
-        classYear: "2028",
-        homeBuilding: "",
-        followedBuildings: [],
-        followedMajors: [],
-        privacyMode: true,
-        eventAlerts: true,
-        lostFoundAlerts: true,
+        ...getStudentProfile(),
+        name: fullName.trim(),
+        email: normalizedEmail,
       });
 
-      router.push(`/verify-email?email=${encodeURIComponent(email.trim())}`);
+      setStep(2);
+      otpRefs.current[0]?.focus();
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : "Signup failed.");
+      setFieldErrors({
+        general: error instanceof Error ? error.message : "Could not create account.",
+      });
     } finally {
       setSubmitting(false);
     }
   };
 
+  const finalizeVerifiedStudent = async () => {
+    if (!supabase) return;
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const resolvedName =
+      typeof user?.user_metadata?.full_name === "string" && user.user_metadata.full_name.trim()
+        ? user.user_metadata.full_name.trim()
+        : fullName.trim();
+
+    setVerifiedStudentEmail(normalizedEmail);
+    saveStudentProfile({
+      ...getStudentProfile(),
+      name: resolvedName,
+      email: normalizedEmail,
+    });
+  };
+
+  const resetOtpInputs = () => {
+    setOtpDigits(Array(OTP_LENGTH).fill(""));
+    window.requestAnimationFrame(() => {
+      otpRefs.current[0]?.focus();
+    });
+  };
+
+  const handleVerifyOtp = async (nextCode?: string) => {
+    const codeToVerify = nextCode ?? otpCode;
+    if (codeToVerify.length !== OTP_LENGTH || !supabase) return;
+
+    try {
+      setVerifying(true);
+      setOtpError("");
+
+      const { error } = await supabase.auth.verifyOtp({
+        type: "email",
+        email: normalizedEmail,
+        token: codeToVerify,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      await finalizeVerifiedStudent();
+      setStep(3);
+    } catch {
+      setOtpError("Invalid code. Try again.");
+      resetOtpInputs();
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const handleOtpChange = (index: number, value: string) => {
+    const digitsOnly = value.replace(/\D/g, "");
+    if (!digitsOnly) {
+      setOtpDigits((current) => {
+        const next = [...current];
+        next[index] = "";
+        return next;
+      });
+      return;
+    }
+
+    const nextDigits = [...otpDigits];
+
+    if (digitsOnly.length > 1) {
+      const pasted = digitsOnly.slice(0, OTP_LENGTH).split("");
+      for (let i = 0; i < OTP_LENGTH; i += 1) {
+        nextDigits[i] = pasted[i] ?? "";
+      }
+      setOtpDigits(nextDigits);
+      const finalIndex = Math.min(pasted.length, OTP_LENGTH) - 1;
+      otpRefs.current[Math.max(finalIndex, 0)]?.focus();
+      if (pasted.length === OTP_LENGTH) {
+        void handleVerifyOtp(pasted.join(""));
+      }
+      return;
+    }
+
+    nextDigits[index] = digitsOnly;
+    setOtpDigits(nextDigits);
+    setOtpError("");
+
+    if (index < OTP_LENGTH - 1) {
+      otpRefs.current[index + 1]?.focus();
+    }
+
+    const joined = nextDigits.join("");
+    if (joined.length === OTP_LENGTH && !nextDigits.includes("")) {
+      void handleVerifyOtp(joined);
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Backspace" && !otpDigits[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleResend = async () => {
+    if (!supabase) return;
+
+    try {
+      setOtpError("");
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: normalizedEmail,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      setResendMessage("Code resent");
+    } catch {
+      setOtpError("Could not resend code right now.");
+    }
+  };
+
   return (
-    <main className="page-shell flex items-center justify-center px-6 py-10 text-[var(--foreground)]">
-      <div className="relative z-10 w-full max-w-md">
-        <div className="mb-8 flex justify-center">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-[9px] bg-[var(--accent)]">
-              <LockKeyhole className="h-[18px] w-[18px] text-white" />
-            </div>
-            <p className="font-display text-3xl font-extrabold tracking-[-0.03em]">
-              <span className="text-[var(--brand-blue)]">my</span>dormstash<span className="text-white/88">.com</span>
-            </p>
-          </div>
-        </div>
+    <main className="min-h-screen bg-[#0A0916] px-5 pb-[calc(env(safe-area-inset-bottom)+24px)] pt-0 text-[#F0EEFF]">
+      <div className="mx-auto w-full max-w-[100vw]">
+        {step === 1 ? (
+          <section className="min-h-screen overflow-y-auto pb-[320px]">
+            <AuthLogo />
 
-        <div className="page-card px-7 py-8 shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
-          <>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-[20px] border border-[rgba(107,92,231,0.24)] bg-[rgba(107,92,231,0.08)] px-3 py-1.5 text-[12px] font-medium text-[#9B8FFF]">
-              <GraduationCap className="h-3.5 w-3.5" />
-              University accounts only
-            </div>
+            <div className="mt-8 rounded-[20px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-5 py-6">
+              <h1 className="text-[18px] font-medium text-[#F0EEFF]">Create account</h1>
 
-            <h1 className="font-display text-[22px] font-bold tracking-[-0.03em]">
-              Create your account
-            </h1>
-            <p className="mt-1.5 text-sm leading-6 text-white/45">
-              Join your campus community on MyDormStash.
-            </p>
-
-            <form
-              className="mt-7 space-y-4"
-              onSubmit={handleSubmit}
-            >
-              <label className="block">
-                <span className="mb-2 block text-[12px] font-normal lowercase tracking-[0.04em] text-white/45">
-                  Full name
-                </span>
-                <div
-                  className={`flex items-center gap-3 rounded-[12px] border bg-white/5 px-4 py-3 ${fieldClass(
-                    name.trim() ? "valid" : "neutral",
-                  )}`}
-                >
-                  <User className="h-4 w-4 text-white/35" />
+              <form className="mt-5 space-y-4" onSubmit={handleCreateAccount}>
+                <label className="block">
+                  <span className="mb-2 block text-[12px] text-[rgba(240,238,255,0.45)]">Full Name</span>
                   <input
                     type="text"
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
+                    value={fullName}
+                    onChange={(event) => setFullName(event.target.value)}
                     placeholder="Jordan Lee"
                     autoComplete="name"
-                    className="w-full bg-transparent text-sm outline-none placeholder:text-white/25"
+                    className="px-4"
                   />
-                </div>
-              </label>
+                  {fieldErrors.name ? <p className="mt-2 text-[12px] text-[#F5A623]">{fieldErrors.name}</p> : null}
+                </label>
 
-              <label className="block">
-                <span className="mb-2 block text-[12px] font-normal lowercase tracking-[0.04em] text-white/45">
-                  University email
-                </span>
-                <div
-                  className={`flex items-center gap-3 rounded-[12px] border bg-white/5 px-4 py-3 ${fieldClass(
-                    emailState.status,
-                  )}`}
-                >
-                  <Mail className="h-4 w-4 text-white/35" />
+                <label className="block">
+                  <span className="mb-2 block text-[12px] text-[rgba(240,238,255,0.45)]">Email</span>
                   <input
                     type="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                     placeholder="you@temple.edu"
                     autoComplete="email"
-                    className="w-full bg-transparent text-sm outline-none placeholder:text-white/25"
+                    className="px-4"
                   />
-                </div>
-                <p className={`mt-1.5 min-h-4 text-[11px] ${hintClass(emailState.status)}`}>
-                  {emailState.hint}
-                </p>
-              </label>
+                  {fieldErrors.email ? <p className="mt-2 text-[12px] text-[#F5A623]">{fieldErrors.email}</p> : null}
+                </label>
 
-              <label className="block">
-                <span className="mb-2 block text-[12px] font-normal lowercase tracking-[0.04em] text-white/45">
-                  Password
-                </span>
-                <div
-                  className={`flex items-center gap-3 rounded-[12px] border bg-white/5 px-4 py-3 ${fieldClass(
-                    passwordState.status,
-                  )}`}
-                >
-                  <LockKeyhole className="h-4 w-4 text-white/35" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    placeholder="Min. 8 characters"
-                    className="w-full bg-transparent text-sm outline-none placeholder:text-white/25"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((value) => !value)}
-                    className="text-white/35 transition hover:text-white/55"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-                <div className="mt-2 flex gap-1">
-                  {[0, 1, 2, 3].map((index) => (
-                    <div
-                      key={index}
-                      className="h-[3px] flex-1 rounded-sm bg-white/8"
-                      style={{
-                        backgroundColor:
-                          index < strength && password
-                            ? strengthColors[Math.max(strength - 1, 0)]
-                            : undefined,
-                      }}
+                <label className="block">
+                  <span className="mb-2 block text-[12px] text-[rgba(240,238,255,0.45)]">Password</span>
+                  <div className="flex h-12 items-center gap-3 rounded-[12px] border border-white/10 bg-[rgba(255,255,255,0.05)] px-4">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      placeholder="Min 8 characters"
+                      className="h-full min-w-0 flex-1 border-0 bg-transparent px-0"
                     />
-                  ))}
-                </div>
-                <p className={`mt-1.5 min-h-4 text-[11px] ${hintClass(passwordState.status)}`}>
-                  {passwordState.hint}
-                </p>
-              </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((value) => !value)}
+                      className="inline-flex h-[44px] w-[44px] items-center justify-center text-[rgba(240,238,255,0.45)]"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  {fieldErrors.password ? (
+                    <p className="mt-2 text-[12px] text-[#F5A623]">{fieldErrors.password}</p>
+                  ) : null}
+                </label>
 
-              <label className="block">
-                <span className="mb-2 block text-[12px] font-normal lowercase tracking-[0.04em] text-white/45">
-                  Confirm password
-                </span>
-                <div
-                  className={`flex items-center gap-3 rounded-[12px] border bg-white/5 px-4 py-3 ${fieldClass(
-                    confirmState.status,
-                  )}`}
+                <label className="block">
+                  <span className="mb-2 block text-[12px] text-[rgba(240,238,255,0.45)]">Confirm Password</span>
+                  <div className="flex h-12 items-center gap-3 rounded-[12px] border border-white/10 bg-[rgba(255,255,255,0.05)] px-4">
+                    <input
+                      type={showConfirm ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(event) => setConfirmPassword(event.target.value)}
+                      placeholder="Re-enter password"
+                      className="h-full min-w-0 flex-1 border-0 bg-transparent px-0"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirm((value) => !value)}
+                      className="inline-flex h-[44px] w-[44px] items-center justify-center text-[rgba(240,238,255,0.45)]"
+                      aria-label={showConfirm ? "Hide confirm password" : "Show confirm password"}
+                    >
+                      {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  {fieldErrors.confirm ? (
+                    <p className="mt-2 text-[12px] text-[#F5A623]">{fieldErrors.confirm}</p>
+                  ) : null}
+                </label>
+
+                {fieldErrors.general ? (
+                  <p className="text-[12px] text-[#F5A623]">{fieldErrors.general}</p>
+                ) : null}
+
+                <button
+                  type="submit"
+                  disabled={!canSubmitStepOne || submitting}
+                  className="inline-flex h-12 w-full items-center justify-center rounded-[20px] bg-[#6B5CE7] px-4 text-[15px] font-medium text-white disabled:opacity-45"
                 >
-                  <LockKeyhole className="h-4 w-4 text-white/35" />
+                  {submitting ? "Creating..." : "Create account"}
+                </button>
+              </form>
+
+              <p className="mt-5 text-center text-[13px] text-[rgba(240,238,255,0.45)]">
+                Already have an account?{" "}
+                <Link href="/signin" className="text-[#9B8FFF]">
+                  Sign in
+                </Link>
+              </p>
+            </div>
+          </section>
+        ) : null}
+
+        {step === 2 ? (
+          <section className="min-h-screen overflow-y-auto pb-[320px]">
+            <div className="flex items-center justify-between pt-[calc(env(safe-area-inset-top)+8px)]">
+              <StepBackButton onClick={() => setStep(1)} />
+              <div className="w-[44px]" />
+            </div>
+
+            <div className="mt-10 text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[20px] border border-[rgba(107,92,231,0.24)] bg-[rgba(107,92,231,0.08)] text-[#9B8FFF]">
+                <Mail className="h-6 w-6" />
+              </div>
+              <h1 className="mt-5 text-[18px] font-medium text-[#F0EEFF]">Check your inbox</h1>
+              <p className="mt-2 text-[15px] text-[#9B8FFF]">{normalizedEmail}</p>
+            </div>
+
+            <div className="mt-8 rounded-[20px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-5 py-6">
+              <div className="flex items-center justify-center gap-2">
+                {otpDigits.map((digit, index) => (
                   <input
-                    type="password"
-                    value={confirm}
-                    onChange={(event) => setConfirm(event.target.value)}
-                    placeholder="Re-enter password"
-                    className="w-full bg-transparent text-sm outline-none placeholder:text-white/25"
+                    key={index}
+                    ref={(element) => {
+                      otpRefs.current[index] = element;
+                    }}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={digit}
+                    onChange={(event) => handleOtpChange(index, event.target.value)}
+                    onKeyDown={(event) => handleOtpKeyDown(index, event)}
+                    onPaste={(event) => {
+                      const pasted = event.clipboardData.getData("text");
+                      if (!pasted) return;
+                      event.preventDefault();
+                      handleOtpChange(index, pasted);
+                    }}
+                    className="h-14 w-12 rounded-[12px] border border-white/10 bg-[rgba(255,255,255,0.05)] text-center text-[24px] text-[#F0EEFF]"
+                    aria-label={`OTP digit ${index + 1}`}
                   />
-                </div>
-                <p className={`mt-1.5 min-h-4 text-[11px] ${hintClass(confirmState.status)}`}>
-                  {confirmState.hint}
-                </p>
-              </label>
+                ))}
+              </div>
+
+              <div className="mt-4 min-h-[20px] text-center">
+                {otpError ? <p className="text-[12px] text-[#F5A623]">{otpError}</p> : null}
+                {!otpError && resendMessage ? <p className="text-[12px] text-[#F5A623]">{resendMessage}</p> : null}
+              </div>
 
               <button
-                type="submit"
-                disabled={!isFormValid || submitting}
-                className="mt-1 inline-flex w-full items-center justify-center rounded-[12px] bg-[var(--accent)] px-5 py-3 text-[15px] font-bold text-white transition hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-35 disabled:active:scale-100"
+                type="button"
+                onClick={() => void handleVerifyOtp()}
+                disabled={otpCode.length !== OTP_LENGTH || verifying}
+                className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-[20px] bg-[#6B5CE7] px-4 text-[15px] font-medium text-white disabled:opacity-45"
               >
-                {submitting ? "Sending code..." : "Create account"}
+                {verifying ? "Verifying..." : "Verify"}
               </button>
-              {submitError ? <p className="text-[12px] text-[rgba(240,238,255,0.35)]">{submitError}</p> : null}
-            </form>
-          </>
-        </div>
 
-        <p className="mt-5 text-center text-[13px] text-white/35">
-          Already have an account?{" "}
-          <Link href="/login" className="font-medium text-[var(--accent)]">
-            Sign in
-          </Link>
-        </p>
+              <div className="mt-5 text-center">
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  className="inline-flex min-h-[44px] items-center justify-center text-[13px] text-[#9B8FFF]"
+                >
+                  Didn&apos;t get it? Resend
+                </button>
+              </div>
+            </div>
+          </section>
+        ) : null}
 
-        <Link
-          href="/"
-          className="mt-5 inline-flex items-center gap-2 text-sm text-white/50 transition hover:text-white/75"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to MyDormStash
-        </Link>
+        {step === 3 ? (
+          <section className="min-h-screen overflow-y-auto pb-[calc(env(safe-area-inset-bottom)+24px)]">
+            <div className="flex items-center justify-between pt-[calc(env(safe-area-inset-top)+8px)]">
+              <StepBackButton onClick={() => setStep(2)} />
+              <div className="w-[44px]" />
+            </div>
+
+            <div className="flex min-h-[70vh] flex-col items-center justify-center text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[rgba(107,92,231,0.12)] text-[#6B5CE7]">
+                <CheckCircle2 className="h-8 w-8" />
+              </div>
+              <h1 className="mt-6 text-[22px] font-medium text-[#F0EEFF]">You&apos;re in.</h1>
+              <p className="mt-2 text-[15px] text-[rgba(240,238,255,0.45)]">
+                Welcome to Temple&apos;s campus marketplace
+              </p>
+            </div>
+          </section>
+        ) : null}
       </div>
     </main>
   );

@@ -53,7 +53,7 @@ export default function AccountPage() {
     const email = getVerifiedStudentEmail();
 
     if (!email) {
-      router.push("/login");
+      router.push("/signin");
       return;
     }
 
@@ -99,7 +99,7 @@ export default function AccountPage() {
   const handleLogout = () => {
     clearVerifiedStudentEmail();
     clearStudentProfile();
-    router.push("/login");
+    router.push("/signin");
   };
 
   return (

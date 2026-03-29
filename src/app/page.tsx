@@ -258,7 +258,7 @@ export default function Home() {
               </span>
             </button>
             <Link
-              href="/login"
+              href="/signin"
               className="inline-flex h-[34px] items-center justify-center rounded-[20px] border border-[rgba(107,92,231,0.5)] bg-transparent px-[14px] text-[13px] font-medium text-[#9B8FFF]"
             >
               Log in
