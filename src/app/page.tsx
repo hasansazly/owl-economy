@@ -46,8 +46,10 @@ const quickPills = [
   { label: "📦 Resell", href: "/sell-goods" },
   { label: "🏠 Rooms", href: "/rent-room", locked: true },
   { label: "🎉 Events", href: "/launch-event" },
+  { label: "💸 Fundraise", href: "/fundraise-fast" },
   { label: "🔎 Lost", href: "/lost-and-found" },
   { label: "✂️ Services", href: "/campus-services" },
+  { label: "🎨 Creative", href: "/campus-creatives" },
   { label: "📸 Wall", href: "/campus-wall" },
 ];
 
