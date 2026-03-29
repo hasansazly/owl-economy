@@ -42,6 +42,9 @@ const quickPills = [
 
 type RecentListing = {
   id: string | number;
+  user_id?: string | null;
+  status?: string | null;
+  images?: string[] | null;
   title?: string | null;
   price?: number | string | null;
   category?: string | null;
@@ -143,12 +146,14 @@ export default function Home() {
       const { data, error } = await supabase
         .from("listings")
         .select("id, title, price, category, description, poster_name, major, class_year, contact_email, email, location, created_at")
+        .eq("status", "active")
         .order("created_at", { ascending: false })
         .limit(4);
 
       const { data: campusLiveData, error: campusLiveFetchError } = await supabase
         .from("listings")
         .select("id, title, price, category, description, poster_name, major, class_year, contact_email, email, location, created_at")
+        .eq("status", "active")
         .in("category", [...campusLiveOrder])
         .order("created_at", { ascending: false });
 

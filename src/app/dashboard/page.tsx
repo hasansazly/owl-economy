@@ -15,7 +15,6 @@ import {
   getPreferencePriority,
 } from "@/lib/campus-identity";
 import {
-  embedUrgencyMeta,
   getExpiryCountdown,
   getMoveOutCountdown,
   getRecentViewerCount,
@@ -36,13 +35,13 @@ import { capWallFeedShare, getCampusWallSummary } from "@/lib/campus-wall";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const feedFilters = ["All", "Events", "Marketplace", "Lost & Found", "Services", "Campus Wall"] as const;
-const postCategories = ["Textbooks", "Mini-Fridges", "Electronics", "Sublets", "Event"] as const;
 const FEED_PAGE_SIZE = 8;
 
 type FeedFilter = (typeof feedFilters)[number];
 
 type ListingRow = {
   id: string | number;
+  user_id?: string | null;
   title?: string | null;
   price?: number | string | null;
   category?: string | null;
@@ -54,40 +53,8 @@ type ListingRow = {
   email?: string | null;
   location?: string | null;
   created_at?: string | null;
-};
-
-type ListingForm = {
-  title: string;
-  price: string;
-  category: string;
-  description: string;
-  major: string;
-  flashSale: boolean;
-  moveOutMode: boolean;
-  expiresInHours: string;
-};
-
-type ListingInsert = {
-  title: string;
-  price: number;
-  category: string;
-  description: string;
-  poster_name: string;
-  major: string | null;
-  class_year: string | null;
-  contact_email: string | null;
-  email: string | null;
-};
-
-const initialForm: ListingForm = {
-  title: "",
-  price: "",
-  category: "Textbooks",
-  description: "",
-  major: "",
-  flashSale: false,
-  moveOutMode: false,
-  expiresInHours: "",
+  status?: string | null;
+  images?: string[] | null;
 };
 
 function getFeedGroup(category: string) {
@@ -163,6 +130,18 @@ function sortListingsNewest(items: ListingRow[]) {
   });
 }
 
+function getSellerInitials(name?: string | null) {
+  const parts = (name || "Temple Student")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (parts.length === 0) return "TS";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+
+  return `${parts[0][0] || ""}${parts[1][0] || ""}`.toUpperCase();
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
@@ -172,16 +151,13 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [postOpen, setPostOpen] = useState(false);
-  const [posting, setPosting] = useState(false);
-  const [postError, setPostError] = useState("");
   const [selectedItem, setSelectedItem] = useState<ListingRow | null>(null);
-  const [form, setForm] = useState<ListingForm>(initialForm);
   const [visibleCount, setVisibleCount] = useState(FEED_PAGE_SIZE);
   const profile = useMemo(() => getStudentProfile(), []);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState<CampusNotification[]>([]);
   const [savedItemIds, setSavedItemIds] = useState<Record<string, boolean>>({});
+  const [avatarByUserId, setAvatarByUserId] = useState<Record<string, string>>({});
   const profileEmail = profile.email;
   const profileEventAlerts = profile.eventAlerts;
   const profileLostFoundAlerts = profile.lostFoundAlerts;
@@ -201,7 +177,7 @@ export default function DashboardPage() {
     const loadDashboard = async () => {
       const [{ data: sessionData }, listingsResponse] = await Promise.all([
         supabase.auth.getSession(),
-        supabase.from("listings").select("*"),
+        supabase.from("listings").select("*").eq("status", "active").order("created_at", { ascending: false }),
       ]);
 
       if (!mounted) return;
@@ -211,6 +187,7 @@ export default function DashboardPage() {
       if (listingsResponse.error) {
         setError("Could not load campus listings right now.");
         setListings([]);
+        setAvatarByUserId({});
       } else {
         const nextListings = sortListingsNewest((listingsResponse.data as ListingRow[]) || []);
         setListings(nextListings);
@@ -225,6 +202,29 @@ export default function DashboardPage() {
         setSavedItemIds(
           Object.fromEntries(nextListings.map((item) => [String(item.id), isSavedListing(item.id)])),
         );
+
+        const userIds = Array.from(
+          new Set(nextListings.map((item) => item.user_id).filter((value): value is string => Boolean(value))),
+        );
+
+        if (userIds.length > 0) {
+          const { data: profileRows } = await supabase
+            .from("profiles")
+            .select("id, avatar_url")
+            .in("id", userIds);
+
+          if (!mounted) return;
+
+          setAvatarByUserId(
+            Object.fromEntries(
+              ((profileRows as Array<{ id: string; avatar_url?: string | null }>) || [])
+                .filter((row) => row.id && row.avatar_url)
+                .map((row) => [row.id, row.avatar_url as string]),
+            ),
+          );
+        } else {
+          setAvatarByUserId({});
+        }
       }
 
       setLoading(false);
@@ -348,69 +348,6 @@ export default function DashboardPage() {
   const handleToggleSavedItem = (item: ListingRow) => {
     const saved = toggleSavedListing(item);
     setSavedItemIds((current) => ({ ...current, [String(item.id)]: saved }));
-  };
-
-  const handlePostItem = async () => {
-    const supabase = getSupabaseBrowserClient();
-
-    if (!supabase) {
-      setPostError("Supabase is not configured.");
-      return;
-    }
-
-    if (!isLoggedIn) {
-      setPostError("You must be logged in to post.");
-      return;
-    }
-
-    if (!form.title.trim() || !form.price.trim() || !form.category.trim() || !form.description.trim()) {
-      setPostError("Please fill out all item fields.");
-      return;
-    }
-
-    const parsedPrice = Number(form.price);
-
-    if (Number.isNaN(parsedPrice) || parsedPrice < 0) {
-      setPostError("Please enter a valid price.");
-      return;
-    }
-
-    try {
-      setPosting(true);
-      setPostError("");
-
-      const listingPayload: ListingInsert = {
-        title: form.title.trim(),
-        price: parsedPrice,
-        category: form.category.trim(),
-        description: embedUrgencyMeta(form.description.trim(), {
-          flashSale: form.flashSale,
-          moveOutMode: form.moveOutMode,
-          expiresAt: form.expiresInHours
-            ? new Date(Date.now() + Number(form.expiresInHours) * 60 * 60 * 1000).toISOString()
-            : null,
-        }),
-        poster_name: profile.name.trim() || "Temple Student",
-        major: profile.major.trim() || form.major.trim() || null,
-        class_year: profile.classYear.trim() || null,
-        contact_email: profile.email.trim() || null,
-        email: profile.email.trim() || null,
-      };
-
-      const { data, error: insertError } = await supabase.from("listings").insert(listingPayload as never).select("*").single();
-
-      if (insertError || !data) {
-        throw new Error("Could not post the item.");
-      }
-
-      setListings((current) => sortListingsNewest([data as ListingRow, ...current]));
-      setForm(initialForm);
-      setPostOpen(false);
-    } catch (postItemError) {
-      setPostError(postItemError instanceof Error ? postItemError.message : "Could not post the item.");
-    } finally {
-      setPosting(false);
-    }
   };
 
   return (
@@ -655,6 +592,8 @@ export default function DashboardPage() {
               const viewerCount = getRecentViewerCount(item.id);
               const expiryCountdown = getExpiryCountdown(urgency.expiresAt);
               const badges = getCampusBadges(listings, item.contact_email || item.email || "");
+              const coverImage = item.images?.[0];
+              const sellerAvatar = item.user_id ? avatarByUserId[item.user_id] : "";
 
               return (
                 <article
@@ -662,6 +601,20 @@ export default function DashboardPage() {
                   className="rounded-[20px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 shadow-[0_16px_36px_rgba(0,0,0,0.2)] backdrop-blur-xl"
                 >
                   <button type="button" onClick={() => openListingDetail(item)} className="block w-full text-left">
+                    <div className="mb-3 overflow-hidden rounded-[16px] border border-white/8 bg-white/[0.03]">
+                      {coverImage ? (
+                        <img
+                          src={coverImage}
+                          alt={item.title || "Campus listing"}
+                          className="aspect-[4/3] w-full object-cover"
+                        />
+                      ) : (
+                        <div className="aspect-[4/3] w-full bg-[linear-gradient(135deg,_rgba(107,92,231,0.16),_rgba(255,255,255,0.03))] px-4 py-4 text-[12px] text-[rgba(240,238,255,0.35)]">
+                          No photo
+                        </div>
+                      )}
+                    </div>
+
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
@@ -672,12 +625,30 @@ export default function DashboardPage() {
                             <span className="text-[13px] font-semibold text-cyan-300">${item.price}</span>
                           ) : null}
                         </div>
-                        <h2 className="mt-3 text-[16px] font-semibold leading-6 text-white">{item.title || "Campus listing"}</h2>
-                        <p className="mt-1 text-[12px] text-white/52">
-                          {item.poster_name || "Temple Student"}
-                          {item.major ? ` · ${item.major}` : ""}
-                          {item.class_year ? ` · ${item.class_year}` : ""}
-                        </p>
+                        <h2 className="mt-3 overflow-hidden text-ellipsis whitespace-nowrap text-[14px] font-medium leading-6 text-white">
+                          {item.title || "Campus listing"}
+                        </h2>
+                        <div className="mt-2 flex items-center gap-2">
+                          {sellerAvatar ? (
+                            <img
+                              src={sellerAvatar}
+                              alt={item.poster_name || "Temple Student"}
+                              className="h-9 w-9 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[rgba(107,92,231,0.4)] bg-[rgba(107,92,231,0.2)] text-[11px] font-medium text-[#9B8FFF]">
+                              {getSellerInitials(item.poster_name)}
+                            </div>
+                          )}
+                          <p className="min-w-0 text-[12px] leading-5 text-white/52">
+                            <span className="block overflow-hidden text-ellipsis whitespace-nowrap text-white/84">
+                              {item.poster_name || "Temple Student"}
+                            </span>
+                            <span className="block overflow-hidden text-ellipsis whitespace-nowrap">
+                              {[item.major, item.class_year].filter(Boolean).join(" · ") || "Temple University"}
+                            </span>
+                          </p>
+                        </div>
                       </div>
                       <div className="shrink-0 rounded-[14px] border border-white/10 bg-[linear-gradient(135deg,_rgba(35,42,54,0.88),_rgba(18,214,255,0.08))] px-4 py-8 text-center text-[11px] font-semibold text-white/65">
                         {category}
@@ -771,8 +742,14 @@ export default function DashboardPage() {
             })}
 
             {visibleListings.length === 0 ? (
-              <div className="rounded-[18px] border border-dashed border-white/12 bg-[rgba(255,255,255,0.02)] p-6 text-center text-[13px] text-white/42">
-                No listings found yet.
+              <div className="rounded-[18px] border border-dashed border-white/12 bg-[rgba(255,255,255,0.02)] p-6 text-center">
+                <p className="text-[13px] text-white/42">No listings yet. Be the first to post.</p>
+                <Link
+                  href="/create-listing"
+                  className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--accent)] px-5 py-3 text-[13px] font-medium text-white"
+                >
+                  + Post
+                </Link>
               </div>
             ) : null}
 
@@ -791,141 +768,13 @@ export default function DashboardPage() {
 
       {isLoggedIn ? (
         <>
-          <button
-            type="button"
-            onClick={() => setPostOpen(true)}
+          <Link
+            href="/create-listing"
             className="fixed bottom-6 right-5 z-30 inline-flex h-14 w-14 items-center justify-center rounded-full bg-cyan-400 text-black shadow-[0_18px_36px_rgba(34,211,238,0.28)] transition hover:scale-[1.03]"
             aria-label="Post New Item"
           >
             <Plus className="h-6 w-6" />
-          </button>
-
-          {postOpen ? (
-            <div className="fixed inset-0 z-40 bg-[rgba(0,0,0,0.68)]">
-              <button
-                type="button"
-                aria-label="Close post form"
-                className="absolute inset-0"
-                onClick={() => setPostOpen(false)}
-              />
-              <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-lg rounded-t-[24px] border border-white/10 bg-[#090909] p-5 shadow-[0_-16px_48px_rgba(0,0,0,0.42)]">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/42">Post an Item</p>
-                    <h2 className="mt-1 text-[20px] font-semibold text-white">New listing</h2>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setPostOpen(false)}
-                    className="rounded-full border border-white/10 p-2 text-white/55 transition hover:bg-white/5"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-
-                <div className="mt-5 space-y-3">
-                  <label className="block">
-                    <span className="mb-1.5 block text-[12px] text-white/48">Title</span>
-                    <input
-                      value={form.title}
-                      onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
-                      className="w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none"
-                      placeholder="Mini fridge in good condition"
-                    />
-                  </label>
-
-                  <label className="block">
-                    <span className="mb-1.5 block text-[12px] text-white/48">Price</span>
-                    <input
-                      value={form.price}
-                      onChange={(event) => setForm((current) => ({ ...current, price: event.target.value }))}
-                      className="w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none"
-                      placeholder="40"
-                    />
-                  </label>
-
-                  <label className="block">
-                    <span className="mb-1.5 block text-[12px] text-white/48">Category</span>
-                    <select
-                      value={form.category}
-                      onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}
-                      className="w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none"
-                    >
-                      {postCategories.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <label className="block">
-                    <span className="mb-1.5 block text-[12px] text-white/48">Description</span>
-                    <textarea
-                      rows={3}
-                      value={form.description}
-                      onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
-                      className="w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none"
-                      placeholder="Great for dorm storage and still runs cold."
-                    />
-                  </label>
-
-                  <label className="block">
-                    <span className="mb-1.5 block text-[12px] text-white/48">Major (optional)</span>
-                    <input
-                      value={form.major}
-                      onChange={(event) => setForm((current) => ({ ...current, major: event.target.value }))}
-                      className="w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none"
-                      placeholder="Computer Science"
-                    />
-                  </label>
-
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <label className="flex items-center justify-between rounded-[14px] border border-white/10 bg-white/[0.03] px-4 py-3">
-                      <span className="text-[13px] text-white/78">Flash sale</span>
-                      <input
-                        type="checkbox"
-                        checked={form.flashSale}
-                        onChange={(event) => setForm((current) => ({ ...current, flashSale: event.target.checked }))}
-                        className="h-4 w-4 accent-[var(--accent)]"
-                      />
-                    </label>
-
-                    <label className="flex items-center justify-between rounded-[14px] border border-white/10 bg-white/[0.03] px-4 py-3">
-                      <span className="text-[13px] text-white/78">Move-Out Mode</span>
-                      <input
-                        type="checkbox"
-                        checked={form.moveOutMode}
-                        onChange={(event) => setForm((current) => ({ ...current, moveOutMode: event.target.checked }))}
-                        className="h-4 w-4 accent-[var(--accent)]"
-                      />
-                    </label>
-                  </div>
-
-                  <label className="block">
-                    <span className="mb-1.5 block text-[12px] text-white/48">Limited-time hours (optional)</span>
-                    <input
-                      value={form.expiresInHours}
-                      onChange={(event) => setForm((current) => ({ ...current, expiresInHours: event.target.value }))}
-                      className="w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none"
-                      placeholder="12"
-                    />
-                  </label>
-                </div>
-
-                {postError ? <p className="mt-3 text-[12px] text-[rgba(240,238,255,0.35)]">{postError}</p> : null}
-
-                <button
-                  type="button"
-                  onClick={handlePostItem}
-                  disabled={posting}
-                  className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-cyan-400 px-5 py-3 text-[14px] font-semibold text-black transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  {posting ? "Posting..." : "Post an Item"}
-                </button>
-              </div>
-            </div>
-          ) : null}
+          </Link>
         </>
       ) : null}
 

@@ -1,469 +1,369 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Check, ChevronDown, ImageUp, MessageCircleMore, Share2, X } from "lucide-react";
-import { ChangeEvent, useMemo, useState } from "react";
+import { ArrowLeft, Plus, X } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
 
-const listingTypes = ["For Sale", "Rental", "Free", "Trade", "Campus Etsy", "Borrow"] as const;
-const conditions = ["New", "Good", "Fair", "Well-loved"] as const;
+import { getStudentProfile } from "@/lib/app-auth";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
-const typeColors: Record<string, { bg: string; text: string; emoji: string }> = {
-  "For Sale": { bg: "rgba(255,62,165,0.15)", text: "#FF3EA5", emoji: "🛒" },
-  Rental: { bg: "rgba(51,65,92,0.35)", text: "#C1CCE0", emoji: "🔑" },
-  Free: { bg: "rgba(255,255,255,0.10)", text: "#FFFFFF", emoji: "🎁" },
-  Trade: { bg: "rgba(255,62,165,0.12)", text: "#FF78C1", emoji: "🔄" },
-  "Campus Etsy": { bg: "rgba(51,65,92,0.45)", text: "#D3DCF0", emoji: "🎨" },
-  Borrow: { bg: "rgba(255,255,255,0.08)", text: "#FFFFFF", emoji: "🤝" },
-};
-
-const conditionStyles: Record<string, string> = {
-  New: "border-[var(--accent)] bg-[rgba(255,62,165,0.1)] text-[var(--accent)]",
-  Good: "border-[#c7d3ea] bg-[rgba(51,65,92,0.28)] text-[#d8e1f2]",
-  Fair: "border-[#8fa0bf] bg-[rgba(51,65,92,0.18)] text-[#b0bdd4]",
-  "Well-loved": "border-[#F09595] bg-[rgba(240,149,149,0.1)] text-[#F09595]",
-};
-
-const categories = [
-  "Textbooks & School Supplies",
-  "Electronics & Tech",
-  "Furniture & Dorm Essentials",
-  "Clothing & Accessories",
-  "Food & Snacks",
-  "Art & Handmade",
-  "Sports & Outdoors",
-  "Tickets & Events",
-  "Other",
-];
-
-const previewEmojis = ["🖼️", "📷", "🌟", "📦", "✨"];
-const quickPostTemplates = [
-  {
-    label: "Dorm extra",
-    title: "Mini fridge for quick pickup",
-    category: "Furniture & Dorm Essentials",
-    description: "One photo, quick pickup, still works great for dorm life.",
-    price: "40",
-    location: "Morgan Hall",
-  },
-  {
-    label: "Class item",
-    title: "Used textbook bundle",
-    category: "Textbooks & School Supplies",
-    description: "One sentence post for a fast class pickup near campus.",
-    price: "25",
-    location: "Charles Library",
-  },
-  {
-    label: "Clothes drop",
-    title: "Campus hoodie for sale",
-    category: "Clothing & Accessories",
-    description: "Clean condition and easy meetup on campus this afternoon.",
-    price: "20",
-    location: "Student Center",
-  },
+const categoryOptions = [
+  "Resell",
+  "Books",
+  "Services",
+  "Events",
+  "Lost & Found",
+  "Fundraise",
+  "Rooms",
+  "Creative",
 ] as const;
 
-export default function CreateListingPage() {
-  const [photos, setPhotos] = useState<string[]>([]);
-  const [listingType, setListingType] = useState<(typeof listingTypes)[number]>("For Sale");
-  const [condition, setCondition] = useState("");
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [period, setPeriod] = useState("Item");
-  const [location, setLocation] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+type FormErrors = Partial<Record<"photos" | "title" | "category" | "description" | "location" | "price" | "general", string>>;
+type LocalPhoto = {
+  file: File;
+  previewUrl: string;
+};
 
-  const priceDisabled = listingType === "Free" || listingType === "Borrow";
-  const ready =
-    title.trim() &&
-    category &&
-    description.trim() &&
-    location.trim() &&
-    (priceDisabled || price);
+function mapCategory(category: string) {
+  if (category === "Books") return "Books";
+  if (category === "Events") return "Event";
+  if (category === "Lost & Found") return "Lost & Found";
+  if (category === "Fundraise") return "Fundraise";
+  if (category === "Rooms") return "Room";
+  if (category === "Creative") return "Campus Creative";
+  return category;
+}
 
-  const previewType = typeColors[listingType];
-  const previewPrice = useMemo(() => {
-    if (listingType === "Free") return "Free";
-    if (listingType === "Borrow") return "Borrow";
-    if (!price) return "—";
-    const formatted = `$${Number(price).toFixed(2)}`;
-    return listingType === "Rental" ? `${formatted} / ${period.toLowerCase()}` : formatted;
-  }, [listingType, period, price]);
+async function compressImageFile(file: File) {
+  const imageBitmap = await createImageBitmap(file);
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
 
-  const handlePhotos = (event: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files ?? []).slice(0, 5);
-    setPhotos(files.map((file, index) => `${previewEmojis[index % previewEmojis.length]} ${file.name}`));
-  };
-
-  const applyQuickTemplate = (template: (typeof quickPostTemplates)[number]) => {
-    setTitle(template.title);
-    setCategory(template.category);
-    setDescription(template.description);
-    setPrice(template.price);
-    setLocation(template.location);
-  };
-
-  const shareCopy = `${title || "New MyDormStash listing"} - ${previewPrice} - ${location || "Campus pickup"}\n${description || "Posted on MyDormStash."}`;
-
-  const shareToInstagram = async () => {
-    try {
-      await navigator.clipboard.writeText(shareCopy);
-    } catch {}
-
-    if (typeof window !== "undefined") {
-      window.location.href = "instagram://camera";
-      window.setTimeout(() => {
-        window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
-      }, 600);
-    }
-  };
-
-  const shareToGroupChat = () => {
-    if (typeof window !== "undefined") {
-      window.location.href = `sms:&body=${encodeURIComponent(shareCopy)}`;
-    }
-  };
-
-  const nativeShare = async () => {
-    if (typeof navigator !== "undefined" && navigator.share) {
-      try {
-        await navigator.share({
-          title: title || "MyDormStash listing",
-          text: shareCopy,
-        });
-      } catch {}
-    }
-  };
-
-  if (submitted) {
-    return (
-      <main className="page-shell px-6 py-16">
-        <div className="mx-auto max-w-xl text-center">
-          <div className="page-card px-8 py-10">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[rgba(255,62,165,0.12)]">
-              <Check className="h-7 w-7 text-[var(--accent)]" />
-            </div>
-            <h1 className="mt-5 font-display text-[22px] font-bold tracking-[-0.03em]">
-              Listing posted!
-            </h1>
-            <p className="mt-2 text-sm leading-6 text-white/40">
-              Your item <strong className="text-[var(--accent)]">&quot;{title}&quot;</strong> is now live
-              on MyDormStash. Your campus will see it right away.
-            </p>
-            <div className="mt-6 grid gap-3">
-              <button
-                type="button"
-                onClick={shareToInstagram}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-black"
-              >
-                <Share2 className="h-4 w-4" />
-                Repost to IG story
-              </button>
-              <button
-                type="button"
-                onClick={shareToGroupChat}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--border)] bg-white/5 px-5 py-3 text-sm font-bold text-[var(--foreground)]"
-              >
-                <MessageCircleMore className="h-4 w-4 text-[var(--accent)]" />
-                Share to group chat
-              </button>
-              <button
-                type="button"
-                onClick={nativeShare}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--border)] bg-transparent px-5 py-3 text-sm font-bold text-white/82"
-              >
-                <Share2 className="h-4 w-4 text-[var(--accent)]" />
-                Share anywhere
-              </button>
-            </div>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <Link
-                href="/"
-                className="inline-flex items-center justify-center rounded-[12px] bg-[var(--accent)] px-5 py-3 text-sm font-bold text-white"
-              >
-                Back to home
-              </Link>
-              <button
-                type="button"
-                onClick={() => {
-                  setSubmitted(false);
-                  setPhotos([]);
-                  setListingType("For Sale");
-                  setCondition("");
-                  setTitle("");
-                  setCategory("");
-                  setDescription("");
-                  setPrice("");
-                  setPeriod("Item");
-                  setLocation("");
-                }}
-                className="inline-flex items-center justify-center rounded-[12px] border border-[var(--border)] bg-white/5 px-5 py-3 text-sm font-bold text-[var(--foreground)]"
-              >
-                Post another item
-              </button>
-            </div>
-          </div>
-        </div>
-      </main>
-    );
+  if (!context) {
+    throw new Error("Image processing is not available.");
   }
 
-  return (
-    <main className="page-shell pb-16 text-[var(--foreground)]">
-      <div className="page-header px-6 py-4">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-white/45 transition hover:text-white/70"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </Link>
-        <p className="font-display text-base font-bold tracking-[-0.02em]">New Listing</p>
-        <button
-          type="button"
-          disabled={!ready}
-          onClick={() => setSubmitted(true)}
-          className="rounded-[10px] bg-[var(--accent)] px-4 py-2 text-[13px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-30"
-        >
-          Post
-        </button>
-      </div>
+  const maxSize = 800;
+  const scale = Math.min(maxSize / imageBitmap.width, maxSize / imageBitmap.height, 1);
+  canvas.width = Math.round(imageBitmap.width * scale);
+  canvas.height = Math.round(imageBitmap.height * scale);
+  context.drawImage(imageBitmap, 0, 0, canvas.width, canvas.height);
 
-      <div className="relative z-10 mx-auto flex max-w-3xl flex-col gap-6 px-6 pt-6">
-        <section className="page-card p-5">
-          <div className="flex items-start justify-between gap-3">
+  const blob = await new Promise<Blob | null>((resolve) => {
+    canvas.toBlob((result) => resolve(result), "image/jpeg", 0.8);
+  });
+
+  if (!blob) {
+    throw new Error("Could not compress image.");
+  }
+
+  return blob;
+}
+
+export default function CreateListingPage() {
+  const profile = getStudentProfile();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [photos, setPhotos] = useState<LocalPhoto[]>([]);
+  const [title, setTitle] = useState("");
+  const [price, setPrice] = useState("");
+  const [category, setCategory] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+
+  const titleCount = title.length;
+  const descriptionCount = description.length;
+
+  const firstFourPhotos = photos.slice(0, 4);
+
+  const validate = () => {
+    const nextErrors: FormErrors = {};
+
+    if (firstFourPhotos.length === 0) nextErrors.photos = "Add at least one photo.";
+    if (!title.trim()) nextErrors.title = "Add a title.";
+    if (!category.trim()) nextErrors.category = "Choose a category.";
+    if (!description.trim()) nextErrors.description = "Add a short description.";
+    if (!location.trim()) nextErrors.location = "Add a location.";
+    if (price && Number.isNaN(Number(price))) nextErrors.price = "Enter a valid price.";
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const handleOpenPicker = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleSelectPhotos = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const incoming = Array.from(event.target.files ?? []).slice(0, 4 - photos.length);
+    if (incoming.length === 0) return;
+
+    setPhotos((current) => [
+      ...current,
+      ...incoming.map((file) => ({
+        file,
+        previewUrl: URL.createObjectURL(file),
+      })),
+    ]);
+    setErrors((current) => ({ ...current, photos: "", general: "" }));
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const removePhoto = (index: number) => {
+    setPhotos((current) => {
+      const next = [...current];
+      const [removed] = next.splice(index, 1);
+      if (removed) URL.revokeObjectURL(removed.previewUrl);
+      return next;
+    });
+  };
+
+  const handleSubmit = async () => {
+    if (!validate()) return;
+
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) {
+      setErrors({ general: "Supabase is not configured." });
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setErrors({});
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user?.id) {
+        throw new Error("You need to sign in before posting.");
+      }
+
+      const listingId = crypto.randomUUID();
+
+      await supabase.storage.createBucket("listings", {
+        public: true,
+      });
+
+      const uploadedUrls: string[] = [];
+      for (const [index, photo] of firstFourPhotos.entries()) {
+        const compressed = await compressImageFile(photo.file);
+        const storagePath = `${user.id}/${listingId}/${index}.jpg`;
+        const { error: uploadError } = await supabase.storage.from("listings").upload(storagePath, compressed, {
+          upsert: true,
+          contentType: "image/jpeg",
+        });
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const { data: publicUrlData } = supabase.storage.from("listings").getPublicUrl(storagePath);
+        uploadedUrls.push(publicUrlData.publicUrl);
+      }
+
+      const { error: insertError } = await supabase.from("listings").insert({
+        id: listingId,
+        user_id: user.id,
+        title: title.trim(),
+        price: price.trim() ? Number(price) : 0,
+        category: mapCategory(category),
+        description: description.trim(),
+        location: location.trim(),
+        images: uploadedUrls,
+        status: "active",
+        poster_name: profile.name.trim() || "Temple Student",
+        major: profile.major.trim() || null,
+        class_year: profile.classYear.trim() || null,
+        contact_email: profile.email.trim() || user.email || null,
+        email: profile.email.trim() || user.email || null,
+      } as never);
+
+      if (insertError) {
+        throw insertError;
+      }
+
+      window.location.href = "/";
+    } catch (error) {
+      setErrors({
+        general: error instanceof Error ? error.message : "Could not post listing.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const helperText = useMemo(() => {
+    return "Listings on Temple campus move fast";
+  }, []);
+
+  return (
+    <main className="min-h-screen bg-[#0A0916] px-5 pb-[calc(env(safe-area-inset-bottom)+32px)] pt-[calc(env(safe-area-inset-top)+8px)] text-[#F0EEFF]">
+      <div className="mx-auto w-full max-w-[100vw]">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/"
+            className="inline-flex h-[44px] w-[44px] items-center justify-center rounded-[20px] text-[rgba(240,238,255,0.5)]"
+            aria-label="Back to feed"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+        </div>
+
+        <section className="mt-4 space-y-5 pb-[320px]">
+          <div className="space-y-3">
+            <p className="text-[12px] text-[rgba(240,238,255,0.45)]">Photos</p>
+            <div className="flex gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <button
+                type="button"
+                onClick={handleOpenPicker}
+                className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[12px] border border-dashed border-[rgba(107,92,231,0.4)] text-[#9B8FFF]"
+              >
+                <Plus className="h-6 w-6" />
+              </button>
+
+              {firstFourPhotos.map((photo, index) => (
+                <div key={photo.previewUrl} className="relative h-20 w-20 shrink-0 overflow-hidden rounded-[12px] border border-white/10">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={photo.previewUrl} alt={`Selected listing ${index + 1}`} className="h-20 w-20 object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removePhoto(index)}
+                    className="absolute right-1 top-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-[rgba(10,9,22,0.82)] text-white"
+                    aria-label={`Remove photo ${index + 1}`}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={handleSelectPhotos}
+            />
+            {errors.photos ? <p className="text-[12px] text-[#F5A623]">{errors.photos}</p> : null}
+          </div>
+
+          <div className="space-y-4">
             <div>
-              <p className="section-kicker !px-0 !text-white">30-Second Quick Post</p>
-              <p className="mt-2 text-sm leading-6 text-white/48">
-                Fastest flow wins supply: one photo, one sentence, price, and a dorm or pickup spot.
-              </p>
+              <label className="mb-2 block text-[12px] text-[rgba(240,238,255,0.45)]">Title</label>
+              <div className="rounded-[12px] border border-white/10 bg-[rgba(255,255,255,0.05)] px-4 py-3">
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(event) => {
+                    setTitle(event.target.value.slice(0, 80));
+                    setErrors((current) => ({ ...current, title: "" }));
+                  }}
+                  placeholder="What are you selling?"
+                  className="border-0 bg-transparent px-0"
+                />
+                <p className="mt-2 text-right text-[12px] text-[rgba(240,238,255,0.45)]">{titleCount}/80</p>
+              </div>
+              {errors.title ? <p className="mt-2 text-[12px] text-[#F5A623]">{errors.title}</p> : null}
+            </div>
+
+            <div>
+              <label className="mb-2 block text-[12px] text-[rgba(240,238,255,0.45)]">Price</label>
+              <div className="flex h-12 items-center rounded-[12px] border border-white/10 bg-[rgba(255,255,255,0.05)] px-4">
+                <span className="mr-2 text-[15px] text-[rgba(240,238,255,0.45)]">$</span>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={price}
+                  onChange={(event) => {
+                    setPrice(event.target.value.replace(/[^\d.]/g, ""));
+                    setErrors((current) => ({ ...current, price: "" }));
+                  }}
+                  placeholder="0.00"
+                  className="h-full border-0 bg-transparent px-0"
+                />
+              </div>
+              {errors.price ? <p className="mt-2 text-[12px] text-[#F5A623]">{errors.price}</p> : null}
+            </div>
+
+            <div>
+              <label className="mb-2 block text-[12px] text-[rgba(240,238,255,0.45)]">Category</label>
+              <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {categoryOptions.map((option) => {
+                  const active = category === option;
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => {
+                        setCategory(option);
+                        setErrors((current) => ({ ...current, category: "" }));
+                      }}
+                      className={`shrink-0 rounded-[20px] border px-4 py-2 text-[13px] ${
+                        active
+                          ? "border-[#6B5CE7] bg-[rgba(107,92,231,0.2)] text-[#9B8FFF]"
+                          : "border-white/10 bg-[rgba(255,255,255,0.04)] text-[rgba(240,238,255,0.45)]"
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  );
+                })}
+              </div>
+              {errors.category ? <p className="mt-2 text-[12px] text-[#F5A623]">{errors.category}</p> : null}
+            </div>
+
+            <div>
+              <label className="mb-2 block text-[12px] text-[rgba(240,238,255,0.45)]">Description</label>
+              <div className="rounded-[12px] border border-white/10 bg-[rgba(255,255,255,0.05)] px-4 py-3">
+                <textarea
+                  value={description}
+                  onChange={(event) => {
+                    setDescription(event.target.value.slice(0, 500));
+                    setErrors((current) => ({ ...current, description: "" }));
+                  }}
+                  placeholder="Describe your item, condition, pickup location..."
+                  className="min-h-[100px] border-0 bg-transparent px-0"
+                />
+                <p className="mt-2 text-right text-[12px] text-[rgba(240,238,255,0.45)]">{descriptionCount}/500</p>
+              </div>
+              {errors.description ? <p className="mt-2 text-[12px] text-[#F5A623]">{errors.description}</p> : null}
+            </div>
+
+            <div>
+              <label className="mb-2 block text-[12px] text-[rgba(240,238,255,0.45)]">Location</label>
+              <input
+                type="text"
+                value={location}
+                onChange={(event) => {
+                  setLocation(event.target.value);
+                  setErrors((current) => ({ ...current, location: "" }));
+                }}
+                placeholder="e.g. Morgan Hall, Johnson Hall, Off-campus"
+                className="px-4"
+              />
+              {errors.location ? <p className="mt-2 text-[12px] text-[#F5A623]">{errors.location}</p> : null}
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            {quickPostTemplates.map((template) => (
-              <button
-                key={template.label}
-                type="button"
-                onClick={() => applyQuickTemplate(template)}
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white/78 transition hover:border-white/25 hover:bg-white/8"
-              >
-                {template.label}
-              </button>
-            ))}
+          {errors.general ? <p className="text-[12px] text-[#F5A623]">{errors.general}</p> : null}
+
+          <div className="pt-2">
+            <p className="mb-3 text-center text-[12px] text-[rgba(240,238,255,0.45)]">{helperText}</p>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="inline-flex h-[52px] w-full items-center justify-center rounded-[20px] bg-[#6B5CE7] px-4 text-[16px] font-medium text-white disabled:opacity-45"
+            >
+              {submitting ? "Posting..." : "Post listing"}
+            </button>
           </div>
         </section>
-
-        <label className="relative flex min-h-[140px] cursor-pointer flex-col items-center justify-center gap-2 rounded-[16px] border border-dashed border-white/15 px-5 py-8 text-center transition hover:border-[rgba(255,62,165,0.4)]">
-          <input type="file" accept="image/*" multiple className="absolute inset-0 opacity-0" onChange={handlePhotos} />
-          <div className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-white/6">
-            <ImageUp className="h-5 w-5 text-white/40" />
-          </div>
-          <p className="text-sm font-medium text-white/50">
-            {photos.length ? `${photos.length} photo${photos.length > 1 ? "s" : ""} added` : "Add photos"}
-          </p>
-          <p className="text-[11px] text-white/25">Tap to upload up to 5 images</p>
-        </label>
-
-        {photos.length > 0 && (
-          <div className="flex flex-wrap gap-2.5">
-            {photos.map((photo) => (
-              <div
-                key={photo}
-                className="relative flex h-[72px] w-[72px] items-center justify-center rounded-[10px] border border-[var(--border)] bg-white/7 text-[28px]"
-              >
-                <span>{photo.slice(0, 2)}</span>
-                <button
-                  type="button"
-                  onClick={() => setPhotos((current) => current.filter((item) => item !== photo))}
-                  className="absolute -right-1.5 -top-1.5 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-[#E24B4A] text-white"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="h-px bg-white/6" />
-        <p className="section-kicker !px-0 !text-white/30">Listing Type</p>
-        <div className="flex flex-wrap gap-2">
-          {listingTypes.map((type) => (
-            <button
-              key={type}
-              type="button"
-              onClick={() => setListingType(type)}
-              className={`rounded-full border px-4 py-2 text-sm transition ${
-                listingType === type
-                  ? "border-[var(--accent)] bg-[rgba(255,62,165,0.1)] text-[var(--accent)]"
-                  : "border-[var(--border)] text-white/50 hover:border-white/25 hover:text-white/80"
-              }`}
-            >
-              {type}
-            </button>
-          ))}
-        </div>
-
-        <div className="h-px bg-white/6" />
-        <p className="section-kicker !px-0 !text-white/30">Details</p>
-
-        <label className="flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-[0.04em] text-white/45">Title</span>
-          <input
-            type="text"
-            maxLength={60}
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            placeholder="e.g. TI-84 Calculator, Blue Dorm Rug..."
-            className="rounded-[12px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/22 focus:border-[rgba(255,62,165,0.45)]"
-          />
-        </label>
-
-        <label className="flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-[0.04em] text-white/45">Category</span>
-          <div className="relative">
-            <select
-              value={category}
-              onChange={(event) => setCategory(event.target.value)}
-              className="w-full appearance-none rounded-[12px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm outline-none focus:border-[rgba(255,62,165,0.45)]"
-            >
-              <option value="" disabled>
-                Select a category
-              </option>
-              {categories.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
-          </div>
-        </label>
-
-        <label className="flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-[0.04em] text-white/45">Description</span>
-          <textarea
-            rows={4}
-            maxLength={300}
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            placeholder="Describe your item — condition, size, any details a buyer should know..."
-            className="rounded-[12px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm leading-6 outline-none placeholder:text-white/22 focus:border-[rgba(255,62,165,0.45)]"
-          />
-          <p className="text-right text-[11px] text-white/25">{description.length} / 300</p>
-        </label>
-
-        <div className="h-px bg-white/6" />
-        <p className="section-kicker !px-0 !text-white/30">Condition</p>
-        <div className="flex flex-wrap gap-2">
-          {conditions.map((item) => (
-            <button
-              key={item}
-              type="button"
-              onClick={() => setCondition(item)}
-              className={`rounded-full border px-4 py-2 text-xs transition ${
-                condition === item
-                  ? conditionStyles[item]
-                  : "border-[var(--border)] text-white/45 hover:border-white/22 hover:text-white/75"
-              }`}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-
-        <div className="h-px bg-white/6" />
-        <p className="section-kicker !px-0 !text-white/30">Pricing</p>
-        <div className={`grid gap-3 sm:grid-cols-2 ${priceDisabled ? "pointer-events-none opacity-30" : ""}`}>
-          <label className="flex flex-col gap-2">
-            <span className="text-xs font-medium uppercase tracking-[0.04em] text-white/45">
-              {listingType === "Rental" ? "Rate ($)" : "Price ($)"}
-            </span>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-white/35">$</span>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={price}
-                onChange={(event) => setPrice(event.target.value)}
-                placeholder="0.00"
-                className="w-full rounded-[12px] border border-[var(--border)] bg-white/5 py-3 pl-7 pr-4 text-sm outline-none placeholder:text-white/22 focus:border-[rgba(255,62,165,0.45)]"
-              />
-            </div>
-          </label>
-
-          {listingType === "Rental" && (
-            <label className="flex flex-col gap-2">
-              <span className="text-xs font-medium uppercase tracking-[0.04em] text-white/45">Per</span>
-              <div className="relative">
-                <select
-                  value={period}
-                  onChange={(event) => setPeriod(event.target.value)}
-                  className="w-full appearance-none rounded-[12px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm outline-none focus:border-[rgba(255,62,165,0.45)]"
-                >
-                  {["Item", "Day", "Week", "Month"].map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
-              </div>
-            </label>
-          )}
-        </div>
-
-        <div className="h-px bg-white/6" />
-        <p className="section-kicker !px-0 !text-white/30">Pickup</p>
-        <label className="flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-[0.04em] text-white/45">Location / Dorm</span>
-          <input
-            type="text"
-            value={location}
-            onChange={(event) => setLocation(event.target.value)}
-            placeholder="e.g. Pollock Dorms, East Quad, Library..."
-            className="rounded-[12px] border border-[var(--border)] bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/22 focus:border-[rgba(255,62,165,0.45)]"
-          />
-        </label>
-
-        <div className="h-px bg-white/6" />
-        <p className="section-kicker !px-0 !text-white/30">Live Preview</p>
-
-        <div className="rounded-[16px] border border-[var(--border)] bg-[var(--panel)] p-4">
-          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/25">
-            How it&apos;ll look in the stash
-          </p>
-          <div className="flex gap-3">
-            <div className="flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-[10px] bg-white/6 text-[26px]">
-              {previewType.emoji}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p
-                className={`font-display text-[15px] font-bold ${
-                  title.trim() ? "text-[var(--foreground)]" : "italic text-white/20"
-                }`}
-              >
-                {title.trim() || "Your listing title"}
-              </p>
-              <p
-                className="mt-1 text-[15px] font-semibold"
-                style={{ color: previewPrice === "—" ? "rgba(255,255,255,0.3)" : previewType.text }}
-              >
-                {previewPrice}
-              </p>
-              <p className="mt-1 text-[11px] text-white/35">{location.trim() || "No location set"}</p>
-              <span
-                className="mt-1.5 inline-block rounded-[5px] px-2 py-0.5 text-[10px] font-semibold"
-                style={{ background: previewType.bg, color: previewType.text }}
-              >
-                {listingType}
-              </span>
-            </div>
-          </div>
-        </div>
       </div>
     </main>
   );
