@@ -3,20 +3,11 @@
 import Link from "next/link";
 import {
   Bell,
-  BedDouble,
   ChevronRight,
   DoorOpen,
   GraduationCap,
-  HandCoins,
   LampDesk,
-  Loader2,
   MapPin,
-  Palette,
-  PartyPopper,
-  Scissors,
-  Search,
-  Shirt,
-  Sparkles,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -31,16 +22,6 @@ import {
 } from "@/lib/listing-urgency";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
-type QuickAction = {
-  title: string;
-  description: string;
-  icon: typeof Shirt;
-  badge: string;
-  href?: string;
-  locked?: boolean;
-  hypeBadge?: string;
-};
-
 const quickPills = [
   { label: "Feed", href: "/dashboard" },
   { label: "📸 Wall", href: "/campus-wall" },
@@ -53,68 +34,6 @@ const quickPills = [
   { label: "🎨 Creative", href: "/campus-creatives" },
 ];
 
-const quickActions: QuickAction[] = [
-  {
-    title: "Campus Feed",
-    description: "Browse the live dashboard of campus listings.",
-    icon: Search,
-    badge: "Feed",
-    href: "/dashboard",
-  },
-  {
-    title: "Sell Goods",
-    description: "Clothes, books, and dorm extras moving fast.",
-    icon: Shirt,
-    badge: "Resell",
-    href: "/sell-goods",
-  },
-  {
-    title: "The Room Swap",
-    description: "Semester sublets and room-wanted posts.",
-    icon: BedDouble,
-    badge: "Coming Soon",
-    href: "/rent-room",
-    locked: true,
-    hypeBadge: "Soon",
-  },
-  {
-    title: "Launch Events",
-    description: "Parties, study jams, and pop-ups on campus.",
-    icon: PartyPopper,
-    badge: "Events",
-    href: "/launch-event",
-  },
-  {
-    title: "Fundraise Fast",
-    description: "Fast fundraiser posts for clubs and orgs.",
-    icon: HandCoins,
-    badge: "Fundraise",
-    href: "/fundraise-fast",
-  },
-  {
-    title: "Campus Creatives",
-    description: "Custom designs, merch, and student-made work.",
-    icon: Palette,
-    badge: "Coming Soon",
-    href: "/campus-creatives",
-    locked: true,
-    hypeBadge: "Soon",
-  },
-  {
-    title: "Lost and Found",
-    description: "Lost IDs, keys, and AirPods with campus karma.",
-    icon: MapPin,
-    badge: "Report",
-    href: "/lost-and-found",
-  },
-  {
-    title: "Campus Services",
-    description: "Hair, braids, nails, tech support, and moving help.",
-    icon: Scissors,
-    badge: "Book",
-    href: "/campus-services",
-  },
-];
 
 type RecentListing = {
   id: string | number;
@@ -193,14 +112,6 @@ const jumpSections = [
 ];
 
 export default function Home() {
-  const [assistantQuestion, setAssistantQuestion] = useState("");
-  const [assistantLoading, setAssistantLoading] = useState(false);
-  const [assistantError, setAssistantError] = useState("");
-  const [assistantReply, setAssistantReply] = useState<{
-    answer: string;
-    suggestedRoute: string;
-    suggestedAction: string;
-  } | null>(null);
   const [recentListings, setRecentListings] = useState<RecentListing[]>([]);
   const [recentLoading, setRecentLoading] = useState(true);
   const [recentError, setRecentError] = useState("");
@@ -289,47 +200,6 @@ export default function Home() {
       mounted = false;
     };
   }, []);
-
-  const askAssistant = async () => {
-    setAssistantError("");
-
-    if (!assistantQuestion.trim()) {
-      setAssistantError("Ask MyDormStash AI a question first.");
-      return;
-    }
-
-    try {
-      setAssistantLoading(true);
-      const response = await fetch("/api/ai/campus-concierge", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ question: assistantQuestion }),
-      });
-
-      const data = (await response.json()) as {
-        error?: string;
-        answer?: string;
-        suggestedRoute?: string;
-        suggestedAction?: string;
-      };
-
-      if (!response.ok) {
-        throw new Error(data.error || "AI assistant failed");
-      }
-
-      setAssistantReply({
-        answer: data.answer || "",
-        suggestedRoute: data.suggestedRoute || "",
-        suggestedAction: data.suggestedAction || "",
-      });
-    } catch (error) {
-      setAssistantError(error instanceof Error ? error.message : "AI assistant failed");
-    } finally {
-      setAssistantLoading(false);
-    }
-  };
 
   const previewItem = useMemo(
     () => recentListings.find((listing) => listing.title === activePreview) ?? recentListings[0] ?? null,
@@ -561,59 +431,6 @@ export default function Home() {
           )}
         </section>
 
-        <section id="launcher" className="border-t border-white/8 px-1 py-5">
-          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/54">Everything Else</p>
-          <div className="grid grid-cols-2 gap-3">
-            {quickActions.map(({ title, description, icon: Icon, badge, href, locked, hypeBadge }) => {
-              const content = (
-                <div className="flex h-full flex-col justify-between gap-4">
-                  {hypeBadge ? (
-                    <span className="absolute right-3 top-3 rounded-full border border-[var(--accent)]/30 bg-[var(--accent)]/12 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
-                      {hypeBadge}
-                    </span>
-                  ) : null}
-                  <div>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04]">
-                      <Icon className="h-5 w-5 text-white/78" />
-                    </div>
-                    <div className="mt-4 min-w-0">
-                      <h2 className="truncate text-[15px] font-semibold tracking-[0.01em] text-white">{title}</h2>
-                      <p className="mt-1 text-[12px] leading-5 text-white/46">{description}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="rounded-full border border-white/12 bg-white/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70">
-                      {badge}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      {locked ? (
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/42">
-                          Locked
-                        </span>
-                      ) : null}
-                      <ChevronRight className="h-4 w-4 shrink-0 text-white/32 transition group-hover:text-white/58" />
-                    </div>
-                  </div>
-                </div>
-              );
-
-              const className = `group relative rounded-[20px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 shadow-[0_16px_32px_rgba(0,0,0,0.18)] backdrop-blur-xl transition ${
-                locked ? "opacity-96" : "hover:border-white/18 hover:bg-white/[0.05]"
-              }`;
-
-              return locked || !href ? (
-                <div key={title} aria-disabled="true" className={className}>
-                  {content}
-                </div>
-              ) : (
-                <Link key={title} href={href} className={className}>
-                  {content}
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-
         <section id="recent" className="border-t border-white/8 px-1 py-5">
           <div className="mb-3 flex items-center justify-between">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/54">Recent Listings</p>
@@ -780,23 +597,9 @@ export default function Home() {
         <section id="ai" className="border-t border-white/8 px-1 py-5">
           <div className="rounded-[20px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 shadow-[0_18px_36px_rgba(0,0,0,0.24)] backdrop-blur-xl">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/54">AI Reply</p>
-            {assistantReply ? (
-              <div className="mt-4 space-y-3">
-                <p className="text-sm leading-6 text-white/72">{assistantReply.answer}</p>
-                <div className="rounded-[14px] border border-white/8 bg-white/[0.02] p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
-                    Suggested Route
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-white">{assistantReply.suggestedRoute}</p>
-                  <p className="mt-2 text-[13px] leading-6 text-white/48">{assistantReply.suggestedAction}</p>
-                </div>
-              </div>
-            ) : (
-              <p className="mt-4 text-sm leading-6 text-white/42">
-                Use the fixed command line to ask about selling, rooms, fundraisers, services, lost items, or events.
-              </p>
-            )}
-            {assistantError ? <p className="mt-4 text-sm text-white/58">{assistantError}</p> : null}
+            <p className="mt-4 text-sm leading-6 text-white/42">
+              Ask MyDormStash AI from the dedicated flows when you want help with selling, rooms, fundraisers, services, lost items, or events.
+            </p>
           </div>
         </section>
       </section>
