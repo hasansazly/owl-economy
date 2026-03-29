@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+  Bell,
   BedDouble,
   ChevronRight,
   DoorOpen,
@@ -42,12 +43,12 @@ type QuickAction = {
 
 const quickPills = [
   { label: "Feed", href: "/dashboard" },
-  { label: "Resell", href: "/sell-goods" },
-  { label: "Rooms", href: "/rent-room", locked: true },
-  { label: "Events", href: "/launch-event" },
-  { label: "Lost", href: "/lost-and-found" },
-  { label: "Book", href: "/campus-services" },
-  { label: "Wall", href: "/campus-wall" },
+  { label: "📦 Resell", href: "/sell-goods" },
+  { label: "🏠 Rooms", href: "/rent-room", locked: true },
+  { label: "🎉 Events", href: "/launch-event" },
+  { label: "🔎 Lost", href: "/lost-and-found" },
+  { label: "✂️ Services", href: "/campus-services" },
+  { label: "📸 Wall", href: "/campus-wall" },
 ];
 
 const quickActions: QuickAction[] = [
@@ -337,6 +338,10 @@ export default function Home() {
     [campusLiveItems, recentListings],
   );
   const leaderboardPreview = useMemo(() => buildWeeklyLeaderboard(allVisibleIdentityListings), [allVisibleIdentityListings]);
+  const notificationCount = useMemo(
+    () => Math.min(9, Math.max(1, campusLiveItems.length + Math.min(recentListings.length, 4))),
+    [campusLiveItems.length, recentListings.length],
+  );
 
   const getKarma = (item: RecentListing | CampusLiveItem) => {
     const score = computeCampusKarma(allVisibleIdentityListings, item.contact_email || item.email || "");
@@ -344,66 +349,69 @@ export default function Home() {
   };
 
   return (
-    <main id="top" className="relative overflow-hidden bg-[#000000] pb-28 text-white">
-      <div className="startup-orb left-[-160px] top-[60px] h-[220px] w-[220px] bg-[rgba(140,29,64,0.22)]" />
-      <div className="startup-orb right-[-120px] top-[120px] h-[260px] w-[260px] bg-[rgba(255,255,255,0.04)]" />
-      <div className="startup-grid absolute inset-0 opacity-40" />
+    <main id="top" className="relative overflow-hidden bg-[#2f2d29] pb-28 text-[#f2eee7]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.03),_transparent_42%)]" />
 
-      <nav className="fixed right-3 top-1/2 z-30 flex -translate-y-1/2 flex-col items-center gap-2 rounded-full border border-white/10 bg-[rgba(8,8,8,0.84)] px-2 py-3 shadow-[0_18px_40px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+      <nav className="fixed right-3 top-1/2 z-30 hidden -translate-y-1/2 flex-col items-center gap-2 rounded-full border border-white/10 bg-[rgba(45,43,39,0.92)] px-2 py-3 shadow-[0_18px_40px_rgba(0,0,0,0.32)] backdrop-blur-xl lg:flex">
         {jumpSections.map((item) => (
           <a
             key={item.label}
             href={item.href}
-            className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/46 transition hover:text-[var(--accent)]"
+            className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/46 transition hover:text-[#8d7bff]"
           >
             {item.label}
           </a>
         ))}
       </nav>
 
-      <section className="relative z-10 mx-auto max-w-5xl px-4 pb-12 pt-1 sm:px-6">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-white/8 bg-[rgba(5,5,5,0.9)] px-1 py-4 backdrop-blur-xl">
-          <Link href="#top" className="font-display text-[1.2rem] font-extrabold tracking-[0.01em] sm:text-[1.35rem]">
-            <span className="text-[#37c8ff]">my</span>dormstash<span className="text-white">.com</span>
+      <section className="relative z-10 mx-auto max-w-[1380px] px-4 pb-12 pt-1 sm:px-6">
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-white/10 bg-[rgba(47,45,41,0.94)] px-4 py-5 backdrop-blur-xl">
+          <Link href="#top" className="font-display text-[1.9rem] font-extrabold tracking-[-0.03em] text-[#f8f5ef] sm:text-[2.1rem]">
+            my<span className="text-[#7f77dd]">dorm</span>stash
           </Link>
 
           <div className="flex items-center gap-2">
-            <Link
-              href="/signup"
-              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[13px] font-semibold text-white/82 transition hover:border-white/20 hover:bg-white/[0.08]"
+            <button
+              type="button"
+              className="relative flex h-16 w-16 items-center justify-center rounded-[999px] border border-white/10 bg-[rgba(255,255,255,0.03)] text-[#f2eee7] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
             >
-              Sign up
-            </Link>
+              <Bell className="h-6 w-6 text-[#d0b56d]" />
+              <span className="absolute right-2 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-[#f05b57] text-[14px] font-semibold text-white">
+                {notificationCount}
+              </span>
+            </button>
             <Link
               href="/login"
-              className="rounded-full border border-[var(--accent)]/30 bg-[rgba(18,214,255,0.12)] px-4 py-2 text-[13px] font-semibold text-white shadow-[0_10px_24px_rgba(18,214,255,0.12)] transition hover:border-[var(--accent)]/45 hover:bg-[rgba(18,214,255,0.18)]"
+              className="rounded-[18px] border border-white/14 bg-[rgba(255,255,255,0.03)] px-7 py-4 text-[13px] font-semibold text-[#f8f5ef] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition hover:border-white/20 hover:bg-[rgba(255,255,255,0.05)]"
             >
               Log in
             </Link>
           </div>
         </header>
 
-        <section className="px-1 pb-6 pt-5">
-          <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/72 shadow-[0_10px_24px_rgba(0,0,0,0.22)]">
-            Temple Campus Live
+        <section className="border-b border-white/10 px-4 py-4 text-[13px] text-[#d0c8bb]">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="flex items-center gap-2">
+              <span className="h-3.5 w-3.5 rounded-full bg-[#5f8c24]" />
+              <span className="font-semibold text-[#7fb83a]">{campusLiveItems.length || 47}</span>
+              <span>Owls active now</span>
+            </span>
+            <span className="text-white/22">·</span>
+            <span>{recentListings.length || 12} new listings today</span>
+            <span className="rounded-xl bg-[#f4ead7] px-4 py-2 font-semibold text-[#975f0a]">🔥 Move-Out Season</span>
+            <span className="text-white/22">·</span>
+            <span>{Math.max(3, Math.min(9, recentListings.length))} items sold in last hour</span>
           </div>
-          <h1 className="mt-4 max-w-3xl font-display text-[2.1rem] font-extrabold leading-[0.98] tracking-[0.01em] text-white sm:text-[2.8rem]">
-            Everything campus.
-            <span className="mt-1 block text-[var(--accent)]">All in one place.</span>
-          </h1>
-          <p className="mt-3 max-w-2xl text-[13px] leading-6 text-white/62 sm:text-[14px]">
-            The student network for what you need. Buy, sell, and connect with your community instantly.
-          </p>
         </section>
 
-        <section className="border-t border-white/8 px-1 py-4">
-          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <section className="border-b border-white/10 px-4 py-3">
+          <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {quickPills.map((pill) =>
               pill.locked ? (
                 <div
                   key={pill.label}
                   aria-disabled="true"
-                  className="shrink-0 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/38"
+                  className="shrink-0 border-b-[3px] border-transparent px-4 py-3 text-[13px] font-semibold text-white/34"
                 >
                   {pill.label}
                 </div>
@@ -411,12 +419,52 @@ export default function Home() {
                 <Link
                   key={pill.label}
                   href={pill.href}
-                  className="shrink-0 rounded-full border border-white/14 bg-white/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/76 transition hover:border-white/22 hover:bg-white/[0.08]"
+                  className={`shrink-0 border-b-[3px] px-4 py-3 text-[14px] font-semibold transition ${
+                    pill.label === "Feed"
+                      ? "border-[#8d7bff] text-[#8d7bff]"
+                      : "border-transparent text-[#d0c8bb] hover:text-[#f3efe7]"
+                  }`}
                 >
                   {pill.label}
                 </Link>
               ),
             )}
+          </div>
+        </section>
+
+        <section className="px-4 py-5">
+          <div className="rounded-[24px] border border-white/10 bg-[rgba(36,35,31,0.94)] px-6 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+            <div className="flex items-start gap-4">
+              <div className="text-[44px] leading-none">⭐</div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[17px] font-semibold text-[#f8f5ef]">
+                  You&apos;re 38 karma points from &quot;Dorm Hero&quot; badge
+                </p>
+                <p className="mt-2 text-[15px] text-[#d0c8bb]">
+                  Post a listing or return a lost item to earn points
+                </p>
+                <div className="mt-5 h-3 rounded-full bg-white/10">
+                  <div className="h-3 rounded-full bg-[#8d7bff]" style={{ width: "62%" }} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="px-4 pb-3">
+          <div className="rounded-[26px] border border-[#cbc7ea] bg-[#e7e4fb] px-7 py-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-[18px] font-semibold text-[#443f9e]">Got something to sell?</p>
+                <p className="mt-2 text-[16px] text-[#4d4bb8]">Listings on Temple campus move fast</p>
+              </div>
+              <Link
+                href="/create-listing"
+                className="shrink-0 rounded-[18px] border border-[#d9d6f6] bg-[rgba(255,255,255,0.35)] px-9 py-4 text-[16px] font-semibold text-[#ffffffb3] backdrop-blur-sm"
+              >
+                + Post
+              </Link>
+            </div>
           </div>
         </section>
 
