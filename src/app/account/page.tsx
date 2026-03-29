@@ -105,7 +105,7 @@ export default function AccountPage() {
   return (
     <main className="min-h-screen bg-black text-white">
       <section className="mx-auto max-w-5xl px-4 pb-16 pt-3 sm:px-6">
-        <header className="sticky top-0 z-20 border-b border-white/8 bg-[rgba(0,0,0,0.92)] py-4 backdrop-blur-xl">
+        <header className="mobile-top-bar border-b border-white/8 bg-[rgba(0,0,0,0.92)] py-4 backdrop-blur-xl">
           <div className="flex items-center justify-between gap-3">
             <Link
               href="/dashboard"

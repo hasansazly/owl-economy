@@ -237,7 +237,7 @@ export default function Home() {
       </nav>
 
       <section className="relative z-10 mx-auto max-w-[1380px] px-4 pb-12 pt-1 sm:px-6">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-white/10 bg-[rgba(47,45,41,0.94)] px-4 py-5 backdrop-blur-xl">
+        <header className="mobile-top-bar flex items-center justify-between border-b border-white/10 bg-[rgba(47,45,41,0.94)] px-4 py-5 backdrop-blur-xl">
           <Link href="#top" className="font-display text-[1.9rem] font-extrabold tracking-[-0.03em] text-[#f8f5ef] sm:text-[2.1rem]">
             my<span className="text-[#7f77dd]">dorm</span>stash
           </Link>
@@ -596,7 +596,7 @@ export default function Home() {
 
       </section>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#36342f] backdrop-blur-xl">
+      <div className="mobile-bottom-nav border-t border-white/10 bg-[#36342f] backdrop-blur-xl">
         <div className="mx-auto grid max-w-[1380px] grid-cols-5">
           <Link href="/" className="flex flex-col items-center gap-1 py-4 text-[#8d7bff]">
             <span className="text-[2rem] leading-none">🏠</span>

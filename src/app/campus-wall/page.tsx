@@ -269,7 +269,7 @@ export default function CampusWallPage() {
   return (
     <main className="min-h-screen bg-black text-white">
       <section className="mx-auto max-w-5xl px-4 pb-28 pt-4 sm:px-6">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-white/8 bg-[rgba(0,0,0,0.94)] py-4 backdrop-blur-xl">
+        <header className="mobile-top-bar flex items-center justify-between border-b border-white/8 bg-[rgba(0,0,0,0.94)] py-4 backdrop-blur-xl">
           <Link href="/" className="inline-flex items-center gap-2 text-sm text-white/52 hover:text-white/72">
             <ArrowLeft className="h-4 w-4" />
             Back

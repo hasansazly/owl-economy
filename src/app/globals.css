@@ -20,6 +20,8 @@
 
 html {
   scroll-behavior: smooth;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -31,6 +33,12 @@ body {
   font-family: var(--font-sans), sans-serif;
   min-height: 100vh;
   font-weight: 400;
+  width: 100%;
+  overflow-x: hidden;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
 }
 
 p,
@@ -54,6 +62,13 @@ b {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+a,
+button,
+[role="button"] {
+  min-width: 44px;
+  min-height: 44px;
 }
 
 ::selection {
@@ -152,6 +167,8 @@ a {
   background: var(--background);
   color: var(--foreground);
   isolation: isolate;
+  width: 100vw;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 84px);
 }
 
 .page-shell::before,
@@ -186,29 +203,27 @@ a {
   position: relative;
   z-index: 1;
   margin: 0 auto;
-  width: 100%;
-  max-width: 72rem;
-  padding: 0.25rem 1rem 4rem;
-}
-
-@media (min-width: 640px) {
-  .page-wrap {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
+  width: 100vw;
+  max-width: 480px;
+  padding: calc(env(safe-area-inset-top) + 68px) 16px calc(env(safe-area-inset-bottom) + 96px);
 }
 
 .page-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 20;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   border-bottom: 0.5px solid var(--divider);
-  background: rgba(0, 0, 0, 0.82);
-  padding: 1.25rem 0.25rem;
+  background: rgba(10, 9, 22, 0.92);
+  min-height: calc(52px + env(safe-area-inset-top));
+  width: 100vw;
+  max-width: 480px;
+  padding: calc(env(safe-area-inset-top) + 8px) 16px 8px;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
@@ -250,8 +265,8 @@ a {
 .page-copy {
   margin: 1rem auto 0;
   max-width: 42rem;
-  font-size: 0.9375rem;
-  line-height: 1.8;
+  font-size: 15px;
+  line-height: 1.6;
   color: rgba(255, 255, 255, 0.52);
 }
 
@@ -311,15 +326,22 @@ button {
 input,
 textarea,
 select {
+  width: 100%;
+  min-height: 48px;
   border: 0.5px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.05);
   color: #f0eeff;
+  font-size: 16px;
 }
 
 input::placeholder,
 textarea::placeholder {
   color: rgba(240, 238, 255, 0.3);
+}
+
+textarea {
+  min-height: 120px;
 }
 
 input:focus,
@@ -368,6 +390,55 @@ select:focus {
   border: 0;
   padding: 0;
   color: rgba(240, 238, 255, 0.35);
+}
+
+.mobile-top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  min-height: calc(52px + env(safe-area-inset-top));
+  padding-top: calc(env(safe-area-inset-top) + 8px) !important;
+  padding-bottom: 8px !important;
+  width: 100vw;
+  max-width: 480px;
+}
+
+.mobile-bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  min-height: calc(64px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  width: 100vw;
+  max-width: 480px;
+}
+
+[class*="max-w-"] {
+  max-width: 480px !important;
+}
+
+[class*="sm:grid-cols-"],
+[class*="md:grid-cols-"],
+[class*="lg:grid-cols-"],
+[class*="xl:grid-cols-"] {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+[class*="sm:flex-row"],
+[class*="md:flex-row"],
+[class*="lg:flex-row"],
+[class*="xl:flex-row"] {
+  flex-direction: column !important;
+}
+
+img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
 }
 
 @keyframes campus-live-pulse {
