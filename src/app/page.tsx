@@ -43,6 +43,7 @@ type QuickAction = {
 
 const quickPills = [
   { label: "Feed", href: "/dashboard" },
+  { label: "📸 Wall", href: "/campus-wall" },
   { label: "📦 Resell", href: "/sell-goods" },
   { label: "🏠 Rooms", href: "/rent-room", locked: true },
   { label: "🎉 Events", href: "/launch-event" },
@@ -50,7 +51,6 @@ const quickPills = [
   { label: "🔎 Lost", href: "/lost-and-found" },
   { label: "✂️ Services", href: "/campus-services" },
   { label: "🎨 Creative", href: "/campus-creatives" },
-  { label: "📸 Wall", href: "/campus-wall" },
 ];
 
 const quickActions: QuickAction[] = [
@@ -434,19 +434,19 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="px-4 py-5">
-          <div className="rounded-[24px] border border-white/10 bg-[rgba(36,35,31,0.94)] px-6 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-            <div className="flex items-start gap-4">
-              <div className="text-[44px] leading-none">⭐</div>
+        <section className="px-4 py-3">
+          <div className="rounded-[20px] border border-white/10 bg-[rgba(36,35,31,0.94)] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+            <div className="flex items-start gap-3">
+              <div className="text-[34px] leading-none">⭐</div>
               <div className="min-w-0 flex-1">
-                <p className="text-[17px] font-semibold text-[#f8f5ef]">
+                <p className="text-[15px] font-semibold leading-6 text-[#f8f5ef]">
                   You&apos;re 38 karma points from &quot;Dorm Hero&quot; badge
                 </p>
-                <p className="mt-2 text-[15px] text-[#d0c8bb]">
+                <p className="mt-1 text-[13px] text-[#d0c8bb]">
                   Post a listing or return a lost item to earn points
                 </p>
-                <div className="mt-5 h-3 rounded-full bg-white/10">
-                  <div className="h-3 rounded-full bg-[#8d7bff]" style={{ width: "62%" }} />
+                <div className="mt-3 h-2 rounded-full bg-white/10">
+                  <div className="h-2 rounded-full bg-[#8d7bff]" style={{ width: "62%" }} />
                 </div>
               </div>
             </div>
