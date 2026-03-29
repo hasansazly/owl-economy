@@ -360,9 +360,7 @@ export default function Home() {
               Loading Campus Live...
             </div>
           ) : campusLiveError ? (
-            <div className="rounded-[18px] border border-[rgba(240,80,80,0.22)] bg-[rgba(240,80,80,0.08)] px-4 py-4 text-[13px] text-[#F09595]">
-              {campusLiveError}
-            </div>
+            <p className="px-4 py-2 text-[13px] text-[rgba(240,238,255,0.35)]">{campusLiveError}</p>
           ) : campusLiveItems.length === 0 ? (
             <div className="rounded-[18px] border border-dashed border-white/12 bg-[rgba(255,255,255,0.02)] px-4 py-6 text-center text-[13px] text-white/42">
               No live lost and found, fundraiser, or event posts yet.
@@ -449,9 +447,7 @@ export default function Home() {
                 Loading recent listings...
               </div>
             ) : recentError ? (
-              <div className="lg:col-span-2 rounded-[18px] border border-[rgba(240,80,80,0.22)] bg-[rgba(240,80,80,0.08)] p-4 text-[13px] text-[#F09595]">
-                {recentError}
-              </div>
+              <p className="lg:col-span-2 p-2 text-[13px] text-[rgba(240,238,255,0.35)]">{recentError}</p>
             ) : recentListings.length === 0 ? (
               <div className="lg:col-span-2 rounded-[18px] border border-dashed border-white/12 bg-[rgba(255,255,255,0.02)] p-6 text-center text-[13px] text-white/42">
                 No recent listings yet. When students post, they’ll appear here automatically.

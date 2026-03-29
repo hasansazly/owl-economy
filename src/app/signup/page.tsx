@@ -64,13 +64,13 @@ export default function SignupPage() {
     name.trim().length > 0 && emailState.valid && passwordState.valid && confirmState.valid;
 
   const fieldClass = (status: string) => {
-    if (status === "error") return "border-[rgba(240,80,80,0.6)]";
+    if (status === "error") return "border-[rgba(107,92,231,0.4)]";
     if (status === "valid") return "border-[rgba(255,62,165,0.45)]";
     return "border-[var(--border)]";
   };
 
   const hintClass = (status: string) => {
-    if (status === "error") return "text-[#F09595]";
+    if (status === "error") return "text-[rgba(240,238,255,0.35)]";
     if (status === "valid") return "text-[var(--accent)]";
     return "text-white/30";
   };
@@ -144,7 +144,7 @@ export default function SignupPage() {
 
         <div className="page-card px-7 py-8 shadow-[0_20px_60px_rgba(0,0,0,0.28)]">
           <>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-lg border border-[rgba(255,62,165,0.24)] bg-[rgba(255,62,165,0.10)] px-3 py-1.5 text-[11px] font-semibold text-[rgba(255,122,193,0.92)]">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-[20px] border border-[rgba(107,92,231,0.24)] bg-[rgba(107,92,231,0.08)] px-3 py-1.5 text-[12px] font-medium text-[#9B8FFF]">
               <GraduationCap className="h-3.5 w-3.5" />
               University accounts only
             </div>
@@ -161,7 +161,7 @@ export default function SignupPage() {
               onSubmit={handleSubmit}
             >
               <label className="block">
-                <span className="mb-2 block text-[12px] font-medium uppercase tracking-[0.04em] text-white/50">
+                <span className="mb-2 block text-[12px] font-normal lowercase tracking-[0.04em] text-white/45">
                   Full name
                 </span>
                 <div
@@ -182,7 +182,7 @@ export default function SignupPage() {
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-[12px] font-medium uppercase tracking-[0.04em] text-white/50">
+                <span className="mb-2 block text-[12px] font-normal lowercase tracking-[0.04em] text-white/45">
                   University email
                 </span>
                 <div
@@ -206,7 +206,7 @@ export default function SignupPage() {
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-[12px] font-medium uppercase tracking-[0.04em] text-white/50">
+                <span className="mb-2 block text-[12px] font-normal lowercase tracking-[0.04em] text-white/45">
                   Password
                 </span>
                 <div
@@ -251,7 +251,7 @@ export default function SignupPage() {
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-[12px] font-medium uppercase tracking-[0.04em] text-white/50">
+                <span className="mb-2 block text-[12px] font-normal lowercase tracking-[0.04em] text-white/45">
                   Confirm password
                 </span>
                 <div
@@ -280,7 +280,7 @@ export default function SignupPage() {
               >
                 {submitting ? "Sending code..." : "Create account"}
               </button>
-              {submitError ? <p className="text-[12px] text-[#F09595]">{submitError}</p> : null}
+              {submitError ? <p className="text-[12px] text-[rgba(240,238,255,0.35)]">{submitError}</p> : null}
             </form>
           </>
         </div>

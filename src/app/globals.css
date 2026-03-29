@@ -1,16 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #050505;
-  --foreground: #ffffff;
-  --muted: rgba(245, 245, 245, 0.72);
-  --accent: #12d6ff;
-  --brand-blue: #4de3ff;
-  --secondary: #121420;
+  --background: #0a0916;
+  --foreground: #f0eeff;
+  --muted: rgba(240, 238, 255, 0.45);
+  --accent: #6b5ce7;
+  --brand-blue: #9b8fff;
+  --secondary: #121020;
   --panel: rgba(255, 255, 255, 0.045);
   --panel-soft: rgba(255, 255, 255, 0.04);
-  --border: rgba(255, 255, 255, 0.12);
-  --divider: rgba(255, 255, 255, 0.09);
+  --border: rgba(255, 255, 255, 0.07);
+  --divider: rgba(255, 255, 255, 0.06);
+  --warm: #f5a623;
 }
 
 * {
@@ -24,11 +25,30 @@ html {
 body {
   margin: 0;
   background:
-    radial-gradient(circle at top right, rgba(30, 58, 138, 0.2), transparent 34%),
+    radial-gradient(circle at top right, rgba(107, 92, 231, 0.18), transparent 34%),
     var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
   min-height: 100vh;
+  font-weight: 400;
+}
+
+p,
+span,
+label,
+li {
+  font-weight: 400;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+strong,
+b {
+  font-weight: 500;
 }
 
 a {
@@ -37,7 +57,7 @@ a {
 }
 
 ::selection {
-  background: rgba(70, 191, 255, 0.24);
+  background: rgba(107, 92, 231, 0.24);
   color: #ffffff;
 }
 
@@ -49,17 +69,17 @@ a {
 .whisper-label {
   font-size: 12px;
   font-weight: 400;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   text-transform: lowercase;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(240, 238, 255, 0.45);
 }
 
 .agora-panel {
-  background: rgba(255, 255, 255, 0.045);
+  background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 22px;
+  border: 0.5px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.05),
     0 22px 40px rgba(0, 0, 0, 0.22);
@@ -71,22 +91,22 @@ a {
 }
 
 .capsule-primary {
-  border-radius: 9999px;
-  background: #ffffff;
-  color: #000000;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 12px 28px rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  background: var(--accent);
+  color: #f0eeff;
+  border: 0.5px solid rgba(107, 92, 231, 0.2);
+  box-shadow: 0 12px 28px rgba(107, 92, 231, 0.16);
 }
 
 .capsule-secondary {
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.03);
-  color: rgba(255, 255, 255, 0.82);
+  border-radius: 20px;
+  border: 0.5px solid rgba(107, 92, 231, 0.4);
+  background: transparent;
+  color: #9b8fff;
 }
 
 .capsule-secondary:hover {
-  border-color: rgba(255, 255, 255, 0.18);
+  border-color: rgba(107, 92, 231, 0.55);
 }
 
 .hero-gradient-title {
@@ -119,7 +139,7 @@ a {
 
 .startup-chip {
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 0.5px solid rgba(255, 255, 255, 0.07);
   background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -149,7 +169,7 @@ a {
   top: 72px;
   height: 240px;
   width: 240px;
-  background: rgba(18, 214, 255, 0.1);
+  background: rgba(107, 92, 231, 0.12);
   opacity: 0.42;
 }
 
@@ -158,7 +178,7 @@ a {
   top: 18px;
   height: 320px;
   width: 320px;
-  background: rgba(30, 58, 138, 0.18);
+  background: rgba(155, 143, 255, 0.12);
   opacity: 0.55;
 }
 
@@ -186,7 +206,7 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  border-bottom: 1px solid var(--divider);
+  border-bottom: 0.5px solid var(--divider);
   background: rgba(0, 0, 0, 0.82);
   padding: 1.25rem 0.25rem;
   backdrop-filter: blur(20px);
@@ -202,12 +222,12 @@ a {
 
 .page-chip {
   border-radius: 9999px;
-  border: 1px solid var(--border);
+  border: 0.5px solid var(--border);
   background: rgba(255, 255, 255, 0.04);
   padding: 0.45rem 0.9rem;
   font-size: 0.75rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.7);
+  font-weight: 400;
+  color: rgba(240, 238, 255, 0.45);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -239,15 +259,15 @@ a {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
+  border: 0.5px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .campus-live-section {
   position: relative;
-  border-top: 1px solid rgba(191, 90, 242, 0.28);
-  box-shadow: inset 0 1px 0 rgba(191, 90, 242, 0.16), 0 -12px 30px rgba(191, 90, 242, 0.08);
+  border-top: 0.5px solid rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 1px 0 rgba(107, 92, 231, 0.1), 0 -12px 30px rgba(107, 92, 231, 0.05);
 }
 
 .campus-live-heading {
@@ -265,8 +285,8 @@ a {
   height: 0.5rem;
   width: 0.5rem;
   border-radius: 9999px;
-  background: #bf5af2;
-  box-shadow: 0 0 0 rgba(191, 90, 242, 0.55);
+  background: #9b8fff;
+  box-shadow: 0 0 0 rgba(155, 143, 255, 0.55);
   animation: campus-live-pulse 2.2s ease-in-out infinite;
 }
 
@@ -275,12 +295,79 @@ a {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 1px solid rgba(191, 90, 242, 0.34);
-  background: rgba(191, 90, 242, 0.1);
+  border: 0.5px solid rgba(107, 92, 231, 0.24);
+  background: rgba(107, 92, 231, 0.08);
   padding: 0.38rem 0.7rem;
   font-size: 0.72rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.82);
+  font-weight: 400;
+  color: rgba(240, 238, 255, 0.72);
+}
+
+button {
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+input,
+textarea,
+select {
+  border: 0.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #f0eeff;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(240, 238, 255, 0.3);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: rgba(107, 92, 231, 0.6);
+}
+
+.text-cyan-300,
+.text-cyan-400,
+.text-\[var\(--accent\)\] {
+  color: #9b8fff !important;
+}
+
+.bg-cyan-400\/8,
+.bg-cyan-400\/10 {
+  background: rgba(107, 92, 231, 0.08) !important;
+}
+
+.border-cyan-400\/20,
+.border-cyan-400\/30 {
+  border-color: rgba(107, 92, 231, 0.24) !important;
+}
+
+.text-amber-300,
+.text-amber-400,
+.text-fuchsia-300 {
+  color: #f5a623 !important;
+}
+
+.bg-rose-400\/10,
+.bg-fuchsia-400,
+.bg-fuchsia-400\/12 {
+  background: rgba(245, 166, 35, 0.1) !important;
+}
+
+.border-rose-400\/20,
+.border-fuchsia-400\/30,
+.border-fuchsia-400\/40 {
+  border-color: rgba(245, 166, 35, 0.2) !important;
+}
+
+.inline-subtle {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: rgba(240, 238, 255, 0.35);
 }
 
 @keyframes campus-live-pulse {

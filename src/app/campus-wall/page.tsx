@@ -315,9 +315,7 @@ export default function CampusWallPage() {
             Loading Campus Wall...
           </div>
         ) : error ? (
-          <div className="mt-6 rounded-[18px] border border-[rgba(240,80,80,0.22)] bg-[rgba(240,80,80,0.08)] p-4 text-[13px] text-[#F09595]">
-            {error}
-          </div>
+          <p className="mt-6 text-[13px] text-[rgba(240,238,255,0.35)]">{error}</p>
         ) : posts.length === 0 ? (
           <div className="mt-6 rounded-[18px] border border-dashed border-white/12 bg-[rgba(255,255,255,0.02)] p-6 text-center text-[13px] text-white/42">
             No Campus Wall posts yet. The first dorm tip or meme will show up here.
@@ -472,7 +470,7 @@ export default function CampusWallPage() {
               </div>
             )}
 
-            {error ? <p className="mt-3 text-[12px] text-[#F09595]">{error}</p> : null}
+            {error ? <p className="mt-3 text-[12px] text-[rgba(240,238,255,0.35)]">{error}</p> : null}
 
             <button
               type="button"

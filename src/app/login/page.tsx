@@ -96,11 +96,11 @@ export default function LoginPage() {
               </div>
             </label>
 
-            {error ? <p className="text-[12px] text-[#F09595]">{error}</p> : null}
+            {error ? <p className="text-[12px] text-[rgba(240,238,255,0.35)]">{error}</p> : null}
 
             <button
               type="submit"
-              className="inline-flex w-full items-center justify-center rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+              className="inline-flex w-full items-center justify-center rounded-[20px] bg-[var(--accent)] px-5 py-3 text-sm font-medium text-white transition hover:opacity-90"
             >
               Continue to Campus Feed
             </button>

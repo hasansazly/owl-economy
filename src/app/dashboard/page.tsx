@@ -633,7 +633,7 @@ export default function DashboardPage() {
         ) : null}
 
         {!loading && isLoggedIn && error ? (
-          <section className="mt-5 rounded-[18px] border border-[rgba(240,80,80,0.22)] bg-[rgba(240,80,80,0.08)] p-4 text-[13px] text-[#F09595]">
+          <section className="mt-5 p-1 text-[13px] text-[rgba(240,238,255,0.35)]">
             {error}
           </section>
         ) : null}
@@ -913,7 +913,7 @@ export default function DashboardPage() {
                   </label>
                 </div>
 
-                {postError ? <p className="mt-3 text-[12px] text-[#F09595]">{postError}</p> : null}
+                {postError ? <p className="mt-3 text-[12px] text-[rgba(240,238,255,0.35)]">{postError}</p> : null}
 
                 <button
                   type="button"

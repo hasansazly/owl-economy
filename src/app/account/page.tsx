@@ -122,7 +122,7 @@ export default function AccountPage() {
         </header>
 
         <section className="px-1 py-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/42">Temple student account</p>
+          <p className="whisper-label">Temple student account</p>
           <h1 className="mt-3 font-display text-[2.1rem] font-bold tracking-[-0.05em] text-white sm:text-[2.7rem]">
             Account Settings
           </h1>
@@ -133,15 +133,15 @@ export default function AccountPage() {
 
         <section className="mb-4 grid gap-3 px-1 sm:grid-cols-3">
           <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/44">Campus Karma</p>
+            <p className="whisper-label">Campus Karma</p>
             <p className="mt-2 text-[22px] font-bold text-white">{myKarma}</p>
           </div>
           <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/44">Temple Rank</p>
+            <p className="whisper-label">Temple Rank</p>
             <p className="mt-2 text-[22px] font-bold text-white">{leaderboardRank > 0 ? `#${leaderboardRank}` : "Unranked"}</p>
           </div>
           <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/44">Badges</p>
+            <p className="whisper-label">Badges</p>
             <p className="mt-2 text-[22px] font-bold text-white">{myBadges.length}</p>
           </div>
         </section>
@@ -337,8 +337,8 @@ export default function AccountPage() {
                 <h2 className="text-[16px] font-semibold text-white">Save & Log Out</h2>
               </div>
 
-              {saved ? <p className="mt-4 text-[12px] font-semibold text-cyan-300">Changes saved.</p> : null}
-              {saveError ? <p className="mt-4 text-[12px] font-semibold text-[#F09595]">{saveError}</p> : null}
+              {saved ? <p className="mt-4 text-[12px] text-[var(--brand-blue)]">Changes saved.</p> : null}
+              {saveError ? <p className="mt-4 text-[12px] text-[rgba(240,238,255,0.35)]">{saveError}</p> : null}
 
               <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                 <button

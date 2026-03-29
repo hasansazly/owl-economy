@@ -142,11 +142,11 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
             Back
           </Link>
 
-          <div className="mt-6 flex h-12 w-12 items-center justify-center rounded-2xl border border-[rgba(18,214,255,0.2)] bg-[rgba(18,214,255,0.08)] text-[var(--accent)]">
+          <div className="mt-6 flex h-12 w-12 items-center justify-center rounded-[14px] border border-[rgba(107,92,231,0.2)] bg-[rgba(107,92,231,0.08)] text-[var(--brand-blue)]">
             <Mail className="h-5 w-5" />
           </div>
 
-          <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/42">
+          <p className="mt-5 text-[12px] font-normal lowercase tracking-[0.04em] text-white/45">
             Verify Your Campus Email
           </p>
           <h1 className="mt-2 font-display text-[1.9rem] font-bold tracking-[-0.04em] text-white">
@@ -155,10 +155,10 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
           <p className="mt-3 text-[13px] leading-6 text-white/48">
             We sent a 6-digit code to your student email. Enter it below to join the Temple marketplace.
           </p>
-          {normalizedEmail ? <p className="mt-2 text-[12px] text-[var(--accent)]">{normalizedEmail}</p> : null}
+          {normalizedEmail ? <p className="mt-2 text-[12px] text-[var(--brand-blue)]">{normalizedEmail}</p> : null}
 
           <label className="mt-6 block">
-            <span className="mb-2 block text-[12px] font-medium uppercase tracking-[0.04em] text-white/45">
+            <span className="mb-2 block text-[12px] font-normal lowercase tracking-[0.04em] text-white/45">
               Verification Code
             </span>
             <input
@@ -168,23 +168,23 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
               value={code}
               onChange={(event) => setCode(event.target.value.replace(/\D/g, ""))}
               placeholder="123456"
-              className="w-full rounded-[18px] border border-white/10 bg-white/5 px-5 py-4 text-center font-display text-[2rem] font-semibold tracking-[0.38em] text-white outline-none placeholder:tracking-[0.2em] placeholder:text-white/18 focus:border-[rgba(18,214,255,0.4)]"
+              className="w-full rounded-[12px] border border-white/10 bg-white/5 px-5 py-4 text-center font-display text-[2rem] font-medium tracking-[0.38em] text-white outline-none placeholder:tracking-[0.2em] placeholder:text-white/18 focus:border-[rgba(107,92,231,0.6)]"
             />
           </label>
 
           {verified ? (
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[rgba(18,214,255,0.24)] bg-[rgba(18,214,255,0.08)] px-4 py-2 text-[13px] text-[var(--accent)]">
+            <div className="mt-4 inline-flex items-center gap-2 rounded-[20px] border border-[rgba(107,92,231,0.24)] bg-[rgba(107,92,231,0.08)] px-4 py-2 text-[13px] text-[var(--brand-blue)]">
               <CheckCircle2 className="h-4 w-4" />
               Code verified
             </div>
           ) : null}
-          {error ? <p className="mt-4 text-[12px] text-[#F09595]">{error}</p> : null}
+          {error ? <p className="mt-4 text-[12px] text-[rgba(240,238,255,0.35)]">{error}</p> : null}
 
           <button
             type="button"
             onClick={handleVerify}
             disabled={!isCodeReady || !normalizedEmail || loading}
-            className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-[var(--accent)] px-5 py-3 text-[14px] font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-35"
+            className="mt-6 inline-flex w-full items-center justify-center rounded-[20px] bg-[var(--accent)] px-5 py-3 text-[14px] font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-35"
           >
             {loading ? "Verifying..." : "Verify Account"}
           </button>
@@ -195,7 +195,7 @@ export default function VerifyEmailClient({ email }: VerifyEmailClientProps) {
               type="button"
               onClick={handleResend}
               disabled={resendCountdown > 0}
-              className="inline-flex items-center gap-2 text-[12px] font-semibold text-[var(--accent)] transition hover:text-white disabled:cursor-not-allowed disabled:text-white/28"
+              className="inline-flex items-center gap-2 text-[12px] font-medium text-[var(--brand-blue)] transition hover:text-white disabled:cursor-not-allowed disabled:text-white/28"
             >
               <RefreshCw className="h-3.5 w-3.5" />
               {resendCountdown > 0 ? `Resend in ${resendCountdown}s` : "Resend Code"}
