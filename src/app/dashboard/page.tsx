@@ -32,9 +32,10 @@ import {
   toggleSavedListing,
   type CampusNotification,
 } from "@/lib/campus-notifications";
+import { capWallFeedShare, getCampusWallSummary } from "@/lib/campus-wall";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
-const feedFilters = ["All", "Events", "Marketplace", "Lost & Found", "Services"] as const;
+const feedFilters = ["All", "Events", "Marketplace", "Lost & Found", "Services", "Campus Wall"] as const;
 const postCategories = ["Textbooks", "Mini-Fridges", "Electronics", "Sublets", "Event"] as const;
 const FEED_PAGE_SIZE = 8;
 
@@ -107,6 +108,7 @@ function getFeedGroup(category: string) {
   ) {
     return "Services";
   }
+  if (value.includes("campus wall") || value.includes("wall")) return "Campus Wall";
   return "Marketplace";
 }
 
@@ -123,6 +125,10 @@ function getBadgeStyles(category: string) {
 
   if (group === "Lost & Found") {
     return "border border-amber-300/25 bg-amber-300/12 text-amber-200";
+  }
+
+  if (group === "Campus Wall") {
+    return "border border-fuchsia-400/25 bg-fuchsia-400/12 text-fuchsia-300";
   }
 
   return "border border-emerald-400/25 bg-emerald-400/12 text-emerald-300";
@@ -276,7 +282,8 @@ export default function DashboardPage() {
       return matchesFilter && matchesQuery;
     });
 
-    return [...sortListingsNewest(next)].sort((a, b) => getRankingScore(b) - getRankingScore(a));
+    const ranked = [...sortListingsNewest(next)].sort((a, b) => getRankingScore(b) - getRankingScore(a));
+    return activeFilter === "All" ? capWallFeedShare(ranked) : ranked;
   }, [activeFilter, listings, profile.followedBuildings, profile.followedMajors, profile.homeBuilding, query]);
   const renderedListings = useMemo(
     () => visibleListings.slice(0, visibleCount),
@@ -720,7 +727,9 @@ export default function DashboardPage() {
                     ) : null}
 
                     <p className="mt-3 line-clamp-3 text-[13px] leading-6 text-white/48">
-                      {urgency.cleanDescription || "Campus listing"}
+                      {getFeedGroup(category) === "Campus Wall"
+                        ? getCampusWallSummary(item.description)
+                        : urgency.cleanDescription || "Campus listing"}
                     </p>
 
                     <div className="mt-3 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-white/58">

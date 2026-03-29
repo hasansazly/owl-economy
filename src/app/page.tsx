@@ -156,7 +156,7 @@ function isFratPriorityWindow(now: Date) {
   const day = now.getDay();
   const hour = now.getHours();
 
-  return (day === 4 && hour >= 18) || day === 5 || day === 6 || (day === 0 && hour < 6);
+  return (day === 4 && hour >= 20) || day === 5 || day === 6 || (day === 0 && hour < 8);
 }
 
 function isFratPartyItem(item: CampusLiveItem) {

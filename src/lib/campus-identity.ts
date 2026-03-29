@@ -40,6 +40,7 @@ export function computeCampusKarma(listings: IdentityListing[], ownerEmail: stri
     if (category.includes("fundraise")) return score + 8;
     if (category.includes("event")) return score + 6;
     if (category.includes("service")) return score + 7;
+    if (category.includes("campus wall")) return score + 4;
 
     return score + 5;
   }, 0);
@@ -138,6 +139,7 @@ export function getCampusBadges(listings: IdentityListing[], ownerEmail: string)
     return !category.includes("lost") && !category.includes("event") && !category.includes("service") && !category.includes("fundraise");
   }).length;
   const eventsCount = owned.filter((item) => (item.category || "").toLowerCase().includes("event")).length;
+  const wallCount = owned.filter((item) => (item.category || "").toLowerCase().includes("campus wall")).length;
 
   if (lostAndFoundCount >= 1) {
     badges.push({ id: "dorm-hero", label: "Dorm Hero" });
@@ -149,6 +151,10 @@ export function getCampusBadges(listings: IdentityListing[], ownerEmail: string)
 
   if (eventsCount >= 2) {
     badges.push({ id: "campus-starter", label: "Campus Starter" });
+  }
+
+  if (wallCount >= 5) {
+    badges.push({ id: "wall-known", label: "Wall Known" });
   }
 
   if (computeCampusKarma(listings, ownerEmail) >= 30) {
