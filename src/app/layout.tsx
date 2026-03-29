@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 
-import { HomeFooter } from "@/components/home-footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -27,7 +26,6 @@ export default function RootLayout({
         }
       >
         {children}
-        <HomeFooter />
       </body>
     </html>
   );
