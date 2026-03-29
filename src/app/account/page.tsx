@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Bell, Building2, LogOut, ScrollText, ShieldCheck, User } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   clearStudentProfile,
@@ -19,8 +19,51 @@ import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const classYears = ["2028", "2027", "2026", "2025", "Graduate"] as const;
 
+type ProfileAvatarRow = {
+  avatar_url?: string | null;
+};
+
+function getInitials(name: string) {
+  const parts = name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (parts.length === 0) return "TS";
+  if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
+
+  return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
+}
+
+async function compressImageFile(file: File) {
+  const imageBitmap = await createImageBitmap(file);
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    throw new Error("Image processing is not available.");
+  }
+
+  const maxSize = 400;
+  const scale = Math.min(maxSize / imageBitmap.width, maxSize / imageBitmap.height, 1);
+  canvas.width = Math.round(imageBitmap.width * scale);
+  canvas.height = Math.round(imageBitmap.height * scale);
+  context.drawImage(imageBitmap, 0, 0, canvas.width, canvas.height);
+
+  const blob = await new Promise<Blob | null>((resolve) => {
+    canvas.toBlob((result) => resolve(result), "image/jpeg", 0.86);
+  });
+
+  if (!blob) {
+    throw new Error("Could not compress image.");
+  }
+
+  return blob;
+}
+
 export default function AccountPage() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [profile, setProfile] = useState<StudentProfile>({
     name: "",
     email: "",
@@ -36,6 +79,9 @@ export default function AccountPage() {
   });
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarError, setAvatarError] = useState("");
   const [listings, setListings] = useState<
     Array<{
       contact_email?: string | null;
@@ -72,6 +118,40 @@ export default function AccountPage() {
       });
   }, []);
 
+  useEffect(() => {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return;
+
+    let active = true;
+
+    supabase.auth.getUser().then(async ({ data }) => {
+      const userId = data.user?.id;
+      if (!userId) return;
+
+      const { data: profileRow } = await supabase
+        .from("profiles")
+        .select("avatar_url")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (!active) return;
+      const typedProfileRow = profileRow as ProfileAvatarRow | null;
+      const nextAvatar = typeof typedProfileRow?.avatar_url === "string" ? typedProfileRow.avatar_url : "";
+      setAvatarUrl(nextAvatar);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!avatarError) return;
+
+    const timer = window.setTimeout(() => setAvatarError(""), 4000);
+    return () => window.clearTimeout(timer);
+  }, [avatarError]);
+
   const myKarma = useMemo(() => computeCampusKarma(listings, profile.email), [listings, profile.email]);
   const myBadges = useMemo(() => getCampusBadges(listings, profile.email), [listings, profile.email]);
   const leaderboardRank = useMemo(() => {
@@ -102,6 +182,79 @@ export default function AccountPage() {
     router.push("/signin");
   };
 
+  const handleChangePhoto = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) {
+      setAvatarError("Upload failed. Try again.");
+      return;
+    }
+
+    try {
+      setAvatarUploading(true);
+      setAvatarError("");
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user?.id) {
+        throw new Error("Missing user");
+      }
+
+      await supabase.storage.createBucket("avatars", {
+        public: true,
+      });
+
+      const compressedFile = await compressImageFile(file);
+      const filePath = `${user.id}/avatar.jpg`;
+
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, compressedFile, {
+        upsert: true,
+        contentType: "image/jpeg",
+      });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: publicData } = supabase.storage.from("avatars").getPublicUrl(filePath);
+      const publicUrl = publicData.publicUrl;
+
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert(
+          {
+            id: user.id,
+            avatar_url: publicUrl,
+            updated_at: new Date().toISOString(),
+          } as never,
+          {
+            onConflict: "id",
+          },
+        );
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      setAvatarUrl(publicUrl);
+    } catch {
+      setAvatarError("Upload failed. Try again.");
+    } finally {
+      setAvatarUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
   return (
     <main className="min-h-screen bg-black text-white">
       <section className="mx-auto max-w-5xl px-4 pb-16 pt-3 sm:px-6">
@@ -122,6 +275,36 @@ export default function AccountPage() {
         </header>
 
         <section className="px-1 py-6">
+          <div className="mb-6 flex flex-col items-center">
+            <div
+              className={`flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-[rgba(107,92,231,0.4)] bg-[rgba(107,92,231,0.2)] transition ${
+                avatarUploading ? "animate-pulse opacity-50" : ""
+              }`}
+            >
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatarUrl} alt="Profile avatar" className="h-20 w-20 rounded-full object-cover" />
+              ) : (
+                <span className="text-[24px] font-medium text-[#9B8FFF]">{getInitials(profile.name)}</span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={handleChangePhoto}
+              className="mt-3 inline-flex min-h-[44px] items-center justify-center text-[13px] text-[#9B8FFF]"
+            >
+              Change photo
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarSelected}
+            />
+            {avatarError ? <p className="mt-1 text-[12px] text-[rgba(245,166,35,0.8)]">{avatarError}</p> : null}
+          </div>
+
           <p className="whisper-label">Temple student account</p>
           <h1 className="mt-3 font-display text-[2.1rem] font-bold tracking-[-0.05em] text-white sm:text-[2.7rem]">
             Account Settings
