@@ -10,7 +10,6 @@ import {
   Search,
   ShieldCheck,
   SlidersHorizontal,
-  Sparkles,
   Upload,
   X,
 } from "lucide-react";
@@ -63,14 +62,6 @@ export default function SellGoodsPage() {
   const [selectedUploads, setSelectedUploads] = useState<string[]>([]);
   const [formState, setFormState] = useState<"idle" | "submitting" | "success">("idle");
   const [formError, setFormError] = useState("");
-  const [aiShopperQuery, setAiShopperQuery] = useState("");
-  const [aiShopperLoading, setAiShopperLoading] = useState(false);
-  const [aiShopperError, setAiShopperError] = useState("");
-  const [aiShopperResult, setAiShopperResult] = useState<{
-    summary: string;
-    itemIds: string[];
-    nextStep: string;
-  } | null>(null);
   const [sellForm, setSellForm] = useState<GoodsForm>({
     seller: "",
     email: "",
@@ -119,13 +110,6 @@ export default function SellGoodsPage() {
 
     return nextItems;
   }, [browseCampus, category, condition, homeCampus, includeOtherCampuses, items, query, sortBy]);
-
-  const aiRecommendedItems = useMemo(() => {
-    if (!aiShopperResult) return [];
-    return aiShopperResult.itemIds
-      .map((id) => items.find((item) => item.id === id))
-      .filter((item): item is GoodsListing => Boolean(item));
-  }, [aiShopperResult, items]);
 
   const getSellerContactHref = (item: GoodsListing) => buildSellerContactHref(item.title, item.sellerEmail);
 
@@ -189,52 +173,6 @@ export default function SellGoodsPage() {
       setStatus("ready");
       setSelectedUploads([]);
     }, 800);
-  };
-
-  const getAIRecommendations = async () => {
-    setAiShopperError("");
-
-    if (!aiShopperQuery.trim()) {
-      setAiShopperError("Tell AI what kind of item you need.");
-      return;
-    }
-
-    try {
-      setAiShopperLoading(true);
-      const response = await fetch("/api/ai/goods-recommendations", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query: aiShopperQuery,
-          homeCampus,
-          browseCampus: browseCampus === "Home Campus" ? homeCampus : browseCampus,
-          includeOtherCampuses,
-        }),
-      });
-
-      const data = (await response.json()) as {
-        error?: string;
-        summary?: string;
-        itemIds?: string[];
-        nextStep?: string;
-      };
-
-      if (!response.ok) {
-        throw new Error(data.error || "AI recommendations failed");
-      }
-
-      setAiShopperResult({
-        summary: data.summary || "",
-        itemIds: data.itemIds || [],
-        nextStep: data.nextStep || "",
-      });
-    } catch (error) {
-      setAiShopperError(error instanceof Error ? error.message : "AI recommendations failed");
-    } finally {
-      setAiShopperLoading(false);
-    }
   };
 
   return (
@@ -401,104 +339,6 @@ export default function SellGoodsPage() {
               Test error state
             </button>
           </div>
-        </section>
-
-        <section className="mt-5 rounded-[20px] border border-[rgba(70,191,255,0.18)] bg-[rgba(255,255,255,0.03)] p-3.5 backdrop-blur sm:p-4">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-white/36">AI Shopper Match</p>
-              <h2 className="mt-2 font-display text-[1.35rem] font-bold tracking-[-0.03em] sm:text-[1.55rem]">
-                Tell DormStash AI what you need.
-              </h2>
-              <p className="mt-2 max-w-xl text-[13px] leading-5 text-white/48">
-                Describe the item, budget, or pickup area.
-              </p>
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(70,191,255,0.24)] bg-[rgba(70,191,255,0.08)] px-3 py-1.5 text-[11px] text-[var(--accent)]">
-              <Sparkles className="h-3.5 w-3.5" />
-              AI match
-            </div>
-          </div>
-
-          <div className="mt-5 grid gap-3 lg:grid-cols-[1fr_auto]">
-            <label className="flex items-center gap-3 rounded-[12px] border border-[var(--border)] bg-white/5 px-3 py-2.5">
-              <Sparkles className="h-4 w-4 text-[var(--accent)]" />
-              <input
-                value={aiShopperQuery}
-                onChange={(event) => setAiShopperQuery(event.target.value)}
-                placeholder="Need a cheap orgo textbook near Charles?"
-                className="w-full bg-transparent text-[13px] outline-none placeholder:text-white/30"
-              />
-            </label>
-
-            <button
-              type="button"
-              onClick={getAIRecommendations}
-              disabled={aiShopperLoading}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 text-[13px] font-semibold text-[#14161b] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {aiShopperLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              {aiShopperLoading ? "Matching..." : "Match with AI"}
-            </button>
-          </div>
-
-          {aiShopperError ? <p className="mt-3 text-sm text-[#F09595]">{aiShopperError}</p> : null}
-
-          {aiShopperResult ? (
-            <div className="mt-5 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-              <div className="rounded-[16px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-3.5">
-                <p className="text-[13px] leading-5 text-white/60">{aiShopperResult.summary}</p>
-                <p className="mt-4 text-xs uppercase tracking-[0.16em] text-[var(--accent)]">Next Step</p>
-                <p className="mt-2 text-[13px] leading-5 text-white/52">{aiShopperResult.nextStep}</p>
-              </div>
-
-              <div className="grid gap-3 md:grid-cols-2">
-                {aiRecommendedItems.map((item) => (
-                  <article
-                    key={item.id}
-                    className="rounded-[16px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-3.5 transition hover:bg-white/5"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="rounded-full bg-[rgba(70,191,255,0.10)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
-                        {item.category}
-                      </span>
-                      <span className="rounded-full bg-white/6 px-3 py-1 text-xs text-white/62">
-                        {item.campus}
-                      </span>
-                      <span className="text-[13px] font-semibold text-[var(--accent)]">${item.price}</span>
-                    </div>
-                    <Link href={`/sell-goods/${item.id}`} className="block">
-                      <h3 className="mt-3 text-[15px] font-semibold text-white">{item.title}</h3>
-                    </Link>
-                    <div className="mt-2 flex items-center gap-2 text-[12px] text-white/58">
-                      <span>{item.seller}</span>
-                      {isVerifiedTempleEmail(item.sellerEmail) ? (
-                        <span className="rounded-full bg-[rgba(125,156,191,0.18)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#c7d6ee]">
-                          Temple Verified
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className="mt-2 text-[13px] leading-5 text-white/48">{item.summary}</p>
-                    <p className="mt-2 text-[11px] text-white/38">
-                      {item.campus} · {item.neighborhood}
-                    </p>
-                    {getSellerContactHref(item) ? (
-                      <a
-                        href={getSellerContactHref(item) ?? "#"}
-                        className="mt-3 inline-flex w-full items-center justify-center rounded-full border border-[rgba(148,163,184,0.26)] bg-[rgba(148,163,184,0.10)] px-4 py-2.5 text-[13px] font-semibold text-[#d7e5f6] transition hover:bg-[rgba(148,163,184,0.16)]"
-                      >
-                        Contact Seller
-                      </a>
-                    ) : (
-                      <span className="mt-3 inline-flex w-full items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-[13px] font-semibold text-white/40">
-                        Contact unavailable
-                      </span>
-                    )}
-                  </article>
-                ))}
-              </div>
-            </div>
-          ) : null}
         </section>
 
         <section className="mt-6">

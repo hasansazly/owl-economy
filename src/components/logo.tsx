@@ -51,10 +51,6 @@ export function DormStashLogo({
         {showTagline ? (
           <div className="mt-2 space-y-1.5">
             <p className="text-[10px] uppercase tracking-[0.34em] text-white/42">Campus Marketplace</p>
-            <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(70,191,255,0.35)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-blue)]">
-              <span className="h-2 w-2 rounded-full bg-[var(--brand-blue)]" />
-              AI-Powered Platform
-            </div>
           </div>
         ) : null}
       </div>

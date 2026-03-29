@@ -594,14 +594,6 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="ai" className="border-t border-white/8 px-1 py-5">
-          <div className="rounded-[20px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 shadow-[0_18px_36px_rgba(0,0,0,0.24)] backdrop-blur-xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/54">AI Reply</p>
-            <p className="mt-4 text-sm leading-6 text-white/42">
-              Ask MyDormStash AI from the dedicated flows when you want help with selling, rooms, fundraisers, services, lost items, or events.
-            </p>
-          </div>
-        </section>
       </section>
 
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#36342f] backdrop-blur-xl">
