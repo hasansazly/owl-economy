@@ -799,25 +799,31 @@ export default function Home() {
         </section>
       </section>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/8 bg-[rgba(5,5,5,0.92)] px-4 py-3 backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-5xl items-center gap-3 rounded-full border border-white/12 bg-[rgba(255,255,255,0.05)] px-4 py-3 shadow-[0_18px_36px_rgba(0,0,0,0.32)]">
-          <Search className="h-4 w-4 shrink-0 text-white/42" />
-          <input
-            type="search"
-            value={assistantQuestion}
-            onChange={(event) => setAssistantQuestion(event.target.value)}
-            placeholder="Ask MyDormStash AI where to post, browse, or start..."
-            className="w-full bg-transparent text-[14px] text-white outline-none placeholder:text-white/28"
-          />
-          <button
-            type="button"
-            onClick={askAssistant}
-            disabled={assistantLoading}
-            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-white px-4 py-2 text-[13px] font-semibold text-black transition disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {assistantLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            <span className="hidden sm:inline">Run</span>
-          </button>
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#36342f] backdrop-blur-xl">
+        <div className="mx-auto grid max-w-[1380px] grid-cols-5">
+          <Link href="/" className="flex flex-col items-center gap-1 py-4 text-[#8d7bff]">
+            <span className="text-[2rem] leading-none">🏠</span>
+            <span className="text-[12px] font-medium">Feed</span>
+          </Link>
+          <Link href="/dashboard" className="flex flex-col items-center gap-1 py-4 text-[#d0c8bb]">
+            <span className="text-[2rem] leading-none">🔎</span>
+            <span className="text-[12px] font-medium">Search</span>
+          </Link>
+          <Link href="/create-listing" className="flex flex-col items-center gap-1 py-4 text-[#8d8177]">
+            <span className="text-[2rem] font-bold leading-none">+</span>
+            <span className="text-[12px] font-medium">Sell</span>
+          </Link>
+          <Link href="/campus-services" className="relative flex flex-col items-center gap-1 py-4 text-[#d0c8bb]">
+            <span className="absolute left-1/2 top-3 ml-3 flex h-6 w-6 items-center justify-center rounded-full bg-[#f05b57] text-[12px] font-semibold text-white">
+              2
+            </span>
+            <span className="text-[2rem] leading-none">💬</span>
+            <span className="text-[12px] font-medium">Messages</span>
+          </Link>
+          <Link href="/account" className="flex flex-col items-center gap-1 py-4 text-[#d0c8bb]">
+            <span className="text-[2rem] leading-none">👤</span>
+            <span className="text-[12px] font-medium">Profile</span>
+          </Link>
         </div>
       </div>
     </main>
