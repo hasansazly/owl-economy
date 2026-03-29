@@ -45,12 +45,13 @@ a {
   font-family: var(--font-sans), sans-serif;
 }
 
-.section-kicker {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: #ffffff;
+.section-kicker,
+.whisper-label {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .agora-panel {
@@ -253,11 +254,11 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  font-size: 0.72rem;
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 400;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #ffffff;
+  text-transform: lowercase;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .campus-live-dot {

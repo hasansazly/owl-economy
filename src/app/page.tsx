@@ -341,13 +341,15 @@ export default function Home() {
         </section>
 
         <section id="flash" className="campus-live-section px-1 py-4">
-          <div className="mb-3 flex items-center justify-between">
-            <p className="campus-live-heading">
-              <span className="campus-live-dot" aria-hidden="true" />
-              Campus Live
-            </p>
-            <span className="campus-live-badge">{campusLiveItems.length} active</span>
-          </div>
+          {!campusLiveLoading && !campusLiveError && campusLiveItems.length > 0 ? (
+            <div className="mb-3 flex items-center justify-between">
+              <p className="campus-live-heading">
+                <span className="campus-live-dot" aria-hidden="true" />
+                Campus Live
+              </p>
+              <span className="campus-live-badge">{campusLiveItems.length} active</span>
+            </div>
+          ) : null}
           {moveOutCountdown ? (
             <div className="mb-3 rounded-[16px] border border-cyan-400/20 bg-cyan-400/8 px-4 py-3 text-[12px] text-white/78">
               <span className="font-semibold text-cyan-300">Move-Out Mode:</span> {moveOutCountdown}
@@ -432,12 +434,14 @@ export default function Home() {
         </section>
 
         <section id="recent" className="border-t border-white/8 px-1 py-5">
-          <div className="mb-3 flex items-center justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/54">Recent Listings</p>
-            <Link href="/dashboard" className="text-[12px] text-white/38 transition hover:text-white/62">
-              See all
-            </Link>
-          </div>
+          {!recentLoading && !recentError && recentListings.length > 0 ? (
+            <div className="mb-3 flex items-center justify-between">
+              <p className="whisper-label">Recent Listings</p>
+              <Link href="/dashboard" className="text-[12px] text-white/38 transition hover:text-white/62">
+                See all
+              </Link>
+            </div>
+          ) : null}
 
           <div className="grid gap-4 lg:grid-cols-[1fr_260px]">
             {recentLoading ? (
@@ -484,7 +488,7 @@ export default function Home() {
                   <div className="flex h-32 items-center justify-center rounded-[14px] border border-white/8 bg-[linear-gradient(135deg,_rgba(18,214,255,0.12),_rgba(255,255,255,0.03))] px-4 text-center text-sm font-semibold text-white/72">
                     {previewItem?.category || "Listing"}
                   </div>
-                  <p className="mt-4 text-[12px] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
+                  <p className="whisper-label mt-4 text-[var(--accent)]">
                     Preview
                   </p>
                   <p className="mt-2 text-sm text-white">
@@ -539,7 +543,7 @@ export default function Home() {
         </section>
 
         <section className="border-t border-white/8 px-1 py-5">
-          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/54">Campus Signals</p>
+          <p className="whisper-label mb-3">Campus Signals</p>
           <div className="space-y-1">
             {supportCards.map(({ title, text, icon: Icon, href }) => {
               const content = (
@@ -565,7 +569,7 @@ export default function Home() {
             })}
           </div>
           <div className="mt-4 rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/46">Top Sellers This Week</p>
+            {leaderboardPreview.length > 0 ? <p className="whisper-label">Top Sellers This Week</p> : null}
             {leaderboardPreview.length > 0 ? (
               <div className="mt-3 space-y-2">
                 {leaderboardPreview.slice(0, 3).map((entry, index) => (

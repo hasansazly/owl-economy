@@ -280,7 +280,7 @@ export default function CampusWallPage() {
         </header>
 
         <section className="pt-5">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/42">Campus Wall</p>
+          <p className="whisper-label">Campus Wall</p>
           <h1 className="mt-2 text-[2rem] font-bold tracking-[-0.04em] text-white">Campus moments, memes, and dorm tips.</h1>
           <p className="mt-3 max-w-2xl text-[14px] leading-6 text-white/52">
             Pure engagement. Post photo + caption or text only, react, comment, and keep students scrolling.
@@ -407,7 +407,7 @@ export default function CampusWallPage() {
           <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-lg rounded-t-[24px] border border-white/10 bg-[#090909] p-5">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/42">Campus Wall</p>
+                <p className="whisper-label">Campus Wall</p>
                 <h2 className="mt-1 text-[20px] font-semibold text-white">New post</h2>
               </div>
               <button type="button" onClick={() => setComposerOpen(false)} className="rounded-full border border-white/10 p-2 text-white/55">

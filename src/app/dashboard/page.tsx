@@ -481,7 +481,7 @@ export default function DashboardPage() {
           {notificationsOpen ? (
             <div className="mt-4 rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.04)] p-3 shadow-[0_16px_36px_rgba(0,0,0,0.2)] backdrop-blur-xl">
               <div className="mb-2 flex items-center justify-between gap-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/46">Campus Alerts</p>
+                {notifications.length > 0 ? <p className="whisper-label">Campus Alerts</p> : <span />}
                 <button
                   type="button"
                   onClick={() => setNotificationsOpen(false)}
@@ -509,7 +509,7 @@ export default function DashboardPage() {
         <section className="pt-5">
           <div className="mb-4 grid gap-3 sm:grid-cols-2">
             <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/44">Following First</p>
+              <p className="whisper-label">Following First</p>
               <p className="mt-2 text-[13px] text-white/74">
                 {profile.homeBuilding
                   ? `${profile.homeBuilding} listings show up first.`
@@ -528,7 +528,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/44">Campus Connections</p>
+              <p className="whisper-label">Campus Connections</p>
               <p className="mt-2 text-[13px] text-white/74">
                 {mutualConnections > 0
                   ? `${mutualConnections} of your classmates also use MyDormStash.`
@@ -539,7 +539,7 @@ export default function DashboardPage() {
 
           <div className="mb-4 grid gap-3 lg:grid-cols-[0.95fr_1.05fr]">
             <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/44">Your Campus Reputation</p>
+              <p className="whisper-label">Your Campus Reputation</p>
               <p className="mt-2 text-[22px] font-bold text-white">{myKarma}</p>
               <p className="mt-1 text-[13px] text-white/58">Karma points from real campus activity.</p>
               {myBadges.length > 0 ? (
@@ -559,7 +559,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/44">Top Sellers This Week on Temple Campus</p>
+              {leaderboard.length > 0 ? <p className="whisper-label">Top Sellers This Week on Temple Campus</p> : null}
               {leaderboard.length > 0 ? (
                 <div className="mt-4 space-y-3">
                   {leaderboard.map((entry, index) => (
@@ -588,7 +588,7 @@ export default function DashboardPage() {
 
           {moveOutCountdown ? (
             <div className="mb-4 rounded-[18px] border border-cyan-400/20 bg-cyan-400/8 px-4 py-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-300">Move-Out Mode</p>
+              <p className="whisper-label text-cyan-300">Move-Out Mode</p>
               <p className="mt-2 text-[13px] text-white/78">{moveOutCountdown}</p>
             </div>
           ) : null}
@@ -641,7 +641,7 @@ export default function DashboardPage() {
         {!loading && isLoggedIn && !error ? (
           <section className="mt-5 space-y-4">
             <div className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] px-4 py-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/44">Campus Feed</p>
+              <p className="whisper-label">Campus Feed</p>
               <p className="mt-2 text-[13px] text-white/74">
                 Ranked by recency, your building and major preferences, and real student engagement.
               </p>
