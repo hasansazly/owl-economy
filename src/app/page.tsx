@@ -6,8 +6,13 @@ import {
   ChevronRight,
   DoorOpen,
   GraduationCap,
+  House,
   LampDesk,
   MapPin,
+  MessageCircle,
+  Plus,
+  Search,
+  User,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -236,43 +241,43 @@ export default function Home() {
         ))}
       </nav>
 
-      <section className="relative z-10 mx-auto max-w-[1380px] px-4 pb-12 pt-1 sm:px-6">
+      <section className="relative z-10 mx-auto max-w-[1380px] px-4 pb-12 pt-[calc(env(safe-area-inset-top)+60px)] sm:px-6">
         <header className="mobile-top-bar flex items-center justify-between border-b border-white/10 bg-[rgba(47,45,41,0.94)] px-4 py-5 backdrop-blur-xl">
-          <Link href="#top" className="font-display text-[1.9rem] font-extrabold tracking-[-0.03em] text-[#f8f5ef] sm:text-[2.1rem]">
+          <Link href="#top" className="font-display text-[15px] font-medium tracking-[-0.02em] text-[#f8f5ef]">
             my<span className="text-[#7f77dd]">dorm</span>stash
           </Link>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-[10px]">
             <button
               type="button"
-              className="relative flex h-16 w-16 items-center justify-center rounded-[999px] border border-white/10 bg-[rgba(255,255,255,0.03)] text-[#f2eee7] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+              className="relative flex h-[34px] w-[34px] items-center justify-center rounded-[20px] border border-[rgba(107,92,231,0.5)] bg-transparent text-[#f2eee7]"
             >
-              <Bell className="h-6 w-6 text-[#d0b56d]" />
-              <span className="absolute right-2 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-[#f05b57] text-[14px] font-semibold text-white">
+              <Bell className="h-[18px] w-[18px] text-[#9B8FFF]" />
+              <span className="absolute -right-1 -top-1 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-[#6B5CE7] text-[10px] font-medium text-white">
                 {notificationCount}
               </span>
             </button>
             <Link
               href="/login"
-              className="rounded-[18px] border border-white/14 bg-[rgba(255,255,255,0.03)] px-7 py-4 text-[13px] font-semibold text-[#f8f5ef] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition hover:border-white/20 hover:bg-[rgba(255,255,255,0.05)]"
+              className="inline-flex h-[34px] items-center justify-center rounded-[20px] border border-[rgba(107,92,231,0.5)] bg-transparent px-[14px] text-[13px] font-medium text-[#9B8FFF]"
             >
               Log in
             </Link>
           </div>
         </header>
 
-        <section className="border-b border-white/10 px-4 py-4 text-[13px] text-[#d0c8bb]">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="flex items-center gap-2">
+        <section className="overflow-x-auto border-b border-white/10 bg-[rgba(255,255,255,0.04)] px-4 py-2 text-[12px] text-[#d0c8bb] whitespace-nowrap [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
+          <div className="inline-flex min-w-max items-center gap-3 whitespace-nowrap">
+            <span className="flex items-center gap-2 whitespace-nowrap">
               <span className="h-3.5 w-3.5 rounded-full bg-[#5f8c24]" />
-              <span className="font-semibold text-[#7fb83a]">{campusLiveItems.length || 47}</span>
+              <span className="font-medium text-[#7fb83a]">{campusLiveItems.length || 47}</span>
               <span>Owls active now</span>
             </span>
             <span className="text-white/22">·</span>
-            <span>{recentListings.length || 12} new listings today</span>
-            <span className="rounded-xl bg-[#f4ead7] px-4 py-2 font-semibold text-[#975f0a]">🔥 Move-Out Season</span>
+            <span className="whitespace-nowrap">{recentListings.length || 12} new listings today</span>
+            <span className="rounded-[20px] bg-[rgba(245,166,35,0.1)] px-3 py-1 font-medium text-[#F5A623]">🔥 Move-Out Season</span>
             <span className="text-white/22">·</span>
-            <span>{Math.max(3, Math.min(9, recentListings.length))} items sold in last hour</span>
+            <span className="whitespace-nowrap">{Math.max(3, Math.min(9, recentListings.length))} items sold in last hour</span>
           </div>
         </section>
 
@@ -324,17 +329,17 @@ export default function Home() {
         </section>
 
         <section className="px-4 pb-3">
-          <div className="rounded-[26px] border border-[#cbc7ea] bg-[#e7e4fb] px-7 py-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]">
-            <div className="flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <p className="text-[18px] font-semibold text-[#443f9e]">Got something to sell?</p>
-                <p className="mt-2 text-[16px] text-[#4d4bb8]">Listings on Temple campus move fast</p>
+          <div className="rounded-[14px] border border-[rgba(107,92,231,0.25)] bg-[rgba(107,92,231,0.10)] px-[14px] py-[14px] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[14px] font-medium text-[#F0EEFF]">Got something to sell?</p>
+                <p className="mt-1 line-clamp-2 text-[12px] text-[#F0EEFF]/50">Listings on Temple campus move fast</p>
               </div>
               <Link
                 href="/create-listing"
-                className="shrink-0 rounded-[18px] border border-[#d9d6f6] bg-[rgba(255,255,255,0.35)] px-9 py-4 text-[16px] font-semibold text-[#ffffffb3] backdrop-blur-sm"
+                className="inline-flex h-[38px] min-w-[72px] shrink-0 items-center justify-center rounded-[20px] bg-[#6B5CE7] px-4 text-[13px] font-medium text-white"
               >
-                + Post
+                Post
               </Link>
             </div>
           </div>
@@ -373,10 +378,10 @@ export default function Home() {
                   className="flex items-center justify-between rounded-[18px] border border-transparent px-3 py-3 transition hover:border-white/8 hover:bg-white/[0.03]"
                 >
                   <div className="min-w-0 pr-3">
-                    <h2 className="truncate text-[15px] font-semibold tracking-[0.01em] text-white">
+                    <h2 className="truncate text-[14px] font-medium tracking-[0.01em] text-white">
                       {item.title || item.category || "Campus post"}
                     </h2>
-                    <p className="mt-1 truncate text-[11px] text-white/52">
+                    <p className="mt-1 line-clamp-2 text-[12px] text-white/52">
                       {item.poster_name || "Temple Student"}
                       {item.major ? ` · ${item.major}` : ""}
                       {item.class_year ? ` · ${item.class_year}` : ""}
@@ -481,7 +486,7 @@ export default function Home() {
                 </div>
 
                 <aside className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 backdrop-blur-xl">
-                  <div className="flex h-32 items-center justify-center rounded-[14px] border border-white/8 bg-[linear-gradient(135deg,_rgba(18,214,255,0.12),_rgba(255,255,255,0.03))] px-4 text-center text-sm font-semibold text-white/72">
+                    <div className="flex aspect-[4/3] items-center justify-center rounded-[14px] border border-white/8 bg-[linear-gradient(135deg,_rgba(107,92,231,0.12),_rgba(255,255,255,0.03))] px-4 text-center text-sm font-medium text-white/72">
                     {previewItem?.category || "Listing"}
                   </div>
                   <p className="whisper-label mt-4 text-[var(--accent)]">
@@ -547,8 +552,8 @@ export default function Home() {
                   <div className="flex min-w-0 items-center gap-3 pr-4">
                     <Icon className="h-4 w-4 shrink-0 text-white/72" />
                     <div className="min-w-0">
-                      <h2 className="truncate text-[15px] font-semibold tracking-[0.03em] text-white">{title}</h2>
-                      <p className="truncate text-[12px] text-white/38">{text}</p>
+                      <h2 className="truncate text-[14px] font-medium tracking-[0.03em] text-white">{title}</h2>
+                      <p className="line-clamp-2 text-[12px] text-white/38">{text}</p>
                     </div>
                   </div>
                   <ChevronRight className="h-4 w-4 shrink-0 text-white/28" />
@@ -571,7 +576,7 @@ export default function Home() {
                 {leaderboardPreview.slice(0, 3).map((entry, index) => (
                   <div key={entry.email} className="flex items-center justify-between gap-3 rounded-[14px] border border-white/10 bg-white/[0.03] px-3 py-3">
                     <div className="min-w-0">
-                      <p className="text-[13px] font-semibold text-white">
+                      <p className="truncate text-[14px] font-medium text-white">
                         #{index + 1} {entry.name}
                       </p>
                       <p className="mt-1 truncate text-[12px] text-white/48">
@@ -598,28 +603,28 @@ export default function Home() {
 
       <div className="mobile-bottom-nav border-t border-white/10 bg-[#36342f] backdrop-blur-xl">
         <div className="mx-auto grid max-w-[1380px] grid-cols-5">
-          <Link href="/" className="flex flex-col items-center gap-1 py-4 text-[#8d7bff]">
-            <span className="text-[2rem] leading-none">🏠</span>
-            <span className="text-[12px] font-medium">Feed</span>
+          <Link href="/" className="flex flex-col items-center justify-center gap-1 py-2 text-[#9B8FFF]">
+            <House className="h-[22px] w-[22px]" />
+            <span className="text-[10px] font-normal">Feed</span>
           </Link>
-          <Link href="/dashboard" className="flex flex-col items-center gap-1 py-4 text-[#d0c8bb]">
-            <span className="text-[2rem] leading-none">🔎</span>
-            <span className="text-[12px] font-medium">Search</span>
+          <Link href="/dashboard" className="flex flex-col items-center justify-center gap-1 py-2 text-white/35">
+            <Search className="h-[22px] w-[22px]" />
+            <span className="text-[10px] font-normal">Search</span>
           </Link>
-          <Link href="/create-listing" className="flex flex-col items-center gap-1 py-4 text-[#8d8177]">
-            <span className="text-[2rem] font-bold leading-none">+</span>
-            <span className="text-[12px] font-medium">Sell</span>
+          <Link href="/create-listing" className="flex flex-col items-center justify-center gap-1 py-2 text-white/35">
+            <Plus className="h-[22px] w-[22px]" />
+            <span className="text-[10px] font-normal">Sell</span>
           </Link>
-          <Link href="/campus-services" className="relative flex flex-col items-center gap-1 py-4 text-[#d0c8bb]">
-            <span className="absolute left-1/2 top-3 ml-3 flex h-6 w-6 items-center justify-center rounded-full bg-[#f05b57] text-[12px] font-semibold text-white">
+          <Link href="/campus-services" className="relative flex flex-col items-center justify-center gap-1 py-2 text-white/35">
+            <span className="absolute left-1/2 top-1 ml-3 flex h-4 w-4 items-center justify-center rounded-full bg-[#6B5CE7] text-[9px] font-medium text-white">
               2
             </span>
-            <span className="text-[2rem] leading-none">💬</span>
-            <span className="text-[12px] font-medium">Messages</span>
+            <MessageCircle className="h-[22px] w-[22px]" />
+            <span className="text-[10px] font-normal">Messages</span>
           </Link>
-          <Link href="/account" className="flex flex-col items-center gap-1 py-4 text-[#d0c8bb]">
-            <span className="text-[2rem] leading-none">👤</span>
-            <span className="text-[12px] font-medium">Profile</span>
+          <Link href="/account" className="flex flex-col items-center justify-center gap-1 py-2 text-white/35">
+            <User className="h-[22px] w-[22px]" />
+            <span className="text-[10px] font-normal">Profile</span>
           </Link>
         </div>
       </div>
