@@ -126,6 +126,15 @@ export default function LostAndFoundPage() {
       return;
     }
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user?.id) {
+      setFormError("You must be signed in to post a report.");
+      return;
+    }
+
     const newReport: ReportItem = {
       id: `report-${Date.now()}`,
       type: reportType,
@@ -140,6 +149,7 @@ export default function LostAndFoundPage() {
     };
 
     const { error } = await supabase.from("listings").insert({
+      user_id: user.id,
       title: `${reportType}: ${newReport.itemName}`,
       price: 0,
       category: "Lost & Found",

@@ -144,6 +144,14 @@ export default function CampusWallPage() {
       setPosting(true);
       setError("");
 
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user?.id) {
+        throw new Error("You must be signed in to post on Campus Wall.");
+      }
+
       const description = serializeCampusWallMeta({
         type: composerType,
         body: composerType === "text" ? textBody.trim() : photoCaption.trim(),
@@ -159,6 +167,7 @@ export default function CampusWallPage() {
       const { data, error: insertError } = await supabase
         .from("listings")
         .insert({
+          user_id: user.id,
           title,
           price: 0,
           category: POST_CATEGORY,
@@ -199,9 +208,18 @@ export default function CampusWallPage() {
     try {
       setCommenting(true);
 
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user?.id) {
+        throw new Error("You must be signed in to comment.");
+      }
+
       const { data, error: insertError } = await supabase
         .from("listings")
         .insert({
+          user_id: user.id,
           title: String(selectedPost.id),
           price: 0,
           category: COMMENT_CATEGORY,
@@ -231,6 +249,12 @@ export default function CampusWallPage() {
     const supabase = getSupabaseBrowserClient();
     if (!supabase) return;
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user?.id) return;
+
     const existing = reactions.find(
       (reaction) =>
         String(reaction.title || "") === String(post.id) &&
@@ -247,6 +271,7 @@ export default function CampusWallPage() {
     const { data } = await supabase
       .from("listings")
       .insert({
+        user_id: user.id,
         title: String(post.id),
         price: 0,
         category: REACTION_CATEGORY,

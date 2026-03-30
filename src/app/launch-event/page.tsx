@@ -65,6 +65,7 @@ type EventForm = {
 };
 
 type EventListingInsert = {
+  user_id: string;
   title: string;
   price: number;
   category: string;
@@ -192,7 +193,16 @@ export default function LaunchEventPage() {
       setPostError("");
       setSuccessMessage("");
 
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user?.id) {
+        throw new Error("You must be signed in to post an event.");
+      }
+
       const payload: EventListingInsert = {
+        user_id: user.id,
         title: form.headline.trim(),
         price: 0,
         category: "Event",

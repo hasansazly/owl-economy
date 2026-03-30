@@ -101,7 +101,16 @@ export default function FundraiseFastPage() {
       setPostError("");
       setPostedMessage("");
 
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user?.id) {
+        throw new Error("You must be signed in to post a fundraiser.");
+      }
+
       const { error } = await supabase.from("listings").insert({
+        user_id: user.id,
         title: headline.trim(),
         price: parsedPrice,
         category: "Fundraise",
