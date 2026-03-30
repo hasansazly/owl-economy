@@ -161,7 +161,7 @@ export default function CreateListingPage() {
 
       const listingId = crypto.randomUUID();
 
-      const uploadedUrls: string[] = [];
+      let uploadedUrl = "";
       for (const photo of firstFourPhotos) {
         const compressed = await compressImageFile(photo.file);
         const storagePath = `${user.id}/${Date.now()}.jpg`;
@@ -179,7 +179,8 @@ export default function CreateListingPage() {
 
         const uploadedPath = uploadData?.path || storagePath;
         const { data: publicUrlData } = supabase.storage.from("listings").getPublicUrl(uploadedPath);
-        uploadedUrls.push(publicUrlData.publicUrl);
+        uploadedUrl = publicUrlData.publicUrl;
+        break;
       }
 
       const insertPayload = {
@@ -190,7 +191,7 @@ export default function CreateListingPage() {
         category: mapCategory(category),
         description: description.trim(),
         location: location.trim(),
-        images: [...uploadedUrls],
+        image_url: uploadedUrl,
         status: "active",
         poster_name: profile.name.trim() || "Temple Student",
         major: profile.major.trim() || null,
