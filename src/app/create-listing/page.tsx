@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { ArrowLeft, Plus, X } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
-
-import { getStudentProfile } from "@/lib/app-auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const categoryOptions = [
@@ -76,7 +74,6 @@ async function compressImageFile(file: File) {
 }
 
 export default function CreateListingPage() {
-  const profile = getStudentProfile();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
   const [title, setTitle] = useState("");
@@ -159,8 +156,6 @@ export default function CreateListingPage() {
 
       if (!validate()) return;
 
-      const listingId = crypto.randomUUID();
-
       let uploadedUrl = "";
       for (const photo of firstFourPhotos) {
         const compressed = await compressImageFile(photo.file);
@@ -184,20 +179,13 @@ export default function CreateListingPage() {
       }
 
       const insertPayload = {
-        id: listingId,
-        user_id: user.id,
         title: title.trim(),
         price: price.trim() ? Number(price) : 0,
         category: mapCategory(category),
         description: description.trim(),
         location: location.trim(),
         image_url: uploadedUrl,
-        status: "active",
-        poster_name: profile.name.trim() || "Temple Student",
-        major: profile.major.trim() || null,
-        class_year: profile.classYear.trim() || null,
-        contact_email: profile.email.trim() || user.email || null,
-        email: profile.email.trim() || user.email || null,
+        user_id: user.id,
       };
 
       console.log("Create listing insert payload:", insertPayload);

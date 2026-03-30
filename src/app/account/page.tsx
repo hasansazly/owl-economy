@@ -17,8 +17,6 @@ import { buildWeeklyLeaderboard, computeCampusKarma, getCampusBadges, normalizeT
 import { isVerifiedTempleEmail } from "@/lib/security";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
-const classYears = ["2028", "2027", "2026", "2025", "Graduate"] as const;
-
 type ProfileAvatarRow = {
   avatar_url?: string | null;
 };
@@ -394,17 +392,29 @@ export default function AccountPage() {
 
               <label className="block">
                 <span className="mb-2 block text-[12px] text-white/48">Class</span>
-                <select
+                <input
                   value={profile.classYear}
-                  onChange={(event) => updateField("classYear", event.target.value)}
+                  onChange={(event) => {
+                    const nextValue = event.target.value.replace(/\D/g, "").slice(0, 4);
+
+                    if (nextValue.length < 4) {
+                      updateField("classYear", nextValue);
+                      return;
+                    }
+
+                    const nextYear = Number(nextValue);
+                    if (nextYear >= 2010 && nextYear <= 2032) {
+                      updateField("classYear", nextValue);
+                    }
+                  }}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={4}
+                  min={2010}
+                  max={2032}
                   className="w-full rounded-[12px] border border-white/10 bg-white/5 px-3 py-2.5 text-[13px] outline-none"
-                >
-                  {classYears.map((year) => (
-                    <option key={year} value={year} className="bg-[#0b0e14] text-white">
-                      Class of {year}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="2028"
+                />
               </label>
             </div>
           </section>
