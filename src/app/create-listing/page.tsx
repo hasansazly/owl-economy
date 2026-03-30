@@ -164,7 +164,7 @@ export default function CreateListingPage() {
       const uploadedUrls: string[] = [];
       for (const photo of firstFourPhotos) {
         const compressed = await compressImageFile(photo.file);
-        const storagePath = `${Date.now()}-${photo.file.name}`;
+        const storagePath = `${user.id}/${Date.now()}.jpg`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("listings")
           .upload(storagePath, compressed, {
@@ -204,6 +204,7 @@ export default function CreateListingPage() {
       const { error: insertError } = await supabase.from("listings").insert(insertPayload as never);
 
       if (insertError) {
+        alert(insertError.message);
         throw insertError;
       }
 
