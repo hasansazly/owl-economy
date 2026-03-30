@@ -3,6 +3,7 @@
 import Link from "next/link";
 import {
   Bell,
+  Heart,
   House,
   MapPin,
   MessageCircle,
@@ -38,7 +39,7 @@ type RecentListing = {
   id: string | number;
   user_id?: string | null;
   status?: string | null;
-  images?: string[] | null;
+  image_url?: string | null;
   title?: string | null;
   price?: number | string | null;
   category?: string | null;
@@ -50,9 +51,66 @@ type RecentListing = {
   email?: string | null;
   location?: string | null;
   created_at?: string | null;
+  profiles?:
+    | {
+        full_name?: string | null;
+        avatar_url?: string | null;
+      }
+    | Array<{
+        full_name?: string | null;
+        avatar_url?: string | null;
+      }>
+    | null;
 };
 
 type CampusLiveItem = RecentListing;
+
+type WallPost = {
+  id: string | number;
+  text?: string | null;
+  body?: string | null;
+  content?: string | null;
+  image_url?: string | null;
+  created_at?: string | null;
+  user_id?: string | null;
+  like_count?: number | null;
+  comment_count?: number | null;
+  profiles?:
+    | {
+        full_name?: string | null;
+        avatar_url?: string | null;
+      }
+    | Array<{
+        full_name?: string | null;
+        avatar_url?: string | null;
+      }>
+    | null;
+};
+
+type ServiceItem = {
+  id: string | number;
+  title?: string | null;
+  category?: string | null;
+  image_url?: string | null;
+  price?: number | string | null;
+  rate?: number | string | null;
+  location?: string | null;
+  created_at?: string | null;
+  rating?: number | string | null;
+  review_count?: number | null;
+  provider_name?: string | null;
+  user_id?: string | null;
+  profiles?:
+    | {
+        full_name?: string | null;
+        avatar_url?: string | null;
+      }
+    | Array<{
+        full_name?: string | null;
+        avatar_url?: string | null;
+      }>
+    | null;
+};
 
 const campusLiveOrder = ["Lost & Found", "Fundraise", "Event"] as const;
 
@@ -87,6 +145,59 @@ function isFratPartyItem(item: CampusLiveItem) {
   return text.includes("frat");
 }
 
+function getProfileData(
+  profile:
+    | {
+        full_name?: string | null;
+        avatar_url?: string | null;
+      }
+    | Array<{
+        full_name?: string | null;
+        avatar_url?: string | null;
+      }>
+    | null
+    | undefined,
+) {
+  if (Array.isArray(profile)) return profile[0] || null;
+  return profile || null;
+}
+
+function getInitials(name?: string | null) {
+  const parts = (name || "Temple Student")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (parts.length === 0) return "TS";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] || ""}${parts[parts.length - 1][0] || ""}`.toUpperCase();
+}
+
+function getListingEmoji(category?: string | null) {
+  const value = (category || "").toLowerCase();
+  if (value.includes("book")) return "📚";
+  if (value.includes("service")) return "✂️";
+  if (value.includes("fund")) return "💸";
+  if (value.includes("event")) return "🎉";
+  if (value.includes("lost")) return "🔎";
+  if (value.includes("room")) return "🏠";
+  if (value.includes("creative")) return "🎨";
+  return "📦";
+}
+
+function getWallText(post: WallPost) {
+  return post.text || post.body || post.content || "";
+}
+
+function getServiceEmoji(category?: string | null) {
+  const value = (category || "").toLowerCase();
+  if (value.includes("hair")) return "✂️";
+  if (value.includes("nail")) return "💅";
+  if (value.includes("make")) return "💄";
+  if (value.includes("braid")) return "✨";
+  if (value.includes("move")) return "📦";
+  return "🛠️";
+}
+
 const jumpSections = [
   { label: "F", href: "#flash" },
   { label: "L", href: "#launcher" },
@@ -101,6 +212,16 @@ export default function Home() {
   const [campusLiveItems, setCampusLiveItems] = useState<CampusLiveItem[]>([]);
   const [campusLiveLoading, setCampusLiveLoading] = useState(true);
   const [campusLiveError, setCampusLiveError] = useState("");
+  const [feedListings, setFeedListings] = useState<RecentListing[]>([]);
+  const [feedListingsLoading, setFeedListingsLoading] = useState(true);
+  const [feedListingsError, setFeedListingsError] = useState("");
+  const [wallPosts, setWallPosts] = useState<WallPost[]>([]);
+  const [wallLoading, setWallLoading] = useState(true);
+  const [wallError, setWallError] = useState("");
+  const [likedWallPosts, setLikedWallPosts] = useState<Record<string, boolean>>({});
+  const [serviceItems, setServiceItems] = useState<ServiceItem[]>([]);
+  const [serviceLoading, setServiceLoading] = useState(true);
+  const [serviceError, setServiceError] = useState("");
   const [activePreview, setActivePreview] = useState<string | null>(null);
   const moveOutCountdown = useMemo(() => getMoveOutCountdown(), []);
 
@@ -180,6 +301,101 @@ export default function Home() {
     };
 
     loadRecentListings();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) {
+      setFeedListingsLoading(false);
+      setFeedListingsError("");
+      return;
+    }
+
+    let mounted = true;
+
+    supabase
+      .from("listings")
+      .select("id, user_id, title, price, category, description, poster_name, major, class_year, contact_email, email, location, created_at, status, image_url, profiles(full_name, avatar_url)")
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(20)
+      .then(({ data, error }) => {
+        if (!mounted) return;
+        if (error) {
+          setFeedListingsError("");
+          setFeedListings([]);
+        } else {
+          setFeedListings((data as RecentListing[]) || []);
+        }
+        setFeedListingsLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) {
+      setWallLoading(false);
+      setWallError("");
+      return;
+    }
+
+    let mounted = true;
+
+    supabase
+      .from("wall_posts")
+      .select("*, profiles(full_name, avatar_url)")
+      .order("created_at", { ascending: false })
+      .limit(10)
+      .then(({ data, error }) => {
+        if (!mounted) return;
+        if (error) {
+          setWallError("");
+          setWallPosts([]);
+        } else {
+          setWallPosts((data as WallPost[]) || []);
+        }
+        setWallLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) {
+      setServiceLoading(false);
+      setServiceError("");
+      return;
+    }
+
+    let mounted = true;
+
+    supabase
+      .from("services")
+      .select("*, profiles(full_name, avatar_url)")
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(10)
+      .then(({ data, error }) => {
+        if (!mounted) return;
+        if (error) {
+          setServiceError("");
+          setServiceItems([]);
+        } else {
+          setServiceItems((data as ServiceItem[]) || []);
+        }
+        setServiceLoading(false);
+      });
 
     return () => {
       mounted = false;
@@ -416,110 +632,192 @@ export default function Home() {
         </section>
 
         <section id="recent" className="border-t border-white/8 px-1 py-5">
-          {!recentLoading && !recentError && recentListings.length > 0 ? (
-            <div className="mb-3 flex items-center justify-between">
-              <p className="whisper-label">Recent Listings</p>
-              <Link href="/dashboard" className="text-[12px] text-white/38 transition hover:text-white/62">
-                See all
+          {(!feedListingsLoading || feedListings.length > 0) ? <p className="mb-3 whisper-label">recent listings</p> : null}
+          {feedListingsLoading ? (
+            <p className="px-2 text-[13px] text-[rgba(240,238,255,0.35)]">Loading recent listings...</p>
+          ) : feedListings.length === 0 ? (
+            <div className="px-2 py-6 text-center">
+              <p className="text-[13px] text-[rgba(240,238,255,0.35)]">No listings yet — be the first to post.</p>
+              <Link
+                href="/create-listing"
+                className="mt-4 inline-flex h-[44px] items-center justify-center rounded-[20px] bg-[#6B5CE7] px-5 text-[13px] font-medium text-white"
+              >
+                + Post
               </Link>
             </div>
-          ) : null}
+          ) : (
+            <div className="grid grid-cols-2 gap-3 px-1">
+              {feedListings.map((listing) => {
+                const profile = getProfileData(listing.profiles);
 
-          <div className="grid gap-4 lg:grid-cols-[1fr_260px]">
-            {recentLoading ? (
-              <div className="lg:col-span-2 rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 text-[13px] text-white/42">
-                Loading recent listings...
-              </div>
-            ) : recentError ? (
-              <p className="lg:col-span-2 p-2 text-[13px] text-[rgba(240,238,255,0.35)]">{recentError}</p>
-            ) : recentListings.length === 0 ? (
-              <div className="lg:col-span-2 rounded-[18px] border border-dashed border-white/12 bg-[rgba(255,255,255,0.02)] p-6 text-center text-[13px] text-white/42">
-                No recent listings yet. When students post, they’ll appear here automatically.
-              </div>
-            ) : (
-              <>
-                <div className="space-y-1">
-                  {recentListings.map((listing) => (
-                    <button
-                      key={String(listing.id)}
-                      type="button"
-                      onMouseEnter={() => setActivePreview(listing.title ?? null)}
-                      onFocus={() => setActivePreview(listing.title ?? null)}
-                      onClick={() => setActivePreview(listing.title ?? null)}
-                      className="flex w-full items-center justify-between rounded-[16px] border border-transparent px-2 py-3 text-left transition hover:border-white/8 hover:bg-white/[0.03]"
-                    >
-                      <span className="min-w-0">
-                        <span className="block truncate text-[14px] font-medium tracking-[0.01em] text-white">
-                          {listing.price !== null && listing.price !== undefined ? `$${listing.price}` : listing.category || "Post"} -{" "}
-                          {listing.title || "Campus listing"} - {listing.location || "Temple Main Campus"}
-                        </span>
-                        <span className="mt-1 block truncate text-[11px] text-white/46">
-                          {getRelativePostLabel(listing.created_at)}
-                        </span>
-                      </span>
-                      <span className="ml-3 shrink-0 rounded-full border border-white/12 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/66">
-                        Peek
-                      </span>
-                    </button>
-                  ))}
-                </div>
-
-                <aside className="rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4 backdrop-blur-xl">
-                    <div className="flex aspect-[4/3] items-center justify-center rounded-[14px] border border-white/8 bg-[linear-gradient(135deg,_rgba(107,92,231,0.12),_rgba(255,255,255,0.03))] px-4 text-center text-sm font-medium text-white/72">
-                    {previewItem?.category || "Listing"}
-                  </div>
-                  <p className="whisper-label mt-4 text-[var(--accent)]">
-                    Preview
-                  </p>
-                  <p className="mt-2 text-sm text-white">
-                    {previewItem?.price !== null && previewItem?.price !== undefined ? `$${previewItem?.price} - ` : ""}
-                    {previewItem?.title || "Campus listing"}
-                  </p>
-                  <p className="mt-1 text-[11px] text-white/52">
-                    {previewItem?.poster_name || "Temple Student"}
-                    {previewItem?.major ? ` · ${previewItem.major}` : ""}
-                    {previewItem?.class_year ? ` · ${previewItem.class_year}` : ""}
-                  </p>
-                  {previewItem ? (
-                    <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-cyan-300/90">
-                      Campus Karma {getKarma(previewItem).score} · {getKarma(previewItem).label}
-                    </p>
-                  ) : null}
-                  {previewItem ? (
-                    <p className="mt-1 text-[11px] text-white/46">{getRelativePostLabel(previewItem.created_at)}</p>
-                  ) : null}
-                  {previewItem && getRecentViewerCount(previewItem.id) > 0 ? (
-                    <p className="mt-1 text-[11px] font-semibold text-amber-300">
-                      🔥 {getRecentViewerCount(previewItem.id)} people are viewing this
-                    </p>
-                  ) : null}
-                  {previewItem && (parseUrgencyMeta(previewItem.description).flashSale || parseUrgencyMeta(previewItem.description).moveOutMode) ? (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {parseUrgencyMeta(previewItem.description).flashSale ? (
-                        <span className="rounded-full border border-rose-400/20 bg-rose-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-rose-300">
-                          Flash Sale
-                        </span>
-                      ) : null}
-                      {parseUrgencyMeta(previewItem.description).moveOutMode ? (
-                        <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-300">
-                          Move-Out
-                        </span>
-                      ) : null}
-                      {getExpiryCountdown(parseUrgencyMeta(previewItem.description).expiresAt) ? (
-                        <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/74">
-                          {getExpiryCountdown(parseUrgencyMeta(previewItem.description).expiresAt)}
-                        </span>
-                      ) : null}
+                return (
+                  <Link
+                    key={String(listing.id)}
+                    href={`/listing/${listing.id}`}
+                    className="overflow-hidden rounded-[14px] border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.03)]"
+                  >
+                    <div className="flex aspect-[4/3] w-full items-center justify-center bg-[rgba(255,255,255,0.05)]">
+                      {listing.image_url ? (
+                        <img src={listing.image_url} alt={listing.title || "Listing image"} className="h-full w-full object-cover" />
+                      ) : (
+                        <span className="text-[26px]">{getListingEmoji(listing.category)}</span>
+                      )}
                     </div>
-                  ) : null}
-                  <p className="mt-1 text-[12px] text-white/42">{previewItem?.location || "Temple Main Campus"}</p>
-                  <p className="mt-3 text-[12px] leading-6 text-white/52">
-                    {parseUrgencyMeta(previewItem?.description).cleanDescription || "Open the feed to view the full post details."}
-                  </p>
-                </aside>
-              </>
-            )}
-          </div>
+                    <div className="p-[10px]">
+                      <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium text-[#F0EEFF]">
+                        {listing.title || "Campus listing"}
+                      </p>
+                      <p className="mt-1 text-[13px] font-medium text-[#9B8FFF]">
+                        {listing.price !== null && listing.price !== undefined ? `$${listing.price}` : "Free"}
+                      </p>
+                      <p className="mt-1 text-[11px] text-[rgba(240,238,255,0.4)]">
+                        {listing.location || "Temple campus"} · {getRelativePostLabel(listing.created_at)}
+                      </p>
+                      <div className="mt-2 flex items-center justify-between gap-2">
+                        <span className="rounded-[20px] bg-[rgba(107,92,231,0.15)] px-2 py-0.5 text-[10px] text-[#9B8FFF]">
+                          {listing.category || "Resell"}
+                        </span>
+                        {profile?.avatar_url ? (
+                          <img src={profile.avatar_url} alt={profile.full_name || "Seller"} className="h-6 w-6 rounded-full object-cover" />
+                        ) : null}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <section className="border-t border-white/8 px-1 py-5">
+          {(!wallLoading || wallPosts.length > 0) ? <p className="mb-3 whisper-label">campus wall</p> : null}
+          {wallLoading ? (
+            <p className="px-2 text-[13px] text-[rgba(240,238,255,0.35)]">Loading campus wall...</p>
+          ) : wallPosts.length === 0 ? (
+            <p className="px-2 text-[13px] text-[rgba(240,238,255,0.35)]">No wall posts yet.</p>
+          ) : (
+            <div className="space-y-3 px-1">
+              {wallPosts.map((post) => {
+                const profile = getProfileData(post.profiles);
+                const name = profile?.full_name || "Temple Student";
+                const likeCount = post.like_count || 0;
+                const commentCount = post.comment_count || 0;
+                const liked = likedWallPosts[String(post.id)] || false;
+
+                return (
+                  <article
+                    key={String(post.id)}
+                    className="rounded-[14px] border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.03)] p-[14px]"
+                  >
+                    <Link href={`/wall/${post.id}`} className="block">
+                      <div className="flex items-center gap-3">
+                        {profile?.avatar_url ? (
+                          <img src={profile.avatar_url} alt={name} className="h-8 w-8 rounded-full object-cover" />
+                        ) : (
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(107,92,231,0.2)] text-[12px] text-[#9B8FFF]">
+                            {getInitials(name)}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-medium text-[#F0EEFF]">{name}</p>
+                          <p className="text-[11px] text-[rgba(240,238,255,0.4)]">{getRelativePostLabel(post.created_at)}</p>
+                        </div>
+                      </div>
+                      <p className="mt-3 text-[14px] leading-[1.6] text-[#F0EEFF]">{getWallText(post)}</p>
+                      {post.image_url ? (
+                        <img
+                          src={post.image_url}
+                          alt="Campus wall post"
+                          className="mt-3 aspect-[16/9] w-full rounded-[10px] object-cover"
+                        />
+                      ) : null}
+                    </Link>
+                    <div className="mt-3 flex items-center gap-4 text-[12px] text-[rgba(240,238,255,0.4)]">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const supabase = getSupabaseBrowserClient();
+                          if (!supabase) return;
+                          const nextLiked = !liked;
+                          const nextCount = Math.max(0, likeCount + (nextLiked ? 1 : -1));
+                          setLikedWallPosts((current) => ({ ...current, [String(post.id)]: nextLiked }));
+                          setWallPosts((current) =>
+                            current.map((item) =>
+                              String(item.id) === String(post.id) ? { ...item, like_count: nextCount } : item,
+                            ),
+                          );
+                          await supabase.from("wall_posts").update({ like_count: nextCount } as never).eq("id", post.id);
+                        }}
+                        className="inline-flex items-center gap-1"
+                      >
+                        <Heart className={`h-4 w-4 ${liked ? "fill-[#9B8FFF] text-[#9B8FFF]" : "text-[rgba(240,238,255,0.4)]"}`} />
+                        {likeCount}
+                      </button>
+                      <Link href={`/wall/${post.id}`} className="inline-flex items-center gap-1">
+                        <MessageCircle className="h-4 w-4" />
+                        {commentCount}
+                      </Link>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <section className="border-t border-white/8 px-1 py-5">
+          {(!serviceLoading || serviceItems.length > 0) ? <p className="mb-3 whisper-label">campus services</p> : null}
+          {serviceLoading ? (
+            <p className="px-2 text-[13px] text-[rgba(240,238,255,0.35)]">Loading campus services...</p>
+          ) : serviceItems.length === 0 ? (
+            <p className="px-2 text-[13px] text-[rgba(240,238,255,0.35)]">No services available yet.</p>
+          ) : (
+            <div className="space-y-3 px-1">
+              {serviceItems.map((service) => {
+                const profile = getProfileData(service.profiles);
+                const providerName = profile?.full_name || service.provider_name || "Temple Student";
+                const rating = Number(service.rating || 0);
+                const stars = Math.max(0, Math.min(5, Math.round(rating)));
+
+                return (
+                  <Link
+                    key={String(service.id)}
+                    href={`/service/${service.id}`}
+                    className="flex items-start gap-3 rounded-[14px] border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.03)] p-[14px]"
+                  >
+                    <div className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[10px] bg-[rgba(107,92,231,0.1)] text-[22px]">
+                      {service.image_url ? (
+                        <img src={service.image_url} alt={service.title || "Service"} className="h-full w-full rounded-[10px] object-cover" />
+                      ) : (
+                        <span>{getServiceEmoji(service.category)}</span>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="overflow-hidden text-ellipsis whitespace-nowrap text-[14px] font-medium text-[#F0EEFF]">
+                        {service.title || "Campus service"}
+                      </p>
+                      <p className="mt-1 text-[11px] text-[rgba(240,238,255,0.4)]">{service.category || "Service"}</p>
+                      <p className="mt-1 text-[13px] font-medium text-[#9B8FFF]">
+                        {service.rate || service.price ? `$${service.rate || service.price}` : "Contact for rate"}
+                      </p>
+                      <div className="mt-2 flex items-center gap-2">
+                        {profile?.avatar_url ? (
+                          <img src={profile.avatar_url} alt={providerName} className="h-6 w-6 rounded-full object-cover" />
+                        ) : (
+                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[rgba(107,92,231,0.2)] text-[11px] text-[#9B8FFF]">
+                            {getInitials(providerName)}
+                          </div>
+                        )}
+                        <span className="text-[12px] text-[rgba(240,238,255,0.6)]">{providerName}</span>
+                        <span className="text-[12px] text-[#F5A623]">{"★".repeat(stars)}{"☆".repeat(Math.max(0, 5 - stars))}</span>
+                        <span className="text-[11px] text-[rgba(240,238,255,0.4)]">({service.review_count || 0})</span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </section>
 
       </section>
