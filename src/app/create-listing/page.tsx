@@ -155,7 +155,7 @@ export default function CreateListingPage() {
       } = await supabase.auth.getUser();
 
       if (!user?.id) {
-        throw new Error("You need to sign in before posting.");
+        throw new Error("You must be logged in to post");
       }
 
       const listingId = crypto.randomUUID();
