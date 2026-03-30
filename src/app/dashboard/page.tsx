@@ -54,7 +54,7 @@ type ListingRow = {
   location?: string | null;
   created_at?: string | null;
   status?: string | null;
-  images?: string[] | null;
+  image_url?: string | null;
 };
 
 function getFeedGroup(category: string) {
@@ -592,7 +592,7 @@ export default function DashboardPage() {
               const viewerCount = getRecentViewerCount(item.id);
               const expiryCountdown = getExpiryCountdown(urgency.expiresAt);
               const badges = getCampusBadges(listings, item.contact_email || item.email || "");
-              const coverImage = item.images?.[0];
+              const coverImage = item.image_url;
               const sellerAvatar = item.user_id ? avatarByUserId[item.user_id] : "";
 
               return (

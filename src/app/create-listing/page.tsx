@@ -159,10 +159,10 @@ export default function CreateListingPage() {
       let uploadedUrl = "";
       for (const photo of firstFourPhotos) {
         const compressed = await compressImageFile(photo.file);
-        const storagePath = `${user.id}/${Date.now()}.jpg`;
+        const path = `${user.id}/${Date.now()}.jpg`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("listings")
-          .upload(storagePath, compressed, {
+          .upload(path, compressed, {
             upsert: true,
             contentType: "image/jpeg",
           });
@@ -172,9 +172,9 @@ export default function CreateListingPage() {
           throw uploadError;
         }
 
-        const uploadedPath = uploadData?.path || storagePath;
-        const { data: publicUrlData } = supabase.storage.from("listings").getPublicUrl(uploadedPath);
-        uploadedUrl = publicUrlData.publicUrl;
+        const uploadedPath = uploadData?.path || path;
+        const { data: urlData } = supabase.storage.from("listings").getPublicUrl(uploadedPath);
+        uploadedUrl = urlData.publicUrl;
         break;
       }
 
