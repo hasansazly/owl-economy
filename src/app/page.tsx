@@ -528,7 +528,7 @@ export default function Home() {
         <div className="mx-auto grid max-w-[1380px] grid-cols-5">
           <Link href="/" className="flex flex-col items-center justify-center gap-1 py-2 text-[#9B8FFF]">
             <House className="h-[22px] w-[22px]" />
-            <span className="text-[10px] font-normal">Feed</span>
+            <span className="text-[10px] font-normal">Home</span>
           </Link>
           <Link href="/dashboard" className="flex flex-col items-center justify-center gap-1 py-2 text-white/35">
             <Search className="h-[22px] w-[22px]" />
