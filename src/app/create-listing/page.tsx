@@ -49,13 +49,28 @@ async function compressImageFile(file: File) {
   canvas.height = Math.round(imageBitmap.height * scale);
   context.drawImage(imageBitmap, 0, 0, canvas.width, canvas.height);
 
-  const blob = await new Promise<Blob | null>((resolve) => {
+  console.log(`[create-listing] original image size: ${file.size} bytes`);
+
+  let blob = await new Promise<Blob | null>((resolve) => {
     canvas.toBlob((result) => resolve(result), "image/jpeg", 0.8);
   });
 
   if (!blob) {
     throw new Error("Could not compress image.");
   }
+
+  if (blob.size > 300 * 1024) {
+    blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob((result) => resolve(result), "image/jpeg", 0.6);
+    });
+
+    if (!blob) {
+      throw new Error("Could not compress image.");
+    }
+  }
+
+  console.log(`[create-listing] compressed image size: ${blob.size} bytes`);
+  imageBitmap.close();
 
   return blob;
 }
