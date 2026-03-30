@@ -149,7 +149,7 @@ export default function CreateListingPage() {
     } = await supabase.auth.getUser();
 
     if (!user?.id) {
-      setErrors({ general: "Please log in" });
+      alert("Please log in");
       return;
     }
 
@@ -161,14 +161,10 @@ export default function CreateListingPage() {
 
       const listingId = crypto.randomUUID();
 
-      await supabase.storage.createBucket("listings", {
-        public: true,
-      });
-
       const uploadedUrls: string[] = [];
       for (const photo of firstFourPhotos) {
         const compressed = await compressImageFile(photo.file);
-        const storagePath = `listings/${Date.now()}.jpg`;
+        const storagePath = `${Date.now()}-${photo.file.name}`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("listings")
           .upload(storagePath, compressed, {
@@ -186,7 +182,7 @@ export default function CreateListingPage() {
         uploadedUrls.push(publicUrlData.publicUrl);
       }
 
-      const { error: insertError } = await supabase.from("listings").insert({
+      const insertPayload = {
         id: listingId,
         user_id: user.id,
         title: title.trim(),
@@ -194,14 +190,18 @@ export default function CreateListingPage() {
         category: mapCategory(category),
         description: description.trim(),
         location: location.trim(),
-        images: uploadedUrls,
+        images: [...uploadedUrls],
         status: "active",
         poster_name: profile.name.trim() || "Temple Student",
         major: profile.major.trim() || null,
         class_year: profile.classYear.trim() || null,
         contact_email: profile.email.trim() || user.email || null,
         email: profile.email.trim() || user.email || null,
-      } as never);
+      };
+
+      console.log("Create listing insert payload:", insertPayload);
+
+      const { error: insertError } = await supabase.from("listings").insert(insertPayload as never);
 
       if (insertError) {
         throw insertError;
@@ -209,6 +209,7 @@ export default function CreateListingPage() {
 
       window.location.href = "/";
     } catch (error) {
+      console.error("Create listing error:", error);
       setErrors({
         general: error instanceof Error ? error.message : "Could not post listing.",
       });
