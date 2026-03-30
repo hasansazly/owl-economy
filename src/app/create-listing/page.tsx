@@ -138,43 +138,78 @@ export default function CreateListingPage() {
   };
 
   const handleSubmit = async () => {
+    if (!validate()) return;
+
     const supabase = getSupabaseBrowserClient();
     if (!supabase) {
       setErrors({ general: "Supabase is not configured." });
       return;
     }
 
-    setSubmitting(true);
-    setErrors({});
+    try {
+      setSubmitting(true);
+      setErrors({});
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    console.log("User:", user);
-    console.log("User error:", userError);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (!user) {
-      alert("Not logged in");
+      if (!user?.id) {
+        throw new Error("You must be logged in to post");
+      }
+
+      const listingId = crypto.randomUUID();
+
+      await supabase.storage.createBucket("listings", {
+        public: true,
+      });
+
+      const uploadedUrls: string[] = [];
+      for (const [index, photo] of firstFourPhotos.entries()) {
+        const compressed = await compressImageFile(photo.file);
+        const storagePath = `${user.id}/${listingId}/${index}.jpg`;
+        const { error: uploadError } = await supabase.storage.from("listings").upload(storagePath, compressed, {
+          upsert: true,
+          contentType: "image/jpeg",
+        });
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const { data: publicUrlData } = supabase.storage.from("listings").getPublicUrl(storagePath);
+        uploadedUrls.push(publicUrlData.publicUrl);
+      }
+
+      const { error: insertError } = await supabase.from("listings").insert({
+        id: listingId,
+        user_id: user.id,
+        title: title.trim(),
+        price: price.trim() ? Number(price) : 0,
+        category: mapCategory(category),
+        description: description.trim(),
+        location: location.trim(),
+        images: uploadedUrls,
+        status: "active",
+        poster_name: profile.name.trim() || "Temple Student",
+        major: profile.major.trim() || null,
+        class_year: profile.classYear.trim() || null,
+        contact_email: profile.email.trim() || user.email || null,
+        email: profile.email.trim() || user.email || null,
+      } as never);
+
+      if (insertError) {
+        throw insertError;
+      }
+
+      window.location.href = "/";
+    } catch (error) {
+      setErrors({
+        general: error instanceof Error ? error.message : "Could not post listing.",
+      });
+    } finally {
       setSubmitting(false);
-      return;
     }
-
-    const { data, error } = await supabase.from("listings").insert({
-      user_id: user.id,
-      title: "test",
-      description: "test",
-      price: 0,
-      category: "Resell",
-      location: "test",
-      status: "active",
-      images: [],
-    } as never);
-
-    console.log("Insert data:", data);
-    console.log("Insert error:", JSON.stringify(error));
-    alert(JSON.stringify(error));
-    setSubmitting(false);
   };
 
   const helperText = useMemo(() => {
