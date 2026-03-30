@@ -144,18 +144,18 @@ export default function CreateListingPage() {
       return;
     }
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user?.id) {
+      setErrors({ general: "Please log in" });
+      return;
+    }
+
     try {
       setSubmitting(true);
       setErrors({});
-
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user?.id) {
-        setErrors({ general: "Please log in" });
-        return;
-      }
 
       if (!validate()) return;
 
@@ -168,7 +168,7 @@ export default function CreateListingPage() {
       const uploadedUrls: string[] = [];
       for (const photo of firstFourPhotos) {
         const compressed = await compressImageFile(photo.file);
-        const storagePath = `${user.id}/${Date.now()}.jpg`;
+        const storagePath = `listings/${Date.now()}.jpg`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("listings")
           .upload(storagePath, compressed, {
@@ -177,6 +177,7 @@ export default function CreateListingPage() {
           });
 
         if (uploadError) {
+          console.error("Listing upload error:", uploadError);
           throw uploadError;
         }
 
