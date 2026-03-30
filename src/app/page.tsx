@@ -31,11 +31,11 @@ const quickPills = [
   { label: "Feed", href: "/dashboard" },
   { label: "📸 Wall", href: "/campus-wall" },
   { label: "📦 Resell", href: "/sell-goods" },
-  { label: "🏠 Rooms", href: "/rent-room", locked: true },
   { label: "🎉 Campus Happenings", href: "/campus-happenings" },
   { label: "🔎 Lost", href: "/lost-and-found" },
   { label: "✂️ Services", href: "/campus-services" },
-  { label: "🎨 Creative", href: "/campus-creatives" },
+  { label: "🏠 Rooms", href: "/rent-room", locked: true },
+  { label: "🎨 Creative", href: "/campus-creatives", locked: true },
 ];
 
 
