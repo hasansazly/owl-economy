@@ -3,11 +3,7 @@
 import Link from "next/link";
 import {
   Bell,
-  ChevronRight,
-  DoorOpen,
-  GraduationCap,
   House,
-  LampDesk,
   MapPin,
   MessageCircle,
   Plus,
@@ -17,7 +13,6 @@ import {
 import { useEffect, useMemo, useState } from "react";
 
 import { computeCampusKarma, getCampusKarmaLabel } from "@/lib/campus-identity";
-import { buildWeeklyLeaderboard, getCampusBadges } from "@/lib/campus-identity";
 import {
   getExpiryCountdown,
   getMoveOutCountdown,
@@ -91,25 +86,6 @@ function isFratPartyItem(item: CampusLiveItem) {
   const text = `${item.title || ""} ${item.description || ""}`.toLowerCase();
   return text.includes("frat");
 }
-
-const supportCards = [
-  {
-    title: "Move-Out Mode",
-    text: "Quickly list storage bins, rugs, mirrors, and mini fridges.",
-    icon: DoorOpen,
-  },
-  {
-    title: "Academic Essentials",
-    text: "Buy, sell, or borrow textbooks and desk gear, or launch a student-led study jam.",
-    icon: LampDesk,
-    href: "/academic-essentials",
-  },
-  {
-    title: "Campus Verified",
-    text: "Built for students who want faster, cleaner, dorm-first discovery.",
-    icon: GraduationCap,
-  },
-];
 
 const jumpSections = [
   { label: "F", href: "#flash" },
@@ -218,7 +194,6 @@ export default function Home() {
     () => [...recentListings, ...campusLiveItems],
     [campusLiveItems, recentListings],
   );
-  const leaderboardPreview = useMemo(() => buildWeeklyLeaderboard(allVisibleIdentityListings), [allVisibleIdentityListings]);
   const notificationCount = useMemo(
     () => Math.min(9, Math.max(1, campusLiveItems.length + Math.min(recentListings.length, 4))),
     [campusLiveItems.length, recentListings.length],
@@ -543,62 +518,6 @@ export default function Home() {
                   </p>
                 </aside>
               </>
-            )}
-          </div>
-        </section>
-
-        <section className="border-t border-white/8 px-1 py-5">
-          <p className="whisper-label mb-3">Campus Signals</p>
-          <div className="space-y-1">
-            {supportCards.map(({ title, text, icon: Icon, href }) => {
-              const content = (
-                <div className="flex items-center justify-between rounded-[18px] border border-transparent px-2 py-3 transition hover:border-white/8 hover:bg-white/[0.03]">
-                  <div className="flex min-w-0 items-center gap-3 pr-4">
-                    <Icon className="h-4 w-4 shrink-0 text-white/72" />
-                    <div className="min-w-0">
-                      <h2 className="truncate text-[14px] font-medium tracking-[0.03em] text-white">{title}</h2>
-                      <p className="line-clamp-2 text-[12px] text-white/38">{text}</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-white/28" />
-                </div>
-              );
-
-              return href ? (
-                <Link key={title} href={href}>
-                  {content}
-                </Link>
-              ) : (
-                <div key={title}>{content}</div>
-              );
-            })}
-          </div>
-          <div className="mt-4 rounded-[18px] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
-            {leaderboardPreview.length > 0 ? <p className="whisper-label">Top Sellers This Week</p> : null}
-            {leaderboardPreview.length > 0 ? (
-              <div className="mt-3 space-y-2">
-                {leaderboardPreview.slice(0, 3).map((entry, index) => (
-                  <div key={entry.email} className="flex items-center justify-between gap-3 rounded-[14px] border border-white/10 bg-white/[0.03] px-3 py-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-[14px] font-medium text-white">
-                        #{index + 1} {entry.name}
-                      </p>
-                      <p className="mt-1 truncate text-[12px] text-white/48">
-                        {entry.major || "Temple student"}
-                        {entry.classYear ? ` · ${entry.classYear}` : ""}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[13px] font-semibold text-cyan-300">{entry.karma} pts</p>
-                      {getCampusBadges(allVisibleIdentityListings, entry.email).length > 0 ? (
-                        <p className="text-[11px] text-white/44">{getCampusBadges(allVisibleIdentityListings, entry.email)[0]?.label}</p>
-                      ) : null}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="mt-3 text-[12px] text-white/42">The weekly leaderboard appears automatically when students start posting this week.</p>
             )}
           </div>
         </section>
