@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, HandCoins, MapPin, Wallet } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { getStudentProfile, isVerifiedStudentLoggedIn } from "@/lib/app-auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
@@ -70,6 +70,15 @@ export default function FundraiseFastPage() {
     .split(".")
     .map((part) => part.trim())
     .filter(Boolean).length;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const template = new URLSearchParams(window.location.search).get("template");
+    if (template === "fundraisers") {
+      applyTemplate(quickFundraisers[0]);
+    }
+  }, []);
 
   const postFundraiser = async () => {
     const supabase = getSupabaseBrowserClient();

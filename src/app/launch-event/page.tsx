@@ -130,6 +130,50 @@ export default function LaunchEventPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const template = new URLSearchParams(window.location.search).get("template");
+    if (!template) return;
+
+    if (template === "frat-party") {
+      applyTemplate(eventTemplates[0]);
+      return;
+    }
+
+    if (template === "club-activities") {
+      applyTemplate(eventTemplates[1]);
+      return;
+    }
+
+    if (template === "meetups") {
+      setForm((current) => ({
+        ...current,
+        headline: "Campus Meetup",
+        eventType: "Club Meeting",
+        vibe: "Casual meetup, easy intros, and a fast campus pull-up.",
+        location: "Student Center",
+        startTime: "6:30 PM",
+        endTime: "8:00 PM",
+      }));
+      setExtras(["Meetup", "Open Join", "Campus"]);
+      return;
+    }
+
+    if (template === "volunteer") {
+      setForm((current) => ({
+        ...current,
+        headline: "Volunteer Drive Meetup",
+        eventType: "Student Assoc. Event",
+        vibe: "Volunteer signup, quick campus service, and a strong turnout push.",
+        location: "Bell Tower",
+        startTime: "3:00 PM",
+        endTime: "5:00 PM",
+      }));
+      setExtras(["Volunteer", "Campus Org", "Open Join"]);
+    }
+  }, []);
+
   const updateField = <K extends keyof EventForm>(field: K, value: EventForm[K]) => {
     setForm((current) => ({ ...current, [field]: value }));
   };
