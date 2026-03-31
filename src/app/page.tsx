@@ -466,7 +466,7 @@ export default function Home() {
           <div className="inline-flex min-w-max items-center gap-3 whitespace-nowrap">
             <span className="flex items-center gap-2 whitespace-nowrap">
               <span className="h-3.5 w-3.5 rounded-full bg-[#5f8c24]" />
-              <span className="font-medium text-[#7fb83a]">{campusLiveItems.length || 47}</span>
+              <span className="font-medium text-[#7fb83a]">{campusLiveItems.length}</span>
               <span>Owls active now</span>
             </span>
             <span className="text-white/22">·</span>
