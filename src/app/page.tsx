@@ -22,6 +22,7 @@ import {
   parseUrgencyMeta,
 } from "@/lib/listing-urgency";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import CampusLivePreviewStrip from "@/components/campus-live-preview-strip";
 
 const quickPills = [
   { label: "Feed", href: "/dashboard" },
@@ -630,6 +631,8 @@ export default function Home() {
             </div>
           )}
         </section>
+
+        <CampusLivePreviewStrip />
 
         <section id="recent" className="border-t border-white/8 px-1 py-5">
           {(!feedListingsLoading || feedListings.length > 0) ? <p className="mb-3 whisper-label">recent listings</p> : null}
