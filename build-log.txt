@@ -1,0 +1,29 @@
+
+> dormstash@0.1.0 build
+> next build
+
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /Users/abuhasan2003/package-lock.json as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+ Detected additional lockfiles: 
+   * /Users/abuhasan2003/Documents/New project/package-lock.json
+
+   ▲ Next.js 15.5.2
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 920ms
+   Linting and checking validity of types ...
+Failed to compile.
+
+./src/app/page.tsx:328:77
+Type error: Property 'hypeBadge' does not exist on type '{ title: string; description: string; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; badge: string; href: string; }'.
+
+[0m [90m 326 |[39m
+ [90m 327 |[39m         [33m<[39m[33msection[39m className[33m=[39m[32m"mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"[39m[33m>[39m
+[31m[1m>[22m[39m[90m 328 |[39m           {quickActions[33m.[39mmap(({ title[33m,[39m description[33m,[39m icon[33m:[39m [33mIcon[39m[33m,[39m badge[33m,[39m href[33m,[39m hypeBadge[33m,[39m disabled }) [33m=>[39m {
+ [90m     |[39m                                                                             [31m[1m^[22m[39m
+ [90m 329 |[39m             [36mconst[39m cardClassName [33m=[39m [32m`agora-panel relative flex min-h-[168px] flex-col justify-between px-4 py-4 transition ${[39m
+ [90m 330 |[39m [32m              disabled ? "cursor-default" : "hover:-translate-y-0.5 hover:bg-white/[0.05]"[39m
+ [90m 331 |[39m [32m            }`[39m[33m;[39m[0m
+Next.js build worker exited with code: 1 and signal: null
